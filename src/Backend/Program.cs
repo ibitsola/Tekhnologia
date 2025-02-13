@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.OpenApi.Models;
+
 
 var builder = WebApplication.CreateBuilder(args); // Create a web application
 
@@ -12,10 +14,16 @@ var builder = WebApplication.CreateBuilder(args); // Create a web application
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Configure Identity for user authentication and role management
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
+// Read JWT settings from `appsettings.json`
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var key = Encoding.UTF8.GetBytes(jwtSettings["Secret"] ?? "your-very-long-secret-key-1234567890!@#ABCDEF");
+
+// Configure Authentication & JWT Bearer Token setup
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -23,27 +31,69 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
+    options.RequireHttpsMetadata = false; // Disable HTTPS enforcement
+    options.SaveToken = true; // Saves the token in the authentication properties
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your_super_secret_key")),
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
+        IssuerSigningKey = new SymmetricSecurityKey(key), // Secure JWT key from config 
+        ValidateIssuer = true, // Validate the issuer (API)
+        ValidateAudience = true, // Validate the audience (clients)
+        ValidIssuer = jwtSettings["Issuer"], // Read from `appsettings.json` 
+        ValidAudience = jwtSettings["Audience"], // Read from `appsettings.json`
+        ValidateLifetime = true, // Ensure the token is not expired
+        ClockSkew = TimeSpan.Zero // Prevents expired tokens from being accepted due to time differences
     };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(); // Enables authorization policies
+
+// Add CORS policy to allow frontend requests
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
 
 // Register Controllers (for handling API requests)
 builder.Services.AddControllers();
 
 // Enable API documentation via Swagger
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer' followed by your token.\nExample: Bearer YOUR_TOKEN_HERE"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
 
 var app = builder.Build(); // Build the application
 
@@ -55,8 +105,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection(); // Redirect HTTP to HTTPS
+app.UseCors("AllowAllOrigins"); // Enable CORS before authentication
 app.UseAuthorization(); // Enable user authentication (to be implemented)
-app.UseAuthorization();
+app.UseAuthorization(); // Enable Authorization Middleware
 app.MapControllers(); // Map API endpoints
 
 app.Run(); // Run the application
