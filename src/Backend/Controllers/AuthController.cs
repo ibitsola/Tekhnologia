@@ -36,7 +36,7 @@ namespace Backend.Controllers
 
             return Ok(new { message = "User registered successfully" });
         }
-
+        
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
@@ -50,6 +50,7 @@ namespace Backend.Controllers
 
             if (!result.Succeeded) return Unauthorized("Invalid credentials");
 
+            var roles = await _userManager.GetRolesAsync(user);
             var tokenHandler = new JwtSecurityTokenHandler();
             var secret = _configuration["Jwt:Secret"] ?? "default_secret_key";
             var key = Encoding.UTF8.GetBytes(secret);
@@ -60,8 +61,11 @@ namespace Backend.Controllers
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id),
                     new Claim(ClaimTypes.Name, user?.Name ?? "Unknown"),
-                    new Claim("name", user?.Name ?? "Unknown")
+                    new Claim("name", user?.Name ?? "Unknown"),
+                    new Claim(ClaimTypes.Role, roles.FirstOrDefault() ?? "User")
                 }),
+                Audience = _configuration["Jwt:Audience"],
+                 Issuer = _configuration["Jwt:Issuer"], 
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
