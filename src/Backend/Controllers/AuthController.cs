@@ -55,20 +55,31 @@ namespace Backend.Controllers
             var secret = _configuration["Jwt:Secret"] ?? "default_secret_key";
             var key = Encoding.UTF8.GetBytes(secret);
 
+
+
+           var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user?.Name ?? "Unknown"),
+                new Claim("name", user?.Name ?? "Unknown")
+            };
+
+            // Add multiple roles if the user has them
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role)); 
+            }
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id),
-                    new Claim(ClaimTypes.Name, user?.Name ?? "Unknown"),
-                    new Claim("name", user?.Name ?? "Unknown"),
-                    new Claim(ClaimTypes.Role, roles.FirstOrDefault() ?? "User")
-                }),
+                Subject = new ClaimsIdentity(claims),
                 Audience = _configuration["Jwt:Audience"],
-                 Issuer = _configuration["Jwt:Issuer"], 
+                Issuer = _configuration["Jwt:Issuer"],
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
+
+
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
             return Ok(new { Token = tokenHandler.WriteToken(token) });

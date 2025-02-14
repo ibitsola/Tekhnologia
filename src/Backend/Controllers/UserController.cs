@@ -1,7 +1,9 @@
+using System.Threading.Tasks;
 using Backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Npgsql.TypeMapping;
 
 namespace Backend.Controllers
@@ -17,22 +19,39 @@ namespace Backend.Controllers
             _userManager = userManager;
         }
 
-        // Get all users (admin only)
+        // Get all users (admin only) sorted by role and name
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public IActionResult GetAllUsers()
+        public async Task<IActionResult> GetAllUsers()
         {
-            var users = _userManager.Users.Select(user => new
-            {
-                user.Id,
-                user.Name,
-                user.Email,
-                user.CreatedAt,
-                user.UpdatedAt
-            }).ToList();
+            var users = await _userManager.Users.ToListAsync();
+            var userList = new List<object>();
 
-            return Ok(users);
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                var role = roles.FirstOrDefault() ?? "User"; // Default to "User" if no role assigned
+
+                userList.Add(new
+                {
+                    user.Id,
+                    user.Name,
+                    user.Email,
+                    Role = role,
+                    user.CreatedAt,
+                    user.UpdatedAt
+                });
+            }
+
+            // Sort by role first (Admins first, then Users) and then by name
+            var sortedUsers = userList
+                .OrderByDescending(u => u.GetType().GetProperty("Role")?.GetValue(u)?.ToString() == "Admin")
+                .ThenBy(u => u.GetType().GetProperty("Name")?.GetValue(u)?.ToString())
+                .ToList();
+
+            return Ok(sortedUsers);
         }
+
 
         // Get users by ID (Admin only)
         [HttpGet("{id}")]
@@ -50,20 +69,6 @@ namespace Backend.Controllers
                 user.CreatedAt,
                 user.UpdatedAt
             });
-        }
-
-        // Delete user (admin only)
-        [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteUser(string id)
-        {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null) return NotFound("User not found");
-
-            var result = await _userManager.DeleteAsync(user);
-            if (!result.Succeeded) return BadRequest("Failed to delete user");
-
-            return Ok(new { message = "User deleted successfully" });
         }
 
         // Get own profile (any logged-in user) 
@@ -103,5 +108,30 @@ namespace Backend.Controllers
             return Ok(new { message = $"{user.Name} has been promoted to Admin!" });
         }
 
+        // Delete user (admin only)
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            // List of users that cannot be deleted
+            var protectedUserIds = new List<string>
+            {
+               "b74664d9-398e-40f9-a4ec-b4520318f762", 
+               "6b051706-09b0-45cf-93bf-56df55db8c77"  
+            };
+
+            if (protectedUserIds.Contains(id))
+            {
+                return Forbid("This user cannot be deleted.");
+            }
+            
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound("User not found");
+
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded) return BadRequest("Failed to delete user");
+
+            return Ok(new { message = "User deleted successfully" });
+        }
     }
 }
