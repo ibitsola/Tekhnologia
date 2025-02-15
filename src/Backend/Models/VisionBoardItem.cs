@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Backend.Models
 {
@@ -9,12 +10,14 @@ namespace Backend.Models
         public Guid VisionId { get; set; } = Guid.NewGuid();
 
         [Required]
-        public Guid UserId { get; set; } // Foreign Key to Users
+        public string UserId { get; set; } = string.Empty; 
+        [ForeignKey("UserId")]
+        public User? User { get; set; } // Defines the relationship
 
         [Required]
-        public string ImageUrl { get; set; } = string.Empty; // Path to image storage
+        public string ImageUrl { get; set; } = string.Empty;
 
-        public string Caption { get; set; } = string.Empty; // Optional text description
+        public string Caption { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
