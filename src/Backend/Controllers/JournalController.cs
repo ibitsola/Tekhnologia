@@ -23,12 +23,18 @@ namespace Backend.Controllers
 
         // Create a new journal entry
         [HttpPost]
-        [Authorize]
+        [Authorize] // Ensures only logged-in users can create a journal entry
         public async Task<IActionResult> CreateJournalEntry([FromBody] JournalEntry entry)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized("User ID not found in token");
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState); // Ensures the request body meets model requirements
 
+            // Extract UserId from token
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User ID not found in token");
+
+            // Set the UserId before saving
             entry.UserId = userId;
             entry.CreatedAt = DateTime.UtcNow;
             entry.UpdatedAt = DateTime.UtcNow;
@@ -38,6 +44,7 @@ namespace Backend.Controllers
 
             return Ok(new { message = "Journal entry created successfully", entry });
         }
+
 
         // Get all journal entries for the logged-in user
         [HttpGet]

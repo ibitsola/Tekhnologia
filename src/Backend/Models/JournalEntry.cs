@@ -9,7 +9,6 @@ namespace Backend.Models
         [Key] 
         public Guid EntryId { get; set; } = Guid.NewGuid();
 
-        [Required]
         public string UserId { get; set; } = string.Empty; 
 
         [ForeignKey("UserId")]
