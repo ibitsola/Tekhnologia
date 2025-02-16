@@ -1,5 +1,6 @@
 using Backend.Data;
 using Backend.Models;
+using Backend.DTOs; 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ using System.Security.Claims;
 namespace Backend.Controllers
 {
     [ApiController]
-    [Route("api/visionboard")]
+    [Route("api/visionboard")] // Base route for vision board APIs
     public class VisionBoardController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -23,14 +24,19 @@ namespace Backend.Controllers
 
         // Create a new vision board item
         [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> CreateVisionBoardItem([FromBody] VisionBoardItem item)
+        [Authorize] // Ensures only logged-in users can create vision board items
+        public async Task<IActionResult> CreateVisionBoardItem([FromBody] CreateVisionBoardItemDTO dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId)) return Unauthorized("User ID not found in token");
 
-            item.UserId = userId;
-            item.CreatedAt = DateTime.UtcNow;
+            var item = new VisionBoardItem
+            {
+                UserId = userId,
+                ImageUrl = dto.ImageUrl,
+                Caption = dto.Caption,
+                CreatedAt = DateTime.UtcNow
+            };
 
             _context.VisionBoardItems.Add(item);
             await _context.SaveChangesAsync();
@@ -40,7 +46,7 @@ namespace Backend.Controllers
 
         // Get all vision board items for the logged-in user
         [HttpGet]
-        [Authorize]
+        [Authorize] // Ensures only logged-in users can access their vision board
         public async Task<IActionResult> GetUserVisionBoard()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -49,36 +55,30 @@ namespace Backend.Controllers
             var items = await _context.VisionBoardItems
                 .Where(v => v.UserId == userId)
                 .OrderByDescending(v => v.CreatedAt)
+                .Select(v => new VisionBoardItemDTO
+                {
+                    VisionId = v.VisionId,
+                    ImageUrl = v.ImageUrl,
+                    Caption = v.Caption,
+                    CreatedAt = v.CreatedAt
+                })
                 .ToListAsync();
 
             return Ok(items);
         }
 
-        // Get a specific vision board item (only if it belongs to the user)
-        [HttpGet("{visionId}")]
-        [Authorize]
-        public async Task<IActionResult> GetVisionBoardItem(Guid visionId)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var item = await _context.VisionBoardItems.FindAsync(visionId);
-
-            if (item == null || item.UserId != userId) return NotFound("Item not found or access denied");
-
-            return Ok(item);
-        }
-
         // Update a vision board item
         [HttpPut("{visionId}")]
-        [Authorize]
-        public async Task<IActionResult> UpdateVisionBoardItem(Guid visionId, [FromBody] VisionBoardItem updatedItem)
+        [Authorize] // Ensures only the owner can update their vision board items
+        public async Task<IActionResult> UpdateVisionBoardItem(Guid visionId, [FromBody] CreateVisionBoardItemDTO dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var item = await _context.VisionBoardItems.FindAsync(visionId);
 
             if (item == null || item.UserId != userId) return NotFound("Item not found or access denied");
 
-            item.ImageUrl = updatedItem.ImageUrl;
-            item.Caption = updatedItem.Caption;
+            item.ImageUrl = dto.ImageUrl;
+            item.Caption = dto.Caption;
 
             _context.VisionBoardItems.Update(item);
             await _context.SaveChangesAsync();
@@ -88,7 +88,7 @@ namespace Backend.Controllers
 
         // Delete a vision board item
         [HttpDelete("{visionId}")]
-        [Authorize]
+        [Authorize] // Ensures only the owner can delete their vision board items
         public async Task<IActionResult> DeleteVisionBoardItem(Guid visionId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
