@@ -43,7 +43,7 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings["Audience"], // Read from `appsettings.json`
         ValidateLifetime = true, // Ensure the token is not expired
         ClockSkew = TimeSpan.Zero // Prevents expired tokens from being accepted due to time differences
-    };
+    };    
 });
 
 builder.Services.AddAuthorization(); // Enables authorization policies
@@ -121,7 +121,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection(); // Redirect HTTP to HTTPS
+if (!app.Environment.IsDevelopment()) // Enforce HTTPS only in production
+{
+    app.UseHttpsRedirection();  // Redirect HTTP to HTTPS
+}
 app.UseCors("AllowAllOrigins"); // Enable CORS before authentication
 app.UseAuthentication(); // Ensure Authentication
 app.UseAuthorization(); // Enable Authorization Middleware
