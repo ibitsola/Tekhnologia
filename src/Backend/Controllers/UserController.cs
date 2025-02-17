@@ -1,10 +1,10 @@
-using System.Threading.Tasks;
 using Backend.Models;
+using Backend.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Npgsql.TypeMapping;
+
 
 namespace Backend.Controllers
 {
@@ -71,6 +71,23 @@ namespace Backend.Controllers
             });
         }
 
+        // Update any user's profile (Admin only)
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDTO model)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound("User not found");
+
+            user.Name = model.Name ?? user.Name;
+            user.Email = model.Email ?? user.Email;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded) return BadRequest(result.Errors);
+
+            return Ok(new { message = $"User {user.Name} updated successfully", user });
+        }
+
         // Get own profile (any logged-in user) 
         [HttpGet("me")]
         [Authorize]
@@ -90,6 +107,27 @@ namespace Backend.Controllers
                 user.CreatedAt,
                 user.UpdatedAt
             });
+        }
+
+        // Update own profile (any logged-in user)
+        [HttpPut("me")]
+        [Authorize]
+        public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateUserDTO model)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized("User ID not found in token");
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return NotFound("User not found");
+
+            // Allow users to update only name & email (modify fields as needed)
+            user.Name = model.Name ?? user.Name;
+            user.Email = model.Email ?? user.Email;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded) return BadRequest(result.Errors);
+
+            return Ok(new { message = "Profile updated successfully", user });
         }
 
         // Post for promote to admin
