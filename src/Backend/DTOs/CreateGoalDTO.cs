@@ -11,6 +11,8 @@ namespace Backend.DTOs
 
         public DateTime? Deadline { get; set; }
 
+        public bool IsCompleted { get; set; } = false; 
+
         [Required]
         public string Urgency { get; set; } = "Not Urgent"; // Eisenhower Matrix
 
