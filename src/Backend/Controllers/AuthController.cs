@@ -1,5 +1,4 @@
 using Backend.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -36,7 +35,7 @@ namespace Backend.Controllers
 
             return Ok(new { message = "User registered successfully" });
         }
-
+        
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
@@ -50,21 +49,36 @@ namespace Backend.Controllers
 
             if (!result.Succeeded) return Unauthorized("Invalid credentials");
 
+            var roles = await _userManager.GetRolesAsync(user);
             var tokenHandler = new JwtSecurityTokenHandler();
             var secret = _configuration["Jwt:Secret"] ?? "default_secret_key";
             var key = Encoding.UTF8.GetBytes(secret);
 
+
+
+           var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user?.Name ?? "Unknown"),
+                new Claim("name", user?.Name ?? "Unknown")
+            };
+
+            // Add multiple roles if the user has them
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role)); 
+            }
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id),
-                    new Claim(ClaimTypes.Name, user?.Name ?? "Unknown"),
-                    new Claim("name", user?.Name ?? "Unknown")
-                }),
+                Subject = new ClaimsIdentity(claims),
+                Audience = _configuration["Jwt:Audience"],
+                Issuer = _configuration["Jwt:Issuer"],
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
+
+
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
             return Ok(new { Token = tokenHandler.WriteToken(token) });

@@ -1,0 +1,20 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace Backend.DTOs
+{
+    public class CreateGoalDTO
+    {
+        [Required]
+        public string Title { get; set; } = string.Empty;
+
+        public string Description { get; set; } = string.Empty;
+
+        public DateTime? Deadline { get; set; }
+
+        [Required]
+        public string Urgency { get; set; } = "Not Urgent"; // Eisenhower Matrix
+
+        [Required]
+        public string Importance { get; set; } = "Not Important"; // Eisenhower Matrix
+    }
+}

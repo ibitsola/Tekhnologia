@@ -43,7 +43,7 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings["Audience"], // Read from `appsettings.json`
         ValidateLifetime = true, // Ensure the token is not expired
         ClockSkew = TimeSpan.Zero // Prevents expired tokens from being accepted due to time differences
-    };
+    };    
 });
 
 builder.Services.AddAuthorization(); // Enables authorization policies
@@ -97,6 +97,23 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build(); // Build the application
 
+// Roles are created when the app starts
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+
+    string[] roleNames = { "Admin", "User" };
+
+    foreach (var roleName in roleNames)
+    {
+        if (!await roleManager.RoleExistsAsync(roleName))
+        {
+            await roleManager.CreateAsync(new IdentityRole(roleName));
+        }
+    }
+}
+
 // Enable API documentation when running in development mode
 if (app.Environment.IsDevelopment())
 {
@@ -104,9 +121,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection(); // Redirect HTTP to HTTPS
+if (!app.Environment.IsDevelopment()) // Enforce HTTPS only in production
+{
+    app.UseHttpsRedirection();  // Redirect HTTP to HTTPS
+}
 app.UseCors("AllowAllOrigins"); // Enable CORS before authentication
-app.UseAuthorization(); // Enable user authentication (to be implemented)
+app.UseAuthentication(); // Ensure Authentication
 app.UseAuthorization(); // Enable Authorization Middleware
 app.MapControllers(); // Map API endpoints
 

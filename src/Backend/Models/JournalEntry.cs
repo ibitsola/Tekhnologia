@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -6,21 +5,23 @@ namespace Backend.Models
 {
     public class JournalEntry
     {
-        [Key] // Marks this as the Primary Key
-        public Guid EntryId { get; set; } = Guid.NewGuid(); // Unique ID for each journal entry (UUID)
+        [Key] 
+        public Guid EntryId { get; set; } = Guid.NewGuid();
+
+        public string UserId { get; set; } = string.Empty; 
+
+        [ForeignKey("UserId")]
+        public User? User { get; set; } // Defines the relationship
 
         [Required]
-        public Guid UserId { get; set; } // Links this entry to a specific user (Foreign Key)
+        public DateTime Date { get; set; } = DateTime.UtcNow;
 
         [Required]
-        public DateTime Date { get; set; } = DateTime.UtcNow; // The date of the entry
+        public string EntryText { get; set; } = string.Empty;
 
-        [Required]
-        public string EntryText { get; set; } = string.Empty; // The journal content
+        public int? SentimentScore { get; set; }
 
-        public int? SentimentScore { get; set; } // Optional AI-generated sentiment analysis score
-
-        public bool Visibility { get; set; } = true; // Public (true) or Private (false)
+        public bool Visibility { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
