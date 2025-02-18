@@ -36,6 +36,7 @@ namespace Backend.Controllers
                 Title = dto.Title,
                 Description = dto.Description,
                 Deadline = dto.Deadline,
+                 IsCompleted = false,
                 Urgency = dto.Urgency,
                 Importance = dto.Importance
             };
@@ -84,11 +85,14 @@ namespace Backend.Controllers
 
             if (goal == null || goal.UserId != userId) return NotFound("Goal not found or access denied");
 
+            bool previousCompletionStatus = goal.IsCompleted;
+            
             goal.Title = dto.Title;
             goal.Description = dto.Description;
             goal.Deadline = dto.Deadline;
             goal.Urgency = dto.Urgency;
             goal.Importance = dto.Importance;
+            goal.IsCompleted = previousCompletionStatus;
             goal.UpdatedAt = DateTime.UtcNow;
 
             _context.Goals.Update(goal);
