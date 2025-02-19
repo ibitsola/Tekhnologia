@@ -1,0 +1,36 @@
+name: Build and Test .NET
+
+on:
+  # Triggers the workflow on pushes to the 'main' branch
+  push:
+    branches: [ "main" ]
+  # Triggers the workflow on pull requests to the 'main' branch
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) Check out the code in the current repository
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      # 2) Setup .NET (here we specify 9.0.x; if you need a preview version, see note below)
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.103'
+
+      # 3) Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore
+
+      # 4) Build the project in Release mode
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      # 5) Run tests (if you have test projects)
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal
