@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "SgKvnbcSk8CGvQcUiW0++7kjgMqp0uWRFl3c/bx2oHs=",
+  "Hash": "p94jedE4wiR/ehALY7pr8S6F1d48rI1tnJ5ePKGSAMk=",
   "Source": "Tekhnologia",
   "BasePath": "_content/Tekhnologia",
   "Mode": "Default",
@@ -1422,6 +1422,27 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\css\\site.css"
+    },
+    {
+      "Identity": "C:\\MyProjects\\Tekhnologia\\wwwroot\\digital-resources\\46347cbe-fd5c-4a00-8bf6-dbc1f6112af2_TfL attendance during industrial action.pdf",
+      "SourceId": "Tekhnologia",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\MyProjects\\Tekhnologia\\wwwroot\\",
+      "BasePath": "_content/Tekhnologia",
+      "RelativePath": "digital-resources/46347cbe-fd5c-4a00-8bf6-dbc1f6112af2_TfL attendance during industrial action#[.{fingerprint}]?.pdf",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "11fkgzx2du",
+      "Integrity": "62qgw5wrtuTbb2ae80aFue5C4DfARqKx4ee3SgNhWu0=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\digital-resources\\46347cbe-fd5c-4a00-8bf6-dbc1f6112af2_TfL attendance during industrial action.pdf"
     },
     {
       "Identity": "C:\\MyProjects\\Tekhnologia\\wwwroot\\favicon.ico",
@@ -3022,6 +3043,88 @@
         {
           "Name": "integrity",
           "Value": "sha256-0FC1RbVkLkwKhJ1oi+r2Hw4Tm9av6DyJeo95YVvfA3Y="
+        }
+      ]
+    },
+    {
+      "Route": "digital-resources/46347cbe-fd5c-4a00-8bf6-dbc1f6112af2_TfL attendance during industrial action.11fkgzx2du.pdf",
+      "AssetFile": "C:\\MyProjects\\Tekhnologia\\wwwroot\\digital-resources\\46347cbe-fd5c-4a00-8bf6-dbc1f6112af2_TfL attendance during industrial action.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "204069"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"62qgw5wrtuTbb2ae80aFue5C4DfARqKx4ee3SgNhWu0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 19 Feb 2025 17:14:11 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "11fkgzx2du"
+        },
+        {
+          "Name": "label",
+          "Value": "digital-resources/46347cbe-fd5c-4a00-8bf6-dbc1f6112af2_TfL attendance during industrial action.pdf"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-62qgw5wrtuTbb2ae80aFue5C4DfARqKx4ee3SgNhWu0="
+        }
+      ]
+    },
+    {
+      "Route": "digital-resources/46347cbe-fd5c-4a00-8bf6-dbc1f6112af2_TfL attendance during industrial action.pdf",
+      "AssetFile": "C:\\MyProjects\\Tekhnologia\\wwwroot\\digital-resources\\46347cbe-fd5c-4a00-8bf6-dbc1f6112af2_TfL attendance during industrial action.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "204069"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"62qgw5wrtuTbb2ae80aFue5C4DfARqKx4ee3SgNhWu0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 19 Feb 2025 17:14:11 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-62qgw5wrtuTbb2ae80aFue5C4DfARqKx4ee3SgNhWu0="
         }
       ]
     },
@@ -21310,7 +21413,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 19 Feb 2025 11:59:58 GMT"
+          "Value": "Wed, 19 Feb 2025 17:25:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21363,7 +21466,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 19 Feb 2025 11:59:58 GMT"
+          "Value": "Wed, 19 Feb 2025 17:25:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21400,7 +21503,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 19 Feb 2025 11:59:58 GMT"
+          "Value": "Wed, 19 Feb 2025 17:25:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21447,7 +21550,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 19 Feb 2025 11:59:58 GMT"
+          "Value": "Wed, 19 Feb 2025 17:25:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21508,7 +21611,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 19 Feb 2025 11:59:58 GMT"
+          "Value": "Wed, 19 Feb 2025 17:25:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21553,7 +21656,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 19 Feb 2025 11:59:58 GMT"
+          "Value": "Wed, 19 Feb 2025 17:25:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21608,7 +21711,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 19 Feb 2025 11:59:58 GMT"
+          "Value": "Wed, 19 Feb 2025 17:25:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21669,7 +21772,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 19 Feb 2025 11:59:58 GMT"
+          "Value": "Wed, 19 Feb 2025 17:25:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21714,7 +21817,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 19 Feb 2025 11:59:58 GMT"
+          "Value": "Wed, 19 Feb 2025 17:25:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21769,7 +21872,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 19 Feb 2025 11:59:58 GMT"
+          "Value": "Wed, 19 Feb 2025 17:25:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21822,7 +21925,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 19 Feb 2025 11:59:58 GMT"
+          "Value": "Wed, 19 Feb 2025 17:25:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21859,7 +21962,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 19 Feb 2025 11:59:58 GMT"
+          "Value": "Wed, 19 Feb 2025 17:25:32 GMT"
         },
         {
           "Name": "Cache-Control",

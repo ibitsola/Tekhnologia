@@ -24,6 +24,7 @@ namespace Data
         public DbSet<JournalEntry> JournalEntries { get; set;} // Stores users' journal entries
         public DbSet<VisionBoardItem> VisionBoardItems { get; set;} // Stores vision board items (images & text)
         public DbSet<Goal> Goals { get; set; } // Stores users career goals
+        public DbSet<DigitalResource> DigitalResources { get; set; }  // New table for digital resources
         
         // The OnModelCreating method allows us to configure table relationships and constraints (I’ll expand it later)
         protected override void OnModelCreating(ModelBuilder modelBuilder)
