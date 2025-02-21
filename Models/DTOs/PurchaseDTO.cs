@@ -11,5 +11,7 @@ namespace Models.DTOs
         public decimal? Price { get; set; }
 
         public DateTime PurchaseDate { get; set; }
+
+        public bool IsPaid { get; set; } 
     }
 }
