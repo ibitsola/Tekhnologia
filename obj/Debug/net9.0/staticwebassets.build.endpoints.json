@@ -43,7 +43,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 19 Feb 2025 17:25:32 GMT"
+          "Value": "Fri, 21 Feb 2025 09:13:06 GMT"
         },
         {
           "Name": "Vary",
@@ -92,7 +92,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 19 Feb 2025 17:25:32 GMT"
+          "Value": "Fri, 21 Feb 2025 09:13:06 GMT"
         }
       ],
       "EndpointProperties": [
@@ -141,7 +141,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 19 Feb 2025 17:25:32 GMT"
+          "Value": "Fri, 21 Feb 2025 09:13:06 GMT"
         },
         {
           "Name": "Vary",
@@ -204,7 +204,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 19 Feb 2025 17:25:32 GMT"
+          "Value": "Fri, 21 Feb 2025 09:13:06 GMT"
         },
         {
           "Name": "Vary",
@@ -245,7 +245,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 19 Feb 2025 17:25:32 GMT"
+          "Value": "Fri, 21 Feb 2025 09:13:06 GMT"
         }
       ],
       "EndpointProperties": [
@@ -286,7 +286,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 19 Feb 2025 17:25:32 GMT"
+          "Value": "Fri, 21 Feb 2025 09:13:06 GMT"
         },
         {
           "Name": "Vary",
@@ -677,6 +677,88 @@
         {
           "Name": "integrity",
           "Value": "sha256-62qgw5wrtuTbb2ae80aFue5C4DfARqKx4ee3SgNhWu0="
+        }
+      ]
+    },
+    {
+      "Route": "digital-resources/c5f3e095-42a6-4c95-bdcf-074677010185_25-free-coaching-tools-and-techniques.1w41qbgnfh.pdf",
+      "AssetFile": "digital-resources/c5f3e095-42a6-4c95-bdcf-074677010185_25-free-coaching-tools-and-techniques.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1706665"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"/wq0hFmSJh6DR50w7CCYhI1CR+aPKCgQShrbVTr4/xY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 20 Feb 2025 16:13:26 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "1w41qbgnfh"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-/wq0hFmSJh6DR50w7CCYhI1CR+aPKCgQShrbVTr4/xY="
+        },
+        {
+          "Name": "label",
+          "Value": "digital-resources/c5f3e095-42a6-4c95-bdcf-074677010185_25-free-coaching-tools-and-techniques.pdf"
+        }
+      ]
+    },
+    {
+      "Route": "digital-resources/c5f3e095-42a6-4c95-bdcf-074677010185_25-free-coaching-tools-and-techniques.pdf",
+      "AssetFile": "digital-resources/c5f3e095-42a6-4c95-bdcf-074677010185_25-free-coaching-tools-and-techniques.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1706665"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"/wq0hFmSJh6DR50w7CCYhI1CR+aPKCgQShrbVTr4/xY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 20 Feb 2025 16:13:26 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-/wq0hFmSJh6DR50w7CCYhI1CR+aPKCgQShrbVTr4/xY="
         }
       ]
     },

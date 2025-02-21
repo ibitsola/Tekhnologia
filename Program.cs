@@ -1,3 +1,4 @@
+using Stripe;
 using Data;
 using Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -8,7 +9,12 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 
 
+
 var builder = WebApplication.CreateBuilder(args); // Create a web application
+
+// Configure Stripe API Key
+var stripeSecretKey = builder.Configuration["Stripe:SecretKey"];
+    StripeConfiguration.ApiKey = stripeSecretKey;
 
 // Register the database connection in the services container
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

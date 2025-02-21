@@ -24,6 +24,18 @@
       <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-62qgw5wrtuTbb2ae80aFue5C4DfARqKx4ee3SgNhWu0="}]]]></EndpointProperties>
       <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"204069"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u002262qgw5wrtuTbb2ae80aFue5C4DfARqKx4ee3SgNhWu0=\u0022"},{"Name":"Last-Modified","Value":"Wed, 19 Feb 2025 17:14:11 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/Tekhnologia/digital-resources/c5f3e095-42a6-4c95-bdcf-074677010185_25-free-coaching-tools-and-techniques.1w41qbgnfh.pdf">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\digital-resources\c5f3e095-42a6-4c95-bdcf-074677010185_25-free-coaching-tools-and-techniques.pdf'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"1w41qbgnfh"},{"Name":"integrity","Value":"sha256-/wq0hFmSJh6DR50w7CCYhI1CR\u002BaPKCgQShrbVTr4/xY="},{"Name":"label","Value":"_content/Tekhnologia/digital-resources/c5f3e095-42a6-4c95-bdcf-074677010185_25-free-coaching-tools-and-techniques.pdf"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"1706665"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022/wq0hFmSJh6DR50w7CCYhI1CR\u002BaPKCgQShrbVTr4/xY=\u0022"},{"Name":"Last-Modified","Value":"Thu, 20 Feb 2025 16:13:26 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/Tekhnologia/digital-resources/c5f3e095-42a6-4c95-bdcf-074677010185_25-free-coaching-tools-and-techniques.pdf">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\digital-resources\c5f3e095-42a6-4c95-bdcf-074677010185_25-free-coaching-tools-and-techniques.pdf'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-/wq0hFmSJh6DR50w7CCYhI1CR\u002BaPKCgQShrbVTr4/xY="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"1706665"},{"Name":"Content-Type","Value":"application/pdf"},{"Name":"ETag","Value":"\u0022/wq0hFmSJh6DR50w7CCYhI1CR\u002BaPKCgQShrbVTr4/xY=\u0022"},{"Name":"Last-Modified","Value":"Thu, 20 Feb 2025 16:13:26 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/Tekhnologia/favicon.61n19gt1b8.ico">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\favicon.ico'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
@@ -772,13 +784,13 @@
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\Tekhnologia.j95l5o33yq.bundle.scp.css'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-GX0/EqqvYYLEBL/2TaK7C6baa9jjrTIgQAIZFM\u002BNNd0="}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"1129"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022GX0/EqqvYYLEBL/2TaK7C6baa9jjrTIgQAIZFM\u002BNNd0=\u0022"},{"Name":"Last-Modified","Value":"Wed, 19 Feb 2025 17:25:32 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"1129"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022GX0/EqqvYYLEBL/2TaK7C6baa9jjrTIgQAIZFM\u002BNNd0=\u0022"},{"Name":"Last-Modified","Value":"Fri, 21 Feb 2025 09:13:06 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/Tekhnologia/Tekhnologia.j95l5o33yq.bundle.scp.css">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\Tekhnologia.j95l5o33yq.bundle.scp.css'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"j95l5o33yq"},{"Name":"integrity","Value":"sha256-GX0/EqqvYYLEBL/2TaK7C6baa9jjrTIgQAIZFM\u002BNNd0="},{"Name":"label","Value":"_content/Tekhnologia/Tekhnologia.bundle.scp.css"}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"1129"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022GX0/EqqvYYLEBL/2TaK7C6baa9jjrTIgQAIZFM\u002BNNd0=\u0022"},{"Name":"Last-Modified","Value":"Wed, 19 Feb 2025 17:25:32 GMT"}]]]></ResponseHeaders>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"1129"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022GX0/EqqvYYLEBL/2TaK7C6baa9jjrTIgQAIZFM\u002BNNd0=\u0022"},{"Name":"Last-Modified","Value":"Fri, 21 Feb 2025 09:13:06 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
   </ItemGroup>
 </Project>
