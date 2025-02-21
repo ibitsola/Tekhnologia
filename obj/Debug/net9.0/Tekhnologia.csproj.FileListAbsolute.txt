@@ -1,4 +1,5 @@
 C:\MyProjects\Tekhnologia\bin\Debug\net9.0\appsettings.Development.json
+C:\MyProjects\Tekhnologia\bin\Debug\net9.0\appsettings.example.json
 C:\MyProjects\Tekhnologia\bin\Debug\net9.0\appsettings.json
 C:\MyProjects\Tekhnologia\bin\Debug\net9.0\Tekhnologia.staticwebassets.runtime.json
 C:\MyProjects\Tekhnologia\bin\Debug\net9.0\Tekhnologia.staticwebassets.endpoints.json

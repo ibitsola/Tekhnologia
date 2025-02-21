@@ -8,13 +8,27 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 
-
-
 var builder = WebApplication.CreateBuilder(args); // Create a web application
 
 // Configure Stripe API Key
-var stripeSecretKey = builder.Configuration["Stripe:SecretKey"];
-    StripeConfiguration.ApiKey = stripeSecretKey;
+//var stripeSecretKey = builder.Configuration["Stripe:SecretKey"];
+    //StripeConfiguration.ApiKey = stripeSecretKey;
+
+// Configure Stripe API Key
+var stripeSecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
+var stripePublishableKey = Environment.GetEnvironmentVariable("STRIPE_PUBLISHABLE_KEY");
+
+// Fallback to appsettings if environment variable is not found
+if (string.IsNullOrEmpty(stripeSecretKey))
+{
+    stripeSecretKey = builder.Configuration["Stripe:SecretKey"];
+}
+if (string.IsNullOrEmpty(stripePublishableKey))
+{
+    stripePublishableKey = builder.Configuration["Stripe:PublishableKey"];
+}
+
+StripeConfiguration.ApiKey = stripeSecretKey; // Set the Stripe secret key
 
 // Register the database connection in the services container
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
