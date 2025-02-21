@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Models.DTOs;
-using Stripe;
-using Stripe.Checkout;
 using System.Security.Claims;
 
 namespace Controllers
@@ -148,122 +146,6 @@ namespace Controllers
             _context.SaveChanges();
             return Ok("Resource updated successfully.");
         }
-
-        // Creates a checkout session for purchasing a digital resource using Stripe
-        [Authorize]
-        [HttpPost("create-checkout-session/{id}")]
-        public async Task<IActionResult> CreateCheckoutSession(int id)
-        {
-            var resource = _context.DigitalResources.Find(id);
-            if (resource == null || resource.IsFree)
-                return BadRequest("Invalid or free resource.");
-
-            if (resource.Price == null)
-                return BadRequest("Price cannot be null.");
-
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("User not found.");
-
-            var domain = "https://tekhnologia.co.uk/";
-
-            var options = new SessionCreateOptions
-            {
-                PaymentMethodTypes = new List<string> { "card" },
-                LineItems = new List<SessionLineItemOptions>
-                {
-                    new SessionLineItemOptions
-                    {
-                        PriceData = new SessionLineItemPriceDataOptions
-                        {
-                            Currency = "usd",
-                            ProductData = new SessionLineItemPriceDataProductDataOptions
-                            {
-                                Name = resource.Title,
-                            },
-                            UnitAmount = (long)(resource.Price.Value * 100), // Convert to cents
-                        },
-                        Quantity = 1,
-                    }
-                },
-                Mode = "payment",
-                SuccessUrl = $"{domain}/success?session_id={{CHECKOUT_SESSION_ID}}",
-                CancelUrl = $"{domain}/cancel",
-                Metadata = new Dictionary<string, string>
-                {
-                    { "userId", userId },
-                    { "resourceId", resource.Id.ToString() }
-                }
-            };
-
-            var stripeClient = new StripeClient(StripeConfiguration.ApiKey);
-            var service = new SessionService(stripeClient);
-            var session = await service.CreateAsync(options);
-            Console.WriteLine($"[DEBUG] Created Checkout Session ID: {session.Id}");
-
-
-
-            // Store session details in DB
-            var purchase = new Purchase
-            {
-                UserId = userId,
-                DigitalResourceId = resource.Id,
-                StripeSessionId = session.Id,
-                IsPaid = false
-            };
-            // Log just after session id is assigned for debugging purpuses
-            Console.WriteLine($"Storing Stripe Session ID: {session.Id} for Purchase {resource.Id}");
-            // Debugging before saving to the database
-            Console.WriteLine($"[DEBUG] Purchase Created - User: {userId}, Resource: {resource.Id}, Stored Session ID: {session.Id}");
-
-            _context.Purchases.Add(purchase);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { url = session.Url });
-        }
-
-        // Retrieves a list of digital resources that the authenticated user has purchased
-        [Authorize]
-        [HttpGet("my-purchases")]
-        public IActionResult GetUserPurchases()
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("User not found.");
-
-            var purchases = _context.Purchases
-                .Where(p => p.UserId == userId && p.IsPaid)
-                .Select(p => new PurchaseDTO
-                {
-                    Id = p.Id,
-                    DigitalResourceId = p.DigitalResourceId,
-                    ResourceTitle = p.DigitalResource.Title,
-                    Price = p.DigitalResource.Price ?? 0,
-                    PurchaseDate = p.PurchaseDate
-                })
-                .ToList();
-
-            return Ok(purchases);
-        }
-
-        // Retrieves a list of all completed purchases
-        [Authorize(Roles = "Admin")]
-        [HttpGet("purchases")]
-        public IActionResult GetPurchases()
-        {
-            var purchases = _context.Purchases
-                .Where(p => p.IsPaid)
-                .Select(p => new PurchaseDTO
-                {
-                    Id = p.Id,
-                    DigitalResourceId = p.DigitalResourceId,
-                    ResourceTitle = p.DigitalResource.Title,
-                    Price = p.DigitalResource.Price ?? 0,
-                    PurchaseDate = p.PurchaseDate
-                })
-                .ToList();
-
-            return Ok(purchases);
-        }
+        
     }
 }
