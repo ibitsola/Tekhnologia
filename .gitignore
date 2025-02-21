@@ -1,0 +1,22 @@
+# Ignore appsettings.json and development config files
+appsettings.json
+appsettings.Development.json
+
+# Ignore sensitive keys
+.env
+
+# Ignore database files (optional)
+*.db
+*.db-shm
+*.db-wal
+
+# Ignore build and binary files
+bin/
+obj/
+
+# Ignore user-specific files
+.vscode/
+.idea/
+*.suo
+*.user
+*.rsuser

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Tekhnologia")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d373c7ec2fce73f69b914ae7a0617863ade9d5aa")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d0b05147e91210d4c1db068c399a31e63b923b99")]
 [assembly: System.Reflection.AssemblyProductAttribute("Tekhnologia")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Tekhnologia")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
