@@ -22,6 +22,7 @@ namespace Controllers
 
         // List all resources with optional filters (category, free/paid)
         [HttpGet]
+        [Authorize]
         public IActionResult GetAllResources([FromQuery] string? category, [FromQuery] bool? isFree)
         {
             var query = _context.DigitalResources.AsQueryable();
@@ -48,8 +49,8 @@ namespace Controllers
         }
 
         // Admin: Upload a new resource
-        [Authorize(Roles = "Admin")]
         [HttpPost("upload")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UploadResource([FromForm] CreateDigitalResourceDTO resourceDTO)
         {
             if (resourceDTO.File == null || resourceDTO.File.Length == 0)
@@ -85,6 +86,7 @@ namespace Controllers
 
         // Users: Download a resource (Free or Purchased in the Future)
         [HttpGet("download/{id}")]
+        [Authorize]
         public IActionResult DownloadResource(int id)
         {
             var resource = _context.DigitalResources.Find(id);
@@ -111,8 +113,8 @@ namespace Controllers
 
 
         // Admin: Delete a resource
-        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]        
         public IActionResult DeleteResource(int id)
         {
             var resource = _context.DigitalResources.Find(id);
@@ -130,8 +132,8 @@ namespace Controllers
         }
 
         // Admin: Edit resource details (title, pricing, category)
-        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]        
         public IActionResult EditResource(int id, [FromBody] DigitalResourceDTO updatedResource)
         {
             var resource = _context.DigitalResources.Find(id);
