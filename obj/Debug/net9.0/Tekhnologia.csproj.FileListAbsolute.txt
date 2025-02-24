@@ -45,6 +45,7 @@ C:\MyProjects\Tekhnologia\bin\Debug\net9.0\Mono.TextTemplating.dll
 C:\MyProjects\Tekhnologia\bin\Debug\net9.0\Newtonsoft.Json.dll
 C:\MyProjects\Tekhnologia\bin\Debug\net9.0\Npgsql.dll
 C:\MyProjects\Tekhnologia\bin\Debug\net9.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\MyProjects\Tekhnologia\bin\Debug\net9.0\OpenAI.dll
 C:\MyProjects\Tekhnologia\bin\Debug\net9.0\SQLitePCLRaw.batteries_v2.dll
 C:\MyProjects\Tekhnologia\bin\Debug\net9.0\SQLitePCLRaw.core.dll
 C:\MyProjects\Tekhnologia\bin\Debug\net9.0\SQLitePCLRaw.provider.e_sqlite3.dll

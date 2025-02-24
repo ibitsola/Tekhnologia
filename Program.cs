@@ -7,12 +7,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using Services;
 
 var builder = WebApplication.CreateBuilder(args); // Create a web application
 
-// Configure Stripe API Key
-//var stripeSecretKey = builder.Configuration["Stripe:SecretKey"];
-    //StripeConfiguration.ApiKey = stripeSecretKey;
+var configuration = new ConfigurationBuilder()
+    .AddUserSecrets<Program>()
+    .Build();
+
+var apiKey = configuration["OpenAI:ApiKey"];
+
 
 // Configure Stripe API Key
 var stripeSecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
@@ -83,9 +87,12 @@ builder.Services.AddCors(options =>
 // Register Controllers (for handling API requests)
 builder.Services.AddControllers();
 
+
 // Enable API documentation via Swagger
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddScoped<AIService>();
 
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
