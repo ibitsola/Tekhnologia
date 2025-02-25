@@ -1,130 +1,87 @@
-using Data;
 using Models;
 using Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Services;
 using System.Security.Claims;
 
 namespace Controllers
 {
     [ApiController]
-    [Route("api/journal")] // Base route for journal APIs
+    [Route("api/journal")]
     public class JournalController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-        private readonly UserManager<User> _userManager;
+        private readonly JournalService _journalService;
 
-        public JournalController(ApplicationDbContext context, UserManager<User> userManager)
+        public JournalController(JournalService journalService)
         {
-            _context = context;
-            _userManager = userManager;
+            _journalService = journalService;
         }
 
         // Create a new journal entry
         [HttpPost]
-        [Authorize] // Ensures only logged-in users can create a journal entry
+        [Authorize]
         public async Task<IActionResult> CreateJournalEntry([FromBody] CreateJournalEntryDTO dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState); // Ensures the request body meets model requirements
+                return BadRequest(ModelState);
 
-            // Extract UserId from token
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized("User ID not found in token");
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User ID not found in token");
 
-            // Map DTO to Entity
-            var entry = new JournalEntry
-            {
-                UserId = userId,
-                EntryText = dto.EntryText,
-                SentimentScore = dto.SentimentScore,
-                Visibility = dto.Visibility,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-
-            // Save to database
-            _context.JournalEntries.Add(entry);
-            await _context.SaveChangesAsync();
-
+            var entry = await _journalService.CreateJournalEntryAsync(userId, dto);
             return Ok(new { message = "Journal entry created successfully", entry });
         }
 
         // Get all journal entries for the logged-in user
         [HttpGet]
-        [Authorize] // Ensures only logged-in users can access their journals
+        [Authorize]
         public async Task<IActionResult> GetUserJournalEntries()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized("User ID not found in token");
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User ID not found in token");
 
-            var entries = await _context.JournalEntries
-                .Where(e => e.UserId == userId)
-                .OrderByDescending(e => e.Date)
-                .Select(e => new JournalEntryDTO
-                {
-                    EntryId = e.EntryId,
-                    EntryText = e.EntryText,
-                    SentimentScore = e.SentimentScore,
-                    Visibility = e.Visibility,
-                    Date = e.Date,
-                    CreatedAt = e.CreatedAt,
-                    UpdatedAt = e.UpdatedAt
-                })
-                .ToListAsync();
-
+            var entries = await _journalService.GetUserJournalEntriesAsync(userId);
             return Ok(entries);
         }
 
         // Get a single journal entry by ID
         [HttpGet("{entryId}")]
-        [Authorize] // Ensures only the owner of the journal entry can view it
+        [Authorize]
         public async Task<IActionResult> GetJournalEntryById(Guid entryId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var entry = await _context.JournalEntries.FindAsync(entryId);
-
-            if (entry == null || entry.UserId != userId) return NotFound("Entry not found or access denied");
+            var entry = await _journalService.GetJournalEntryByIdAsync(entryId, userId!);
+            if (entry == null)
+                return NotFound("Entry not found or access denied");
 
             return Ok(entry);
         }
 
         // Update an existing journal entry
         [HttpPut("{entryId}")]
-        [Authorize] // Ensures only the owner can update their entry
+        [Authorize]
         public async Task<IActionResult> UpdateJournalEntry(Guid entryId, [FromBody] CreateJournalEntryDTO dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var entry = await _context.JournalEntries.FindAsync(entryId);
+            var (success, error, updatedEntry) = await _journalService.UpdateJournalEntryAsync(entryId, dto, userId!);
+            if (!success)
+                return NotFound(error);
 
-            if (entry == null || entry.UserId != userId) return NotFound("Entry not found or access denied");
-
-            // Update fields
-            entry.EntryText = dto.EntryText;
-            entry.SentimentScore = dto.SentimentScore;
-            entry.Visibility = dto.Visibility;
-            entry.UpdatedAt = DateTime.UtcNow;
-
-            _context.JournalEntries.Update(entry);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Journal entry updated successfully", entry });
+            return Ok(new { message = "Journal entry updated successfully", entry = updatedEntry });
         }
 
         // Delete a journal entry
         [HttpDelete("{entryId}")]
-        [Authorize] // Ensures only the owner can delete their entry
+        [Authorize]
         public async Task<IActionResult> DeleteJournalEntry(Guid entryId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var entry = await _context.JournalEntries.FindAsync(entryId);
-
-            if (entry == null || entry.UserId != userId) return NotFound("Entry not found or access denied");
-
-            _context.JournalEntries.Remove(entry);
-            await _context.SaveChangesAsync();
+            var (success, error) = await _journalService.DeleteJournalEntryAsync(entryId, userId!);
+            if (!success)
+                return NotFound(error);
 
             return Ok(new { message = "Journal entry deleted successfully" });
         }
