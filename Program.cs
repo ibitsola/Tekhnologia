@@ -123,6 +123,12 @@ builder.Services.AddSwaggerGen(options =>
 
 
 var app = builder.Build(); // Build the application
+// Apply pending migrations automatically
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.Migrate();
+}
 
 // Roles are created when the app starts
 using (var scope = app.Services.CreateScope())
@@ -140,6 +146,42 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
+
+// This code creates an Admin user in the database if one does not already exist.
+using (var scope = app.Services.CreateScope())
+{
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+    string adminEmail = "admin@example.com";
+    string adminPassword = "Admin@1234";
+
+    var admin = await userManager.FindByEmailAsync(adminEmail);
+    if (admin == null)
+    {
+        admin = new User
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            Name = "Admin User",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        var result = await userManager.CreateAsync(admin, adminPassword);
+        if (result.Succeeded)
+        {
+            // Assign the "Admin" role to the newly created admin user
+            await userManager.AddToRoleAsync(admin, "Admin");
+        }
+        else
+        {
+            foreach (var error in result.Errors)
+            {
+                Console.WriteLine(error.Description);
+            }
+        }
+    }
+}
+
 
 // Enable API documentation when running in development mode
 if (app.Environment.IsDevelopment())

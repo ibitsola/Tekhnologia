@@ -10,15 +10,15 @@ namespace Data
         // The constructor receives database options (like which database provider we are using - SQLite/PostgreSQL)
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                // Ensure the database is stored in the correct location
-                string dbPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "Tekhnologia.db"));
-                optionsBuilder.UseSqlite($"Data Source={dbPath}");
-            }
-        }
+        // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        // {
+        //     if (!optionsBuilder.IsConfigured)
+        //     {
+        //         // Ensure the database is stored in the correct location
+        //         string dbPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database", "Tekhnologia.db"));
+        //         optionsBuilder.UseSqlite($"Data Source={dbPath}");
+        //     }
+        // }
                 
         // These are our "tables" in the database.
         public DbSet<JournalEntry> JournalEntries { get; set;} // Stores users' journal entries
