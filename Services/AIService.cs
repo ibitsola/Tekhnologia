@@ -1,4 +1,5 @@
 using OpenAI.Chat;
+using System.Threading.Tasks;
 
 namespace Services
 {
