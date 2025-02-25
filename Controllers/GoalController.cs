@@ -1,13 +1,9 @@
-using Data;
 using Models;
 using Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Services;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using System;
 
 namespace Controllers
 {
@@ -15,13 +11,11 @@ namespace Controllers
     [Route("api/goals")]
     public class GoalController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-        private readonly UserManager<User> _userManager;
+        private readonly GoalService _goalService;
 
-        public GoalController(ApplicationDbContext context, UserManager<User> userManager)
+        public GoalController(GoalService goalService)
         {
-            _context = context;
-            _userManager = userManager;
+            _goalService = goalService;
         }
 
         // Create a new goal
@@ -30,22 +24,10 @@ namespace Controllers
         public async Task<IActionResult> CreateGoal([FromBody] CreateGoalDTO dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized("User ID not found in token");
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User ID not found in token");
 
-            var goal = new Goal
-            {
-                UserId = userId,
-                Title = dto.Title,
-                Description = dto.Description,
-                Deadline = dto.Deadline,
-                 IsCompleted = false,
-                Urgency = dto.Urgency,
-                Importance = dto.Importance
-            };
-
-            _context.Goals.Add(goal);
-            await _context.SaveChangesAsync();
-
+            var goal = await _goalService.CreateGoalAsync(userId, dto);
             return Ok(new { message = "Goal created successfully", goal });
         }
 
@@ -55,25 +37,10 @@ namespace Controllers
         public async Task<IActionResult> GetUserGoals()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized("User ID not found in token");
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User ID not found in token");
 
-            var goals = await _context.Goals
-                .Where(g => g.UserId == userId)
-                .OrderByDescending(g => g.CreatedAt)
-                .Select(g => new GoalResponseDTO
-                {
-                    GoalId = g.GoalId,
-                    Title = g.Title,
-                    Description = g.Description,
-                    Deadline = g.Deadline,
-                    IsCompleted = g.IsCompleted,
-                    Urgency = g.Urgency,
-                    Importance = g.Importance,
-                    CreatedAt = g.CreatedAt,
-                    UpdatedAt = g.UpdatedAt
-                })
-                .ToListAsync();
-
+            var goals = await _goalService.GetUserGoalsAsync(userId);
             return Ok(goals);
         }
 
@@ -83,24 +50,11 @@ namespace Controllers
         public async Task<IActionResult> UpdateGoal(Guid goalId, [FromBody] CreateGoalDTO dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var goal = await _context.Goals.FindAsync(goalId);
+            var (success, error, updatedGoal) = await _goalService.UpdateGoalAsync(goalId, dto, userId!);
+            if (!success)
+                return NotFound(error);
 
-            if (goal == null || goal.UserId != userId) return NotFound("Goal not found or access denied");
-
-            bool previousCompletionStatus = goal.IsCompleted;
-            
-            goal.Title = dto.Title;
-            goal.Description = dto.Description;
-            goal.Deadline = dto.Deadline;
-            goal.Urgency = dto.Urgency;
-            goal.Importance = dto.Importance;
-            goal.IsCompleted = previousCompletionStatus;
-            goal.UpdatedAt = DateTime.UtcNow;
-
-            _context.Goals.Update(goal);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Goal updated successfully", goal });
+            return Ok(new { message = "Goal updated successfully", goal = updatedGoal });
         }
 
         // Mark goal as completed
@@ -109,17 +63,11 @@ namespace Controllers
         public async Task<IActionResult> MarkGoalAsCompleted(Guid goalId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var goal = await _context.Goals.FindAsync(goalId);
+            var (success, error, updatedGoal) = await _goalService.MarkGoalAsCompletedAsync(goalId, userId!);
+            if (!success)
+                return NotFound(error);
 
-            if (goal == null || goal.UserId != userId) return NotFound("Goal not found or access denied");
-
-            goal.IsCompleted = true;
-            goal.UpdatedAt = DateTime.UtcNow;
-
-            _context.Goals.Update(goal);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Goal marked as completed", goal });
+            return Ok(new { message = "Goal marked as completed", goal = updatedGoal });
         }
 
         // Delete a goal
@@ -128,12 +76,9 @@ namespace Controllers
         public async Task<IActionResult> DeleteGoal(Guid goalId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var goal = await _context.Goals.FindAsync(goalId);
-
-            if (goal == null || goal.UserId != userId) return NotFound("Goal not found or access denied");
-
-            _context.Goals.Remove(goal);
-            await _context.SaveChangesAsync();
+            var (success, error) = await _goalService.DeleteGoalAsync(goalId, userId!);
+            if (!success)
+                return NotFound(error);
 
             return Ok(new { message = "Goal deleted successfully" });
         }

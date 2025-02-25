@@ -1,106 +1,71 @@
-using Data;
 using Models;
-using Models.DTOs; 
+using Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Services;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using System;
-
 
 namespace Controllers
 {
     [ApiController]
-    [Route("api/visionboard")] // Base route for vision board APIs
+    [Route("api/visionboard")]
     public class VisionBoardController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-        private readonly UserManager<User> _userManager;
+        private readonly VisionBoardService _visionBoardService;
 
-        public VisionBoardController(ApplicationDbContext context, UserManager<User> userManager)
+        public VisionBoardController(VisionBoardService visionBoardService)
         {
-            _context = context;
-            _userManager = userManager;
+            _visionBoardService = visionBoardService;
         }
 
         // Create a new vision board item
         [HttpPost]
-        [Authorize] // Ensures only logged-in users can create vision board items
+        [Authorize]
         public async Task<IActionResult> CreateVisionBoardItem([FromBody] CreateVisionBoardItemDTO dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized("User ID not found in token");
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User ID not found in token");
 
-            var item = new VisionBoardItem
-            {
-                UserId = userId,
-                ImageUrl = dto.ImageUrl,
-                Caption = dto.Caption,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.VisionBoardItems.Add(item);
-            await _context.SaveChangesAsync();
-
+            var item = await _visionBoardService.CreateVisionBoardItemAsync(userId, dto);
             return Ok(new { message = "Vision board item added successfully", item });
         }
 
         // Get all vision board items for the logged-in user
         [HttpGet]
-        [Authorize] // Ensures only logged-in users can access their vision board
+        [Authorize]
         public async Task<IActionResult> GetUserVisionBoard()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return Unauthorized("User ID not found in token");
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User ID not found in token");
 
-            var items = await _context.VisionBoardItems
-                .Where(v => v.UserId == userId)
-                .OrderByDescending(v => v.CreatedAt)
-                .Select(v => new VisionBoardItemDTO
-                {
-                    VisionId = v.VisionId,
-                    ImageUrl = v.ImageUrl,
-                    Caption = v.Caption,
-                    CreatedAt = v.CreatedAt
-                })
-                .ToListAsync();
-
+            var items = await _visionBoardService.GetUserVisionBoardAsync(userId);
             return Ok(items);
         }
 
         // Update a vision board item
         [HttpPut("{visionId}")]
-        [Authorize] // Ensures only the owner can update their vision board items
+        [Authorize]
         public async Task<IActionResult> UpdateVisionBoardItem(Guid visionId, [FromBody] CreateVisionBoardItemDTO dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var item = await _context.VisionBoardItems.FindAsync(visionId);
+            var (success, error, updatedItem) = await _visionBoardService.UpdateVisionBoardItemAsync(visionId, dto, userId!);
+            if (!success)
+                return NotFound(error);
 
-            if (item == null || item.UserId != userId) return NotFound("Item not found or access denied");
-
-            item.ImageUrl = dto.ImageUrl;
-            item.Caption = dto.Caption;
-
-            _context.VisionBoardItems.Update(item);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Vision board item updated successfully", item });
+            return Ok(new { message = "Vision board item updated successfully", item = updatedItem });
         }
 
         // Delete a vision board item
         [HttpDelete("{visionId}")]
-        [Authorize] // Ensures only the owner can delete their vision board items
+        [Authorize]
         public async Task<IActionResult> DeleteVisionBoardItem(Guid visionId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var item = await _context.VisionBoardItems.FindAsync(visionId);
-
-            if (item == null || item.UserId != userId) return NotFound("Item not found or access denied");
-
-            _context.VisionBoardItems.Remove(item);
-            await _context.SaveChangesAsync();
+            var (success, error) = await _visionBoardService.DeleteVisionBoardItemAsync(visionId, userId!);
+            if (!success)
+                return NotFound(error);
 
             return Ok(new { message = "Vision board item deleted successfully" });
         }

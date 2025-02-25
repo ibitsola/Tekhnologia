@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "BG+fDMOctd2614TLiqGRqOOZYbpy572OLxD2VHZFKIM=",
+  "Hash": "N8FZx306CRxhm0clzsQzIiAPOyhq2NxRyQoCIcG4I7c=",
   "Source": "Tekhnologia",
   "BasePath": "_content/Tekhnologia",
   "Mode": "Default",
@@ -1422,6 +1422,48 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\css\\site.css"
+    },
+    {
+      "Identity": "C:\\MyProjects\\Tekhnologia\\wwwroot\\digital-resources\\00f95c1c-7084-49a7-b115-5b38c2deed86_25-free-coaching-tools-and-techniques.pdf",
+      "SourceId": "Tekhnologia",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\MyProjects\\Tekhnologia\\wwwroot\\",
+      "BasePath": "_content/Tekhnologia",
+      "RelativePath": "digital-resources/00f95c1c-7084-49a7-b115-5b38c2deed86_25-free-coaching-tools-and-techniques#[.{fingerprint}]?.pdf",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "1w41qbgnfh",
+      "Integrity": "/wq0hFmSJh6DR50w7CCYhI1CR+aPKCgQShrbVTr4/xY=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\digital-resources\\00f95c1c-7084-49a7-b115-5b38c2deed86_25-free-coaching-tools-and-techniques.pdf"
+    },
+    {
+      "Identity": "C:\\MyProjects\\Tekhnologia\\wwwroot\\digital-resources\\41f80d63-26fd-4134-a59d-20a72d6e37c6_25-free-coaching-tools-and-techniques.pdf",
+      "SourceId": "Tekhnologia",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\MyProjects\\Tekhnologia\\wwwroot\\",
+      "BasePath": "_content/Tekhnologia",
+      "RelativePath": "digital-resources/41f80d63-26fd-4134-a59d-20a72d6e37c6_25-free-coaching-tools-and-techniques#[.{fingerprint}]?.pdf",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "1w41qbgnfh",
+      "Integrity": "/wq0hFmSJh6DR50w7CCYhI1CR+aPKCgQShrbVTr4/xY=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\digital-resources\\41f80d63-26fd-4134-a59d-20a72d6e37c6_25-free-coaching-tools-and-techniques.pdf"
     },
     {
       "Identity": "C:\\MyProjects\\Tekhnologia\\wwwroot\\digital-resources\\46347cbe-fd5c-4a00-8bf6-dbc1f6112af2_TfL attendance during industrial action.pdf",
@@ -3064,6 +3106,170 @@
         {
           "Name": "integrity",
           "Value": "sha256-0FC1RbVkLkwKhJ1oi+r2Hw4Tm9av6DyJeo95YVvfA3Y="
+        }
+      ]
+    },
+    {
+      "Route": "digital-resources/00f95c1c-7084-49a7-b115-5b38c2deed86_25-free-coaching-tools-and-techniques.1w41qbgnfh.pdf",
+      "AssetFile": "C:\\MyProjects\\Tekhnologia\\wwwroot\\digital-resources\\00f95c1c-7084-49a7-b115-5b38c2deed86_25-free-coaching-tools-and-techniques.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1706665"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"/wq0hFmSJh6DR50w7CCYhI1CR+aPKCgQShrbVTr4/xY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 25 Feb 2025 17:26:06 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "1w41qbgnfh"
+        },
+        {
+          "Name": "label",
+          "Value": "digital-resources/00f95c1c-7084-49a7-b115-5b38c2deed86_25-free-coaching-tools-and-techniques.pdf"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-/wq0hFmSJh6DR50w7CCYhI1CR+aPKCgQShrbVTr4/xY="
+        }
+      ]
+    },
+    {
+      "Route": "digital-resources/00f95c1c-7084-49a7-b115-5b38c2deed86_25-free-coaching-tools-and-techniques.pdf",
+      "AssetFile": "C:\\MyProjects\\Tekhnologia\\wwwroot\\digital-resources\\00f95c1c-7084-49a7-b115-5b38c2deed86_25-free-coaching-tools-and-techniques.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1706665"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"/wq0hFmSJh6DR50w7CCYhI1CR+aPKCgQShrbVTr4/xY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 25 Feb 2025 17:26:06 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-/wq0hFmSJh6DR50w7CCYhI1CR+aPKCgQShrbVTr4/xY="
+        }
+      ]
+    },
+    {
+      "Route": "digital-resources/41f80d63-26fd-4134-a59d-20a72d6e37c6_25-free-coaching-tools-and-techniques.1w41qbgnfh.pdf",
+      "AssetFile": "C:\\MyProjects\\Tekhnologia\\wwwroot\\digital-resources\\41f80d63-26fd-4134-a59d-20a72d6e37c6_25-free-coaching-tools-and-techniques.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1706665"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"/wq0hFmSJh6DR50w7CCYhI1CR+aPKCgQShrbVTr4/xY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 25 Feb 2025 17:26:29 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "1w41qbgnfh"
+        },
+        {
+          "Name": "label",
+          "Value": "digital-resources/41f80d63-26fd-4134-a59d-20a72d6e37c6_25-free-coaching-tools-and-techniques.pdf"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-/wq0hFmSJh6DR50w7CCYhI1CR+aPKCgQShrbVTr4/xY="
+        }
+      ]
+    },
+    {
+      "Route": "digital-resources/41f80d63-26fd-4134-a59d-20a72d6e37c6_25-free-coaching-tools-and-techniques.pdf",
+      "AssetFile": "C:\\MyProjects\\Tekhnologia\\wwwroot\\digital-resources\\41f80d63-26fd-4134-a59d-20a72d6e37c6_25-free-coaching-tools-and-techniques.pdf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1706665"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/pdf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"/wq0hFmSJh6DR50w7CCYhI1CR+aPKCgQShrbVTr4/xY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 25 Feb 2025 17:26:29 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-/wq0hFmSJh6DR50w7CCYhI1CR+aPKCgQShrbVTr4/xY="
         }
       ]
     },
@@ -21516,7 +21722,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 25 Feb 2025 13:42:41 GMT"
+          "Value": "Tue, 25 Feb 2025 21:08:36 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21569,7 +21775,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 25 Feb 2025 13:42:41 GMT"
+          "Value": "Tue, 25 Feb 2025 21:08:36 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21606,7 +21812,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 25 Feb 2025 13:42:41 GMT"
+          "Value": "Tue, 25 Feb 2025 21:08:36 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21653,7 +21859,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 25 Feb 2025 13:42:41 GMT"
+          "Value": "Tue, 25 Feb 2025 21:08:36 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21714,7 +21920,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 25 Feb 2025 13:42:41 GMT"
+          "Value": "Tue, 25 Feb 2025 21:08:36 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21759,7 +21965,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 25 Feb 2025 13:42:41 GMT"
+          "Value": "Tue, 25 Feb 2025 21:08:36 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21814,7 +22020,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 25 Feb 2025 13:42:41 GMT"
+          "Value": "Tue, 25 Feb 2025 21:08:36 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21875,7 +22081,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 25 Feb 2025 13:42:41 GMT"
+          "Value": "Tue, 25 Feb 2025 21:08:36 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21920,7 +22126,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 25 Feb 2025 13:42:41 GMT"
+          "Value": "Tue, 25 Feb 2025 21:08:36 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -21975,7 +22181,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 25 Feb 2025 13:42:41 GMT"
+          "Value": "Tue, 25 Feb 2025 21:08:36 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -22028,7 +22234,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 25 Feb 2025 13:42:41 GMT"
+          "Value": "Tue, 25 Feb 2025 21:08:36 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -22065,7 +22271,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 25 Feb 2025 13:42:41 GMT"
+          "Value": "Tue, 25 Feb 2025 21:08:36 GMT"
         },
         {
           "Name": "Cache-Control",

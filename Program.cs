@@ -34,10 +34,29 @@ if (string.IsNullOrEmpty(stripePublishableKey))
 
 StripeConfiguration.ApiKey = stripeSecretKey; // Set the Stripe secret key
 
+// Register JournalService as a scoped service for journal-related business logic.
+builder.Services.AddScoped<JournalService>();
+// Register AuthService as a scoped service so that a new instance is created per HTTP request.
+builder.Services.AddScoped<AuthService>();
+// Register AuthService as a scoped service so that a new instance is created per HTTP request.
+builder.Services.AddScoped<AuthService>();
+// Register UserService as a scoped service for user-related business logic.
+builder.Services.AddScoped<UserService>();
+// Register AdminService as a scoped service for admin-related business logic.
+builder.Services.AddScoped<AdminService>();
+// Register VisionBoardService as a scoped service for vision board–related business logic.
+builder.Services.AddScoped<VisionBoardService>();
+// Register DigitalResourceService as a scoped service for digital resource business logic.
+builder.Services.AddScoped<DigitalResourceService>();
+// Register GoalService as a scoped service for goal-related business logic.
+builder.Services.AddScoped<GoalService>();
+// Register PaymentService as a scoped service for payment-related business logic.
+builder.Services.AddScoped<PaymentService>();
+
+
 // Register the database connection in the services container
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 // Configure Identity for user authentication and role management
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -147,36 +166,42 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// This code creates an Admin user in the database if one does not already exist.
+// This code creates an Admin user in the database if no admin exists.
 using (var scope = app.Services.CreateScope())
 {
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-    string adminEmail = "admin@example.com";
-    string adminPassword = "Admin@1234";
-
-    var admin = await userManager.FindByEmailAsync(adminEmail);
-    if (admin == null)
+    // Instead of checking by email, check if there are any users in the "Admin" role.
+    var admins = await userManager.GetUsersInRoleAsync("Admin");
+    
+    if (!admins.Any())
     {
-        admin = new User
-        {
-            UserName = adminEmail,
-            Email = adminEmail,
-            Name = "Admin User",
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+        string adminEmail = "admin@example.com";
+        string adminPassword = "Admin@1234";
 
-        var result = await userManager.CreateAsync(admin, adminPassword);
-        if (result.Succeeded)
+        var admin = await userManager.FindByEmailAsync(adminEmail);
+        if (admin == null)
         {
-            // Assign the "Admin" role to the newly created admin user
-            await userManager.AddToRoleAsync(admin, "Admin");
-        }
-        else
-        {
-            foreach (var error in result.Errors)
+            admin = new User
             {
-                Console.WriteLine(error.Description);
+                UserName = adminEmail,
+                Email = adminEmail,
+                Name = "Admin User",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            var result = await userManager.CreateAsync(admin, adminPassword);
+            if (result.Succeeded)
+            {
+                // Assign the "Admin" role to the newly created admin user.
+                await userManager.AddToRoleAsync(admin, "Admin");
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    Console.WriteLine(error.Description);
+                }
             }
         }
     }
