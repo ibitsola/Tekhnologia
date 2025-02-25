@@ -50,6 +50,9 @@ builder.Services.AddScoped<VisionBoardService>();
 builder.Services.AddScoped<DigitalResourceService>();
 // Register GoalService as a scoped service for goal-related business logic.
 builder.Services.AddScoped<GoalService>();
+// Register PaymentService as a scoped service for payment-related business logic.
+builder.Services.AddScoped<PaymentService>();
+
 
 // Register the database connection in the services container
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
