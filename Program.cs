@@ -48,8 +48,8 @@ builder.Services.AddScoped<AdminService>();
 builder.Services.AddScoped<VisionBoardService>();
 // Register DigitalResourceService as a scoped service for digital resource business logic.
 builder.Services.AddScoped<DigitalResourceService>();
-
-
+// Register GoalService as a scoped service for goal-related business logic.
+builder.Services.AddScoped<GoalService>();
 
 // Register the database connection in the services container
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
