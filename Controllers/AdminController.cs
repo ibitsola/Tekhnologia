@@ -103,7 +103,7 @@ namespace Controllers
             // List of users that cannot be deleted
             var protectedUserIds = new List<string>
             {
-               "b45c31f5-b345-4cb6-88f4-c1930afad1c5", 
+               "682dd3de-5e64-4ba5-ba42-1cecace32402", 
                "5c87f46c-2d3b-48d7-89d6-d8fcfeda1a4b"  
             };
 

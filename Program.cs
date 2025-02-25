@@ -36,11 +36,13 @@ StripeConfiguration.ApiKey = stripeSecretKey; // Set the Stripe secret key
 
 // Register AuthService as a scoped service so that a new instance is created per HTTP request.
 builder.Services.AddScoped<AuthService>();
-
+// Register AuthService as a scoped service so that a new instance is created per HTTP request.
+builder.Services.AddScoped<AuthService>();
+// Register UserService as a scoped service for user-related business logic.
+builder.Services.AddScoped<UserService>();
 // Register the database connection in the services container
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 // Configure Identity for user authentication and role management
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
