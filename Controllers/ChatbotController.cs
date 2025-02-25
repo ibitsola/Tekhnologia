@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Models.DTOs;
 using Services; 
 using Microsoft.AspNetCore.Authorization;
-using System.Threading.Tasks;
 
 namespace Controllers
 {
