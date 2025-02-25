@@ -40,6 +40,8 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<AuthService>();
 // Register UserService as a scoped service for user-related business logic.
 builder.Services.AddScoped<UserService>();
+// Register AdminService as a scoped service for admin-related business logic.
+builder.Services.AddScoped<AdminService>();
 // Register the database connection in the services container
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
