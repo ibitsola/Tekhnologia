@@ -34,6 +34,9 @@ if (string.IsNullOrEmpty(stripePublishableKey))
 
 StripeConfiguration.ApiKey = stripeSecretKey; // Set the Stripe secret key
 
+// Register AuthService as a scoped service so that a new instance is created per HTTP request.
+builder.Services.AddScoped<AuthService>();
+
 // Register the database connection in the services container
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
