@@ -1,10 +1,10 @@
-using Models.DTOs;
+using Tekhnologia.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Services;
+using Tekhnologia.Services;
 using System.Security.Claims;
 
-namespace Controllers
+namespace Tekhnologia.Controllers
 {
     [Route("api/digitalresources")]
     [ApiController]

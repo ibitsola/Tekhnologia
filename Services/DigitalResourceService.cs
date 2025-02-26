@@ -1,8 +1,8 @@
-using Data;
-using Models;
-using Models.DTOs;
+using Tekhnologia.Data;
+using Tekhnologia.Models;
+using Tekhnologia.Models.DTOs;
 
-namespace Services
+namespace Tekhnologia.Services
 {
     /// <summary>
     /// Provides business logic for digital resources including listing, uploading,

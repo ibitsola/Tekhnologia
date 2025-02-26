@@ -1,7 +1,6 @@
 using OpenAI.Chat;
-using System.Threading.Tasks;
 
-namespace Services
+namespace Tekhnologia.Services
 {
     public class AIService
     {

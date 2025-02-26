@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity;
-using Models;
-using Models.DTOs;
+using Tekhnologia.Models;
+using Tekhnologia.Models.DTOs;
 
-namespace Services
+namespace Tekhnologia.Services
 {
     /// <summary>
     /// Provides user-related business logic such as fetching profiles, updating profile data, and changing passwords.

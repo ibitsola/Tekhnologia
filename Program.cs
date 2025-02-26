@@ -1,13 +1,13 @@
 using Stripe;
-using Data;
-using Models;
+using Tekhnologia.Data;
+using Tekhnologia.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
-using Services;
+using Tekhnologia.Services;
 
 var builder = WebApplication.CreateBuilder(args); // Create a web application
 

@@ -1,11 +1,10 @@
-using Data;
-using Models;
-using Models.DTOs;
+using Tekhnologia.Data;
+using Tekhnologia.Models;
+using Tekhnologia.Models.DTOs;
 using Stripe;
 using Stripe.Checkout;
-using Microsoft.EntityFrameworkCore;
 
-namespace Services
+namespace Tekhnologia.Services
 {
     /// <summary>
     /// Provides business logic for processing digital resource purchases using Stripe.
