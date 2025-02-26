@@ -3,10 +3,10 @@ name: Build and Test .NET
 on:
   # Triggers the workflow on pushes to the 'main' branch
   push:
-    branches: [ "main" ]
+    branches: [ "main", "Irasworkingbranchv2" ]
   # Triggers the workflow on pull requests to the 'main' branch
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "Irasworkingbranchv2" ]
 
 jobs:
   build-and-test:

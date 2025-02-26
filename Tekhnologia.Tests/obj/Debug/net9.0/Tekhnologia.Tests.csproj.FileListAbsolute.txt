@@ -180,3 +180,4 @@ C:\TekhnologiaUK\Tekhnologia.Tests\obj\Debug\net9.0\refint\Tekhnologia.Tests.dll
 C:\TekhnologiaUK\Tekhnologia.Tests\obj\Debug\net9.0\Tekhnologia.Tests.pdb
 C:\TekhnologiaUK\Tekhnologia.Tests\obj\Debug\net9.0\Tekhnologia.Tests.genruntimeconfig.cache
 C:\TekhnologiaUK\Tekhnologia.Tests\obj\Debug\net9.0\ref\Tekhnologia.Tests.dll
+C:\TekhnologiaUK\Tekhnologia.Tests\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.InMemory.dll
