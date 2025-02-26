@@ -173,6 +173,7 @@ C:\TekhnologiaUK\Tekhnologia.Tests\obj\Debug\net9.0\Tekhnologia.Tests.GeneratedM
 C:\TekhnologiaUK\Tekhnologia.Tests\obj\Debug\net9.0\Tekhnologia.Tests.AssemblyInfoInputs.cache
 C:\TekhnologiaUK\Tekhnologia.Tests\obj\Debug\net9.0\Tekhnologia.Tests.AssemblyInfo.cs
 C:\TekhnologiaUK\Tekhnologia.Tests\obj\Debug\net9.0\Tekhnologia.Tests.csproj.CoreCompileInputs.cache
+C:\TekhnologiaUK\Tekhnologia.Tests\obj\Debug\net9.0\Tekhnologia.Tests.sourcelink.json
 C:\TekhnologiaUK\Tekhnologia.Tests\obj\Debug\net9.0\Tekhnolo.E45F7A37.Up2Date
 C:\TekhnologiaUK\Tekhnologia.Tests\obj\Debug\net9.0\Tekhnologia.Tests.dll
 C:\TekhnologiaUK\Tekhnologia.Tests\obj\Debug\net9.0\refint\Tekhnologia.Tests.dll
