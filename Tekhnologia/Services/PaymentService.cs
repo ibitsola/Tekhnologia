@@ -189,7 +189,7 @@ namespace Tekhnologia.Services
             if (stripeEvent.Type == "checkout.session.completed")
             {
                 var session = stripeEvent.Data.Object as Session;
-                if (session == null || string.IsNullOrEmpty(session.Id))
+                if (session == null || string.IsNullOrEmpty(session!.Id))
                     throw new Exception("Invalid Stripe session.");
 
                 var purchase = _context.Purchases.FirstOrDefault(p => p.StripeSessionId == session.Id);
