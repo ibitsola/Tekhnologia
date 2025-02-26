@@ -6363,11 +6363,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\MyProjects\\Tekhnologia\\Tekhnologia.csproj",
+      "projectUniqueName": "C:\\TekhnologiaUK\\Tekhnologia\\Tekhnologia.csproj",
       "projectName": "Tekhnologia",
-      "projectPath": "C:\\MyProjects\\Tekhnologia\\Tekhnologia.csproj",
+      "projectPath": "C:\\TekhnologiaUK\\Tekhnologia\\Tekhnologia.csproj",
       "packagesPath": "C:\\Users\\PanagiotaIraBitsola\\.nuget\\packages\\",
-      "outputPath": "C:\\MyProjects\\Tekhnologia\\obj\\",
+      "outputPath": "C:\\TekhnologiaUK\\Tekhnologia\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

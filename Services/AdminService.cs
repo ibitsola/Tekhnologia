@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Models;
-using Models.DTOs;
+using Tekhnologia.Models;
+using Tekhnologia.Models.DTOs;
 
-namespace Services
+namespace Tekhnologia.Services
 {
     /// <summary>
     /// Provides admin-related business logic such as retrieving users, updating profiles,

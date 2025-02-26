@@ -1,4 +1,4 @@
-namespace Models.DTOs
+namespace Tekhnologia.Models.DTOs
 {
     public class GoalResponseDTO
     {

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using Models.DTOs;
-using Services; 
+using Tekhnologia.Models.DTOs;
+using Tekhnologia.Services; 
 using Microsoft.AspNetCore.Authorization;
 
-namespace Controllers
+namespace Tekhnologia.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

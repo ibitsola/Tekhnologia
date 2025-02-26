@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Models.DTOs
+namespace Tekhnologia.Models.DTOs
 {
     public class CreateGoalDTO
     {

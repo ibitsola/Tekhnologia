@@ -1,8 +1,8 @@
-using Models;
+using Tekhnologia.Models;
 using Microsoft.AspNetCore.Mvc;
-using Services;
+using Tekhnologia.Services;
 
-namespace Controllers
+namespace Tekhnologia.Controllers
 {
     [ApiController]
     [Route("api/auth")]

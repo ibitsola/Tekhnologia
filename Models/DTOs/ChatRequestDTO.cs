@@ -1,6 +1,4 @@
-using System.Runtime.CompilerServices;
-
-namespace Models.DTOs
+namespace Tekhnologia.Models.DTOs
 {
     public class ChatRequestDTO
     {

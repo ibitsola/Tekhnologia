@@ -1,4 +1,4 @@
-namespace Models
+namespace Tekhnologia.Models
 {
     public class ErrorViewModel
     {

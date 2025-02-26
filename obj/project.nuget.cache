@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "B5zs71S6TU8=",
+  "dgSpecHash": "2vt63Vv7gII=",
   "success": true,
-  "projectFilePath": "C:\\MyProjects\\Tekhnologia\\Tekhnologia.csproj",
+  "projectFilePath": "C:\\TekhnologiaUK\\Tekhnologia\\Tekhnologia.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\PanagiotaIraBitsola\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\PanagiotaIraBitsola\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

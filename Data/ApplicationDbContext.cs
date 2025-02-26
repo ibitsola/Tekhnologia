@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore; // Import Entity Framework Core for database operations
-using Models;
+using Tekhnologia.Models;
 
-namespace Data
+namespace Tekhnologia.Data
 {
     // The ApplicationDbContext class is the "bridge" between the database and the application.
     public class ApplicationDbContext : IdentityDbContext<User>

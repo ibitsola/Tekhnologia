@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using Services;
+using Tekhnologia.Services;
 
-namespace Controllers
+namespace Tekhnologia.Controllers
 {
     [Route("api/payment")]
     [ApiController]
