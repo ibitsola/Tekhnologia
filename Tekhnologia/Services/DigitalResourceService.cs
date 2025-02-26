@@ -1,6 +1,7 @@
 using Tekhnologia.Data;
 using Tekhnologia.Models;
 using Tekhnologia.Models.DTOs;
+using Tekhnologia.Services.Interfaces; // Add this
 
 namespace Tekhnologia.Services
 {
@@ -8,7 +9,7 @@ namespace Tekhnologia.Services
     /// Provides business logic for digital resources including listing, uploading,
     /// downloading, deletion, and editing.
     /// </summary>
-    public class DigitalResourceService
+    public class DigitalResourceService : IDigitalResourceService
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _env;
@@ -19,9 +20,6 @@ namespace Tekhnologia.Services
             _env = env;
         }
 
-        /// <summary>
-        /// Retrieves all digital resources with optional filters for category and free/paid status.
-        /// </summary>
         public List<DigitalResourceDTO> GetAllResources(string? category, bool? isFree)
         {
             var query = _context.DigitalResources.AsQueryable();
@@ -47,9 +45,6 @@ namespace Tekhnologia.Services
             return resources;
         }
 
-        /// <summary>
-        /// Uploads a new digital resource.
-        /// </summary>
         public async Task<DigitalResource> UploadResourceAsync(CreateDigitalResourceDTO resourceDTO, string uploaderName)
         {
             if (resourceDTO.File == null || resourceDTO.File.Length == 0)
@@ -84,16 +79,12 @@ namespace Tekhnologia.Services
             return newResource;
         }
 
-        /// <summary>
-        /// Downloads a resource by id. If the resource is not free, checks if a valid purchase exists.
-        /// </summary>
         public (DigitalResource Resource, byte[] FileBytes) DownloadResource(int id, string userId)
         {
             var resource = _context.DigitalResources.Find(id);
             if (resource == null)
                 throw new Exception("Resource not found.");
 
-            // If resource is paid, check if purchase exists
             if (!resource.IsFree)
             {
                 var purchase = _context.Purchases
@@ -110,9 +101,6 @@ namespace Tekhnologia.Services
             return (resource, fileBytes);
         }
 
-        /// <summary>
-        /// Deletes a resource by id, removing both the file and its database record.
-        /// </summary>
         public async Task DeleteResourceAsync(int id)
         {
             var resource = _context.DigitalResources.Find(id);
@@ -127,9 +115,6 @@ namespace Tekhnologia.Services
             await _context.SaveChangesAsync();
         }
 
-        /// <summary>
-        /// Edits a digital resource's details.
-        /// </summary>
         public async Task EditResourceAsync(int id, DigitalResourceDTO updatedResource)
         {
             var resource = _context.DigitalResources.Find(id);

@@ -4,13 +4,14 @@ using Tekhnologia.Data;
 using Tekhnologia.Models;
 using Tekhnologia.Models.DTOs;
 using Tekhnologia.Services;
+using Tekhnologia.Services.Interfaces;
 
 namespace Tekhnologia.Tests.Services
 {
     public class GoalServiceTests : IDisposable
     {
         private readonly ApplicationDbContext _context;
-        private readonly GoalService _goalService;
+        private readonly IGoalService _goalService;
 
         public GoalServiceTests()
         {

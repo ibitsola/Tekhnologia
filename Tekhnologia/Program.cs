@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using Tekhnologia.Services;
+using Tekhnologia.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args); // Create a web application
 
@@ -34,24 +35,16 @@ if (string.IsNullOrEmpty(stripePublishableKey))
 
 StripeConfiguration.ApiKey = stripeSecretKey; // Set the Stripe secret key
 
-// Register JournalService as a scoped service for journal-related business logic.
+// Register services with their interfaces
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IDigitalResourceService, DigitalResourceService>(); 
+builder.Services.AddScoped<AIService>();
+builder.Services.AddScoped<IGoalService, GoalService>();
 builder.Services.AddScoped<JournalService>();
-// Register AuthService as a scoped service so that a new instance is created per HTTP request.
-builder.Services.AddScoped<AuthService>();
-// Register AuthService as a scoped service so that a new instance is created per HTTP request.
-builder.Services.AddScoped<AuthService>();
-// Register UserService as a scoped service for user-related business logic.
-builder.Services.AddScoped<UserService>();
-// Register AdminService as a scoped service for admin-related business logic.
-builder.Services.AddScoped<AdminService>();
-// Register VisionBoardService as a scoped service for vision board–related business logic.
-builder.Services.AddScoped<VisionBoardService>();
-// Register DigitalResourceService as a scoped service for digital resource business logic.
-builder.Services.AddScoped<DigitalResourceService>();
-// Register GoalService as a scoped service for goal-related business logic.
-builder.Services.AddScoped<GoalService>();
-// Register PaymentService as a scoped service for payment-related business logic.
 builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<VisionBoardService>();
 
 
 // Register the database connection in the services container

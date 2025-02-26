@@ -1,9 +1,9 @@
-using Tekhnologia.Models;
 using Tekhnologia.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tekhnologia.Services;
 using System.Security.Claims;
+using Tekhnologia.Services.Interfaces;
 
 namespace Tekhnologia.Controllers
 {
@@ -11,9 +11,9 @@ namespace Tekhnologia.Controllers
     [Route("api/goals")]
     public class GoalController : ControllerBase
     {
-        private readonly GoalService _goalService;
+        private readonly IGoalService _goalService;
 
-        public GoalController(GoalService goalService)
+        public GoalController(IGoalService goalService)
         {
             _goalService = goalService;
         }

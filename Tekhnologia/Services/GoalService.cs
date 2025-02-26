@@ -1,6 +1,7 @@
 using Tekhnologia.Data;
 using Tekhnologia.Models;
 using Tekhnologia.Models.DTOs;
+using Tekhnologia.Services.Interfaces; 
 using Microsoft.EntityFrameworkCore;
 
 namespace Tekhnologia.Services
@@ -9,7 +10,7 @@ namespace Tekhnologia.Services
     /// Provides business logic for creating, retrieving, updating, marking completed, 
     /// and deleting goals.
     /// </summary>
-    public class GoalService
+    public class GoalService : IGoalService
     {
         private readonly ApplicationDbContext _context;
 
