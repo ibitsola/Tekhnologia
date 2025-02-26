@@ -219,7 +219,10 @@ namespace Tekhnologia.Tests.Services
 
             // Assert
             var updated = _context.Purchases.Find(1);
-            updated.IsPaid.Should().BeTrue();
+            updated.Should().NotBeNull();
+
+            updated!.IsPaid.Should().BeTrue(); 
+
         }
 
         [Fact]
