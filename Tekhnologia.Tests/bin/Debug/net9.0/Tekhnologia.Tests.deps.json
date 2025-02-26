@@ -9,6 +9,7 @@
       "Tekhnologia.Tests/1.0.0": {
         "dependencies": {
           "FluentAssertions": "8.1.1",
+          "Microsoft.AspNetCore.Hosting.Abstractions": "2.3.0",
           "Microsoft.AspNetCore.Http": "2.3.0",
           "Microsoft.AspNetCore.Identity": "2.3.0",
           "Microsoft.EntityFrameworkCore.InMemory": "9.0.2",

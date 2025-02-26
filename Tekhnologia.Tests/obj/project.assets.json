@@ -5560,6 +5560,7 @@
   "projectFileDependencyGroups": {
     "net9.0": [
       "FluentAssertions >= 8.1.1",
+      "Microsoft.AspNetCore.Hosting.Abstractions >= 2.3.0",
       "Microsoft.AspNetCore.Http >= 2.3.0",
       "Microsoft.AspNetCore.Identity >= 2.3.0",
       "Microsoft.EntityFrameworkCore.InMemory >= 9.0.2",
@@ -5631,6 +5632,10 @@
           "FluentAssertions": {
             "target": "Package",
             "version": "[8.1.1, )"
+          },
+          "Microsoft.AspNetCore.Hosting.Abstractions": {
+            "target": "Package",
+            "version": "[2.3.0, )"
           },
           "Microsoft.AspNetCore.Http": {
             "target": "Package",
