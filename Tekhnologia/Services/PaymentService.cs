@@ -164,7 +164,7 @@ namespace Tekhnologia.Services
             if (purchase == null)
                 throw new Exception("Purchase not found.");
 
-            if (purchase.IsPaid)
+            if (purchase!.IsPaid)
                 throw new Exception("Purchase is already marked as paid.");
 
             purchase.IsPaid = true;
