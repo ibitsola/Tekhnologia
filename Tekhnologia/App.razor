@@ -1,0 +1,13 @@
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Routing
+@using Tekhnologia.Views.Shared
+
+
+<Router AppAssembly="@typeof(Program).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)" />
+    </Found>
+    <NotFound>
+        <h3>Sorry, the page was not found!</h3>
+    </NotFound>
+</Router>

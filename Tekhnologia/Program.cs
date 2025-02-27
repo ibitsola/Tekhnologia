@@ -18,7 +18,6 @@ var configuration = new ConfigurationBuilder()
 
 var apiKey = configuration["OpenAI:ApiKey"];
 
-
 // Configure Stripe API Key
 var stripeSecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
 var stripePublishableKey = Environment.GetEnvironmentVariable("STRIPE_PUBLISHABLE_KEY");
@@ -45,7 +44,6 @@ builder.Services.AddScoped<IJournalService, JournalService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IVisionBoardService, VisionBoardService>();
-
 
 // Register the database connection in the services container
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -95,10 +93,8 @@ builder.Services.AddCors(options =>
     });
 });
 
-
 // Register Controllers (for handling API requests)
 builder.Services.AddControllers();
-
 
 // Enable API documentation via Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -133,14 +129,25 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// Add Blazor Services before building the app
+builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor();
+builder.Services.AddSignalR();
 
 var app = builder.Build(); // Build the application
+
 // Apply pending migrations automatically
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     dbContext.Database.Migrate();
 }
+
+// Enable Blazor Middleware
+app.UseStaticFiles(); 
+app.UseRouting(); 
+app.MapBlazorHub(); 
+app.MapFallbackToPage("/_Host"); 
 
 // Roles are created when the app starts
 using (var scope = app.Services.CreateScope())
@@ -158,48 +165,6 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
-
-// This code creates an Admin user in the database if no admin exists.
-using (var scope = app.Services.CreateScope())
-{
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-    // Instead of checking by email, check if there are any users in the "Admin" role.
-    var admins = await userManager.GetUsersInRoleAsync("Admin");
-    
-    if (!admins.Any())
-    {
-        string adminEmail = "admin@example.com";
-        string adminPassword = "Admin@1234";
-
-        var admin = await userManager.FindByEmailAsync(adminEmail);
-        if (admin == null)
-        {
-            admin = new User
-            {
-                UserName = adminEmail,
-                Email = adminEmail,
-                Name = "Admin User",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-
-            var result = await userManager.CreateAsync(admin, adminPassword);
-            if (result.Succeeded)
-            {
-                // Assign the "Admin" role to the newly created admin user.
-                await userManager.AddToRoleAsync(admin, "Admin");
-            }
-            else
-            {
-                foreach (var error in result.Errors)
-                {
-                    Console.WriteLine(error.Description);
-                }
-            }
-        }
-    }
-}
-
 
 // Enable API documentation when running in development mode
 if (app.Environment.IsDevelopment())
