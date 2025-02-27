@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Tekhnologia.Models.DTOs;
 using Tekhnologia.Services; 
 using Microsoft.AspNetCore.Authorization;
+using Tekhnologia.Services.Interfaces;
 
 namespace Tekhnologia.Controllers
 {
@@ -10,9 +11,9 @@ namespace Tekhnologia.Controllers
     [Authorize]
     public class ChatbotController : ControllerBase
     {
-        private readonly AIService _aiService;
+        private readonly IAIService _aiService;
 
-        public ChatbotController(AIService aiService)
+        public ChatbotController(IAIService aiService)
         {
             _aiService = aiService;
         }
@@ -25,9 +26,9 @@ namespace Tekhnologia.Controllers
                 return BadRequest("Invalid request data.");
             }
 
-            // Use the correct variable name ("chatRequest") instead of "chatRequestDto"
             var response = await _aiService.GetBusinessCoachingResponse(chatRequest.Message);
-            return Ok(new { response });
+            return Ok(new ChatbotResponseDTO { Response = response });
         }
+
     }
 }

@@ -1,13 +1,14 @@
-using Tekhnologia.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Tekhnologia.Models;
+using Tekhnologia.Services.Interfaces;
 
 namespace Tekhnologia.Services
 {
-    public class AuthService
+    public class AuthService : IAuthService
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
@@ -20,9 +21,6 @@ namespace Tekhnologia.Services
             _configuration = configuration;
         }
 
-        /// <summary>
-        /// Registers a new user using the provided register model.
-        /// </summary>
         public async Task<IdentityResult> RegisterAsync(RegisterModel model)
         {
             var user = new User
@@ -36,9 +34,6 @@ namespace Tekhnologia.Services
             return result;
         }
 
-        /// <summary>
-        /// Authenticates a user and returns a JWT token if successful.
-        /// </summary>
         public async Task<string?> LoginAsync(LoginModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
@@ -61,7 +56,6 @@ namespace Tekhnologia.Services
                 new Claim("name", user.Name ?? "Unknown")
             };
 
-            // Add roles to the claims if available.
             foreach (var role in roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));

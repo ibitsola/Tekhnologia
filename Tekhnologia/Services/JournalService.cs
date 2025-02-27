@@ -2,13 +2,14 @@ using Tekhnologia.Data;
 using Tekhnologia.Models;
 using Tekhnologia.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
+using Tekhnologia.Services.Interfaces;
 
 namespace Tekhnologia.Services
 {
     /// <summary>
     /// Provides business logic for creating, retrieving, updating, and deleting journal entries.
     /// </summary>
-    public class JournalService
+    public class JournalService : IJournalService
     {
         private readonly ApplicationDbContext _context;
 

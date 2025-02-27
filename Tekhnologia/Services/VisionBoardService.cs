@@ -2,13 +2,14 @@ using Tekhnologia.Data;
 using Tekhnologia.Models;
 using Tekhnologia.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
+using Tekhnologia.Services.Interfaces;
 
 namespace Tekhnologia.Services
 {
     /// <summary>
     /// Provides business logic for creating, retrieving, updating, and deleting vision board items.
     /// </summary>
-    public class VisionBoardService
+    public class VisionBoardService : IVisionBoardService
     {
         private readonly ApplicationDbContext _context;
 

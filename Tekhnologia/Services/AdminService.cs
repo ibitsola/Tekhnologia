@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Tekhnologia.Models;
 using Tekhnologia.Models.DTOs;
+using Tekhnologia.Services.Interfaces;
 
 namespace Tekhnologia.Services
 {
@@ -9,7 +10,7 @@ namespace Tekhnologia.Services
     /// Provides admin-related business logic such as retrieving users, updating profiles,
     /// promoting users, and deleting users.
     /// </summary>
-    public class AdminService
+    public class AdminService : IAdminService
     {
         private readonly UserManager<User> _userManager;
 

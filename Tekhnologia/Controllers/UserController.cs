@@ -2,7 +2,7 @@ using Tekhnologia.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using Tekhnologia.Services;
+using Tekhnologia.Services.Interfaces;
 
 namespace Tekhnologia.Controllers
 {
@@ -10,9 +10,9 @@ namespace Tekhnologia.Controllers
     [Route("api/users")]
     public class UserController : ControllerBase
     {
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
 
-        public UserController(UserService userService)
+        public UserController(IUserService userService)
         {
             _userService = userService;
         }

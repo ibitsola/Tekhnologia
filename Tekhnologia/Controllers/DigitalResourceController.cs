@@ -1,8 +1,8 @@
 using Tekhnologia.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Tekhnologia.Services;
 using System.Security.Claims;
+using Tekhnologia.Services.Interfaces;
 
 namespace Tekhnologia.Controllers
 {
@@ -10,9 +10,9 @@ namespace Tekhnologia.Controllers
     [ApiController]
     public class DigitalResourceController : ControllerBase
     {
-        private readonly DigitalResourceService _digitalResourceService;
+        private readonly IDigitalResourceService _digitalResourceService;
 
-        public DigitalResourceController(DigitalResourceService digitalResourceService)
+        public DigitalResourceController(IDigitalResourceService digitalResourceService)
         {
             _digitalResourceService = digitalResourceService;
         }

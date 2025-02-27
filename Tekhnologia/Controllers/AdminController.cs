@@ -2,6 +2,7 @@ using Tekhnologia.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tekhnologia.Services;
+using Tekhnologia.Services.Interfaces;
 
 namespace Tekhnologia.Controllers
 {
@@ -10,9 +11,9 @@ namespace Tekhnologia.Controllers
     [Authorize(Roles = "Admin")] // Restrict all routes to Admins
     public class AdminController : ControllerBase
     {
-        private readonly AdminService _adminService;
+        private readonly IAdminService _adminService;
 
-        public AdminController(AdminService adminService)
+        public AdminController(IAdminService adminService)
         {
             _adminService = adminService;
         }

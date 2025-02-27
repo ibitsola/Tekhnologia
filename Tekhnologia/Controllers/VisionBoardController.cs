@@ -1,9 +1,9 @@
-using Tekhnologia.Models;
 using Tekhnologia.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tekhnologia.Services;
 using System.Security.Claims;
+using Tekhnologia.Services.Interfaces;
 
 namespace Tekhnologia.Controllers
 {
@@ -11,9 +11,9 @@ namespace Tekhnologia.Controllers
     [Route("api/visionboard")]
     public class VisionBoardController : ControllerBase
     {
-        private readonly VisionBoardService _visionBoardService;
+        private readonly IVisionBoardService _visionBoardService;
 
-        public VisionBoardController(VisionBoardService visionBoardService)
+        public VisionBoardController(IVisionBoardService visionBoardService)
         {
             _visionBoardService = visionBoardService;
         }

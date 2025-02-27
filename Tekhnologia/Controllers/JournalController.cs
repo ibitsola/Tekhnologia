@@ -1,9 +1,8 @@
-using Tekhnologia.Models;
 using Tekhnologia.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Tekhnologia.Services;
 using System.Security.Claims;
+using Tekhnologia.Services.Interfaces;
 
 namespace Tekhnologia.Controllers
 {
@@ -11,9 +10,9 @@ namespace Tekhnologia.Controllers
     [Route("api/journal")]
     public class JournalController : ControllerBase
     {
-        private readonly JournalService _journalService;
+        private readonly IJournalService _journalService;
 
-        public JournalController(JournalService journalService)
+        public JournalController(IJournalService journalService)
         {
             _journalService = journalService;
         }

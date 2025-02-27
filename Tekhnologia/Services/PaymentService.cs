@@ -3,13 +3,15 @@ using Tekhnologia.Models;
 using Tekhnologia.Models.DTOs;
 using Stripe;
 using Stripe.Checkout;
+using Tekhnologia.Services.Interfaces;
+
 
 namespace Tekhnologia.Services
 {
     /// <summary>
     /// Provides business logic for processing digital resource purchases using Stripe.
     /// </summary>
-    public class PaymentService
+    public class PaymentService : IPaymentService
     {
         private readonly ApplicationDbContext _context;
         private readonly string _domain;
@@ -164,7 +166,7 @@ namespace Tekhnologia.Services
             if (purchase == null)
                 throw new Exception("Purchase not found.");
 
-            if (purchase.IsPaid)
+            if (purchase!.IsPaid)
                 throw new Exception("Purchase is already marked as paid.");
 
             purchase.IsPaid = true;
@@ -189,7 +191,7 @@ namespace Tekhnologia.Services
             if (stripeEvent.Type == "checkout.session.completed")
             {
                 var session = stripeEvent.Data.Object as Session;
-                if (session == null || string.IsNullOrEmpty(session.Id))
+                if (session == null || string.IsNullOrEmpty(session!.Id))
                     throw new Exception("Invalid Stripe session.");
 
                 var purchase = _context.Purchases.FirstOrDefault(p => p.StripeSessionId == session.Id);
