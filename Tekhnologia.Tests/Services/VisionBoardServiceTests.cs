@@ -4,13 +4,14 @@ using Tekhnologia.Data;
 using Tekhnologia.Models;
 using Tekhnologia.Models.DTOs;
 using Tekhnologia.Services;
+using Tekhnologia.Services.Interfaces;
 
 namespace Tekhnologia.Tests.Services
 {
     public class VisionBoardServiceTests : IDisposable
     {
         private readonly ApplicationDbContext _context;
-        private readonly VisionBoardService _visionBoardService;
+        private readonly IVisionBoardService _visionBoardService;
 
         public VisionBoardServiceTests()
         {

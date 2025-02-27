@@ -2,7 +2,6 @@ using Tekhnologia.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using Tekhnologia.Services;
 using Tekhnologia.Services.Interfaces;
 
 namespace Tekhnologia.Controllers
