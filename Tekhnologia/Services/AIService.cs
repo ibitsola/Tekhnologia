@@ -1,8 +1,9 @@
 using OpenAI.Chat;
+using Tekhnologia.Services.Interfaces;
 
 namespace Tekhnologia.Services
 {
-    public class AIService
+    public class AIService : IAIService
     {
         private readonly ChatClient _chatClient;
 

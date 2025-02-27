@@ -39,12 +39,12 @@ StripeConfiguration.ApiKey = stripeSecretKey; // Set the Stripe secret key
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IDigitalResourceService, DigitalResourceService>(); 
-builder.Services.AddScoped<AIService>();
+builder.Services.AddScoped<IAIService, AIService>();
 builder.Services.AddScoped<IGoalService, GoalService>();
 builder.Services.AddScoped<IJournalService, JournalService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<VisionBoardService>();
+builder.Services.AddScoped<IVisionBoardService, VisionBoardService>();
 
 
 // Register the database connection in the services container
