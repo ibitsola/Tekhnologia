@@ -3,13 +3,15 @@ using Tekhnologia.Models;
 using Tekhnologia.Models.DTOs;
 using Stripe;
 using Stripe.Checkout;
+using Tekhnologia.Services.Interfaces;
+
 
 namespace Tekhnologia.Services
 {
     /// <summary>
     /// Provides business logic for processing digital resource purchases using Stripe.
     /// </summary>
-    public class PaymentService
+    public class PaymentService : IPaymentService
     {
         private readonly ApplicationDbContext _context;
         private readonly string _domain;

@@ -4,7 +4,6 @@ using Tekhnologia.Controllers;
 using Tekhnologia.Models;
 using Tekhnologia.Services.Interfaces;
 using Tekhnologia.Tests.Fakes;
-using Xunit;
 
 namespace Tekhnologia.Tests.Controllers
 {

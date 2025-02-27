@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Tekhnologia.Models;
 using Tekhnologia.Services.Interfaces;

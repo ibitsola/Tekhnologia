@@ -1,33 +1,25 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Moq;
-using Stripe;
-using Stripe.Checkout;
 using Tekhnologia.Data;
 using Tekhnologia.Models;
-using Tekhnologia.Models.DTOs;
 using Tekhnologia.Services;
-using Xunit;
+using Tekhnologia.Services.Interfaces;
 
 namespace Tekhnologia.Tests.Services
 {
     public class PaymentServiceTests : IDisposable
     {
         private readonly ApplicationDbContext _context;
-        private readonly PaymentService _paymentService;
+        private readonly IPaymentService _paymentService;
 
         public PaymentServiceTests()
         {
-            // Create a new in-memory database for each test to ensure isolation.
+            // Create a new in‑memory database for isolation.
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
             _context = new ApplicationDbContext(options);
+            // Instantiate the concrete PaymentService (which implements IPaymentService)
             _paymentService = new PaymentService(_context);
         }
 
