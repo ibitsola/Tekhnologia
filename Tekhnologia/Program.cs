@@ -43,7 +43,7 @@ builder.Services.AddScoped<AIService>();
 builder.Services.AddScoped<IGoalService, GoalService>();
 builder.Services.AddScoped<IJournalService, JournalService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
-builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<VisionBoardService>();
 
 

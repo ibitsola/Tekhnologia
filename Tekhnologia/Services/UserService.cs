@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Identity;
 using Tekhnologia.Models;
 using Tekhnologia.Models.DTOs;
+using Tekhnologia.Services.Interfaces; 
 
 namespace Tekhnologia.Services
 {
     /// <summary>
     /// Provides user-related business logic such as fetching profiles, updating profile data, and changing passwords.
     /// </summary>
-    public class UserService
+    public class UserService : IUserService
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
