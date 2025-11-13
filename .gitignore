@@ -1,6 +1,7 @@
 # Private development documentation
 notes/
 sdlc/
+.github/copilot-instructions.md
 
 # Database files
 *.db

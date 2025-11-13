@@ -57,10 +57,6 @@
         </button>
     </div>
 
-    @if (!string.IsNullOrEmpty(successMessage))
-    {
-        <div class="notification is-primary">@successMessage</div>
-    }
     @if (!string.IsNullOrEmpty(errorMessage))
     {
         <div class="notification is-alert">@errorMessage</div>
@@ -74,7 +70,6 @@
 
 @code {
     private RegisterModel signupModel = new();
-    private string? successMessage;
     private string? errorMessage;
     private bool isSubmitting = false;
 
@@ -82,34 +77,30 @@
     {
         isSubmitting = true;
         errorMessage = null;
-        successMessage = null;
 
-        var result = await AuthService.RegisterAsync(signupModel);
-
-        if (result.Succeeded)
+        try
         {
-            successMessage = "User signed up successfully! Logging you in...";
+            var result = await AuthService.RegisterAsync(signupModel);
 
-            var signinResult = await AuthService.LoginAsync(new LoginModel
+            if (result.Succeeded)
             {
-                Email = signupModel.Email,
-                Password = signupModel.Password
-            });
-
-            if (!string.IsNullOrEmpty(signinResult))
-            {
-                Navigation.NavigateTo("/profile", forceLoad: true);
+                // Redirect to server endpoint that can write cookies
+                var email = Uri.EscapeDataString(signupModel.Email);
+                var password = Uri.EscapeDataString(signupModel.Password);
+                Navigation.NavigateTo($"/api/auth/autologin?email={email}&password={password}", forceLoad: true);
             }
             else
             {
-                Navigation.NavigateTo("/signin");   // typo fixed
+                errorMessage = string.Join("; ", result.Errors.Select(e => e.Description));
             }
         }
-        else
+        catch (Exception ex)
         {
-            errorMessage = string.Join("; ", result.Errors.Select(e => e.Description));
+            errorMessage = $"Registration failed: {ex.Message}";
         }
-
-        isSubmitting = false;
+        finally
+        {
+            isSubmitting = false;
+        }
     }
 }

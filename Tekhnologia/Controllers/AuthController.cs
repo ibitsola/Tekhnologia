@@ -67,5 +67,22 @@ namespace Tekhnologia.Controllers
 
             return Ok(new { message = "User registered successfully" });
         }
+
+        // Auto-login endpoint after registration (GET to allow cookie write)
+        [HttpGet("autologin")]
+        public async Task<IActionResult> AutoLogin([FromQuery] string email, [FromQuery] string password)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+                return Redirect("/signin");
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null && await _userManager.CheckPasswordAsync(user, password))
+            {
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return Redirect("/");
+            }
+
+            return Redirect("/signin");
+        }
     }
 }

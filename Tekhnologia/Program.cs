@@ -35,7 +35,7 @@ var apiBaseUrl  = builder.Configuration[$"ApiBaseUrls:{environment}"]
 
 // ─── 4) Register your application services ─────────────────────────────────────
 builder.Services.AddScoped<IAuthStateService, AuthStateService>();
-builder.Services.AddHttpClient<IBlazorAuthService, BlazorAuthService>();
+builder.Services.AddScoped<IBlazorAuthService, BlazorAuthService>();
 
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IDigitalResourceService, DigitalResourceService>();
@@ -153,15 +153,7 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddScoped<IAuthStateService, AuthStateService>();
 //builder.Services.AddSignalR();
-
-//  register HttpClient with a BaseAddress pointing to server
-builder.Services.AddScoped(sp =>
-{
-    var nav = sp.GetRequiredService<NavigationManager>();
-    return new HttpClient { BaseAddress = new Uri(nav.BaseUri) };
-});
 
 
 // ─── 8) Build and apply migrations + seed roles ────────────────────────────────

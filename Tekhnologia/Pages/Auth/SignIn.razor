@@ -68,25 +68,28 @@ else
     private bool isSubmitting = false;
     private bool hasCheckedSignin = false;
 
+    private Action? authHandler;
+
     protected override async Task OnInitializedAsync()
     {
-        AuthState.OnChange += OnAuthStateChanged;
+        authHandler = () => InvokeAsync(() =>
+        {
+            if (AuthState.IsLoggedIn)
+            {
+                Navigation.NavigateTo("/profile");
+            }
+        });
+
+        AuthState.OnChange += authHandler;
 
         await AuthState.CheckAuthStatus();
         hasCheckedSignin = true;
     }
 
-    private void OnAuthStateChanged()
-    {
-        if (AuthState.IsLoggedIn)
-        {
-            Navigation.NavigateTo("/profile", forceLoad: true); // 🔁 forceLoad ensures cookie state refresh
-        }
-    }
-
     public void Dispose()
     {
-        AuthState.OnChange -= OnAuthStateChanged;
+        if (authHandler != null)
+            AuthState.OnChange -= authHandler;
     }
 
     private async Task HandleSignin()

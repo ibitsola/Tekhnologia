@@ -49,9 +49,12 @@
 @code {
     private bool isActive = false;
 
+    private Action? authHandler;
+
     protected override async Task OnInitializedAsync()
     {
-        AuthState.OnChange += StateHasChanged;
+        authHandler = () => InvokeAsync(StateHasChanged);
+        AuthState.OnChange += authHandler;
         await AuthState.CheckAuthStatus();
     }
 
@@ -65,6 +68,7 @@
 
     public void Dispose()
     {
-        AuthState.OnChange -= StateHasChanged;
+        if (authHandler != null)
+            AuthState.OnChange -= authHandler;
     }
 }
