@@ -1,0 +1,76 @@
+@page "/aicoach"
+@using Tekhnologia.Models.DTOs
+@using Microsoft.AspNetCore.Components.Forms
+@using Tekhnologia.Services.Interfaces
+@using Tekhnologia.Views.Shared
+@inject IAIService Ai
+@inject IAuthStateService Auth
+
+@if (!Auth.IsLoggedIn)
+{
+    <RedirectToSignIn />
+}
+else
+{
+    <section class="section ai-coach-wrapper">
+        <div class="ai-image-container">
+            <img class="ai-img" src="images/AICoachEve.png" alt="AI coach" />
+        </div>
+
+        <div class="ai-chat-box box">
+            @foreach (var l in log)
+            {
+                <p><strong>@l.Role:</strong> @l.Text</p>
+            }
+
+            <EditForm Model="@model" OnSubmit="Send">
+                <InputTextArea @bind-Value="model.Message"
+                               class="textarea"
+                               placeholder="Ask your AI coach anything…" />
+                <button type="submit"
+                        class="button is-primary send-btn"
+                        disabled="@busy">
+                    @(busy ? "Sending…" : "Send")
+                </button>
+            </EditForm>
+
+            @if (!string.IsNullOrWhiteSpace(error))
+            {
+                <div class="notification is-danger mt-2">@error</div>
+            }
+        </div>
+    </section>
+}
+
+@code {
+    record Line(string Role, string Text);
+
+    ChatRequestDTO model = new();
+    List<Line> log = new();
+    bool busy;
+    string? error;
+
+    async Task Send()
+    {
+        var msg = model.Message?.Trim();
+        if (busy || string.IsNullOrEmpty(msg)) return;
+
+        busy = true;
+        log.Add(new("You", msg));
+        model.Message = string.Empty;
+
+        try
+        {
+            var reply = await Ai.GetBusinessCoachingResponse(msg);
+            log.Add(new("AI", reply));
+        }
+        catch (Exception ex)
+        {
+            error = $"❌ {ex.Message}";
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

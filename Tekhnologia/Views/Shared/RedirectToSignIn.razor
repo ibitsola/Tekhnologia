@@ -1,0 +1,10 @@
+@namespace Tekhnologia.Views.Shared
+@inject NavigationManager Navigation
+
+@code {
+    protected override void OnInitialized()
+    {
+        // send them to /signin if they hit an [Authorize] page unauthenticated
+        Navigation.NavigateTo("/signin", true);
+    }
+}

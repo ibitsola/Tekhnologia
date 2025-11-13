@@ -1,31 +1,739 @@
-html {
-  font-size: 14px;
+/* ============================== */
+/* VARIABLES & GENERAL STYLES */
+/* ============================== */
+:root {
+  --dark: #131416;
+  --brand-bg: hsl(var(--brand-h), var(--brand-s), var(--brand-l-dark));
+  --page-gradient: linear-gradient(#131416, #041b11);
+  --shine-bg: #131416;
+  --shine-bg-subtle: #17191c;
+  --shine-highlight: #0fdb80;
+  --shine-highlight-subtle: #03b565;
+  --brand: #0fd780;
+  --brand-strong: #0ff784;
+  --text-strong: #ffffff;
+  --navbar-gap: 0.75em;
+  --gray-text: #777777; /* used for "Already have an account?" text */
 }
 
-@media (min-width: 768px) {
-  html {
+html,
+body {
+  background: var(--dark);
+  background-image: var(--page-gradient);
+  background-attachment: fixed;
+  background-size: 100% 100%;
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================== */
+/* HEADINGS & TEXT STYLING */
+/* ============================== */
+h1,
+.title,
+.footer-logo {
+  font-family: "Oswald", sans-serif;
+  font-size: 56px;
+  font-weight: 700;
+  color: var(--text-strong);
+  letter-spacing: 1px;
+}
+
+/* Secondary text uses Poppins */
+.home-text,
+.home-subtext,
+.navbar-item,
+.footer-legal p {
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--shine-highlight-subtle);
+}
+
+/* Navbar navigation items (using Poppins, forced to white) */
+.navbar-item {
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  color: var(--text-strong) !important; /* Force white color */
+}
+
+/* Ensure logo in navbar uses Oswald */
+.navbar-logo {
+  font-family: "Oswald", sans-serif;
+  display: flex;                 /* <-- important */
+  align-items: center;
+  gap: 0.15em;                   /* Optional: tighter than margin-right */
+  font-size: 1.5rem;             /* Optional: match footer a[logo] style */
+  font-weight: bold;
+  text-decoration: none;
+}
+
+/* Logo Color Fix: Remove any extra spacing between the two spans */
+.logo-text {
+  color: var(--text-strong); /* "TEKHNOLOGIA" in white */
+  margin: 0;
+}
+.logo-gray {
+  color: var(--gray-text); /* ".CO.UK" in dark gray */
+  margin: 0;
+}
+
+/* NEW: Logo Image Sizes */
+.navbar-logo-icon {
+  width: 28px;
+  height: 28px;
+  vertical-align: middle;
+  margin-right: 0.5em;
+}
+.footer-logo-icon {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  margin-right: 0.5em;
+}
+
+/* ============================== */
+/* RESPONSIVE TYPOGRAPHY */
+/* ============================== */
+@media screen and (max-width: 768px) {
+  h1,
+  .title,
+  .footer-logo {
+    font-size: 40px;
+  }
+  .navbar-item,
+  .footer-nav a {
     font-size: 16px;
+  }
+  .home-text {
+    font-size: 18px;
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
+/* ============================== */
+/* HOME INTRO SECTION */
+/* ============================== */
+.home {
+  min-height: 80vh;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
   position: relative;
-  min-height: 100%;
+  overflow: hidden;
+  background: transparent !important;
+  padding-top: 10vh;
 }
 
-body {
-  margin-bottom: 60px;
+.home-intro {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  max-width: min(90vw, 1000px); 
+  text-align: center;
+  color: var(--text-bold);
+  padding: 0 1rem;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+.home-intro .title {
+  font-size: clamp(40px, 6vw, 84px);
+  font-weight: 900;
+  color: var(--text-strong);
+  letter-spacing: 1px;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+/* Horizontal line for emphasis */
+.hr {
+  width: 50%;
+  height: 2px;
+  background: var(--shine-highlight);
+  border: none;
+  margin: 10px auto;
 }
+
+.home-text {
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--shine-highlight-subtle);
+  margin-bottom: 10px;
+}
+
+.home-subtext {
+  font-size: 20px;
+  font-weight: 300;
+  color: var(--text-bold);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+/* Links */
+.link {
+  color: var(--shine-highlight);
+  text-decoration: none;
+  font-weight: 600;
+}
+.link:hover {
+  text-decoration: underline;
+}
+
+/* ============================== */
+/* CALL-TO-ACTION BUTTONS */
+/* ============================== */
+.home-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.home-buttons-shine .shine {
+  background: transparent;
+  padding: 16px 36px;
+  font-size: 24px;
+  font-weight: bold;
+  border-radius: 10px;
+  color: white;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s ease-in-out;
+  border: 3px solid rgba(15, 219, 128, 0.6);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(15, 219, 128, 0.4);
+}
+.home-buttons-shine .shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  z-index: -1;
+  filter: blur(4px);
+}
+.home-buttons-shine .shine::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, transparent, rgba(15, 219, 128, 0.3), transparent);
+  filter: blur(8px);
+  animation: spin 4s linear infinite;
+  opacity: 0.6;
+  pointer-events: none;
+}
+.home-buttons-shine .shine:hover {
+  border-color: rgba(15, 219, 128, 0.9);
+  box-shadow: 0 0 25px rgba(15, 219, 128, 0.8);
+}
+.home-buttons-shine .shine:hover::before {
+  opacity: 0.8;
+}
+
+/* ============================== */
+/* FEATURES SECTION */
+/* ============================== */
+.features-section {
+  margin-top: -50px;
+  padding-bottom: 40px;
+}
+.feature-box {
+  background: var(--dark) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+  padding: 20px;
+  text-align: center;
+  border-radius: 8px;
+}
+.feature-box .title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+.feature-box p {
+  font-size: 16px;
+  color: var(--text-bold);
+}
+.feature-box .button {
+  margin-top: 10px;
+}
+
+/* ============================== */
+/* NAVBAR */
+/* ============================== */
+.navbar {
+  position: absolute;
+  top: 0.5cm; /*  ~18-19px from top, can adjust if needed */
+  left: 0;
+  width: 100%;
+  background-color: transparent !important;
+  box-shadow: none;
+  z-index: 1000;
+}
+
+.navbar-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--navbar-gap);
+}
+
+.navbar-buttons .button {
+  font-size: 1.125rem;
+  padding: 12px 24px;
+  border-radius: 6px;
+  transition: all 0.3s ease-in-out;
+  line-height: 1;
+}
+.navbar-buttons .button.is-outlined {
+  background: transparent;
+  border: 2px solid var(--brand);
+  color: var(--text-strong);
+}
+.navbar-buttons .button.is-outlined:hover {
+  background: rgba(0, 255, 128, 0.1);
+  border-color: var(--brand-strong);
+}
+.navbar-buttons .button.is-primary {
+  background: rgba(15, 219, 128, 0.15);
+  color: white;
+  border: 2px solid rgba(15, 219, 128, 0.8);
+  box-shadow: 0 0 10px rgba(15, 219, 128, 0.5);
+}
+.navbar-buttons .button.is-primary:hover {
+  background: rgba(15, 219, 128, 0.25);
+  box-shadow: 0 0 20px rgba(15, 219, 128, 1);
+}
+
+/* ============================== */
+/* FOOTER */
+/* ============================== */
+.footer {
+  padding: calc(2 * var(--navbar-gap));
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--navbar-gap);
+  align-items: center;
+  background: transparent;
+}
+.footer-logo {
+  margin-bottom: 0.5em;
+}
+.footer-logo a {
+  color: var(--text-strong);
+  text-decoration: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1em 2em;
+}
+.footer-nav .navbar-item {
+  color: var(--text-strong);
+  text-decoration: none;
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+}
+.footer-nav .navbar-item:hover {
+  text-decoration: underline;
+}
+.footer-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1em;
+  font-size: 1.125rem;
+}
+.footer-buttons .button.is-outlined {
+  background: transparent;
+  border: 2px solid var(--brand);
+  color: var(--text-strong);
+  transition: all 0.3s ease-in-out;
+}
+.footer-buttons .button.is-outlined:hover {
+  background: rgba(0, 255, 128, 0.1);
+  border-color: var(--brand-strong);
+}
+.footer-buttons .button.is-primary {
+  background: rgba(15, 219, 128, 0.15);
+  color: white;
+  border: 2px solid rgba(15, 219, 128, 0.8);
+  box-shadow: 0 0 10px rgba(15, 219, 128, 0.5);
+  transition: all 0.3s ease-in-out;
+}
+.footer-buttons .button.is-primary:hover {
+  background: rgba(15, 219, 128, 0.25);
+  box-shadow: 0 0 20px rgba(15, 219, 128, 1);
+}
+.footer-legal p {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1em 2em;
+  font-size: 0.875em;
+  color: var(--text, #fff);
+  opacity: 0.8;
+}
+.footer-legal .link {
+  color: var(--text, #fff);
+  text-decoration: none;
+}
+.footer-legal .link:hover {
+  text-decoration: underline;
+}
+
+/* ============================== */
+/* GENERAL CLEANUP */
+/* ============================== */
+.container,
+.section,
+.content {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* ============================== */
+/* ANIMATED BUTTON LIGHT EFFECT */
+/* ============================== */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================== */
+/* LOGO & FAVICON */
+/* ============================== */
+.logo-icon {
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+  margin-right: 0.5em;
+}
+
+/* ============================== */
+/* GOAL LIST*/
+/* ============================== */
+.goal-list {
+  list-style: none;
+  padding: 0;
+}
+.goal-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+.goal-list button {
+  margin-left: 5px;
+}
+
+/* ============================== */
+/* FEATURE BOXES STYLING */
+/* ============================== */
+.feature-box {
+  background-color: var(--dark);
+  border: 1px solid var(--brand);
+  border-radius: 1em;
+  padding: 1em;
+  margin: 0.5em;
+  text-align: left;
+  box-shadow: 0 0 10px rgba(15, 219, 128, 0.6);
+  transition: transform 0.3s ease;
+}
+.feature-box:hover {
+  transform: translateY(-5px);
+}
+.feature-box h3 {
+  font-family: "Oswald", sans-serif;
+  font-size: 1.2em;
+  font-weight: 700;
+  color: var(--text-strong);
+  margin-bottom: 0.5em;
+}
+.feature-box p.feature-subtext {
+  font-family: "Poppins", sans-serif;
+  font-size: 0.9em;
+  color: var(--gray-text);
+  margin: 0;
+}
+.feature-boxes-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1em;
+}
+.feature-boxes-row .feature-box {
+  flex: 1 1 200px;
+  max-width: 250px;
+}
+@media screen and (max-width: 768px) {
+  .feature-boxes-row {
+    flex-direction: column;
+    align-items: center;
+  }
+  .columns .column {
+    flex: 1 1 100%;
+  }
+}
+
+/* ============================== */
+/* Service pages features*/
+/* ============================== */
+h2.title.section-title {
+  --bulma-title-size: 2rem !important;
+  font-size: var(--bulma-title-size) !important;
+}
+h1.title.service-title {
+  font-size: 4.5rem !important;
+  margin-top: 14vh;
+  margin-bottom: 8rem;
+}
+
+/* ============================== */
+/* AUTH PAGE OVERRIDES */
+/* ============================== */
+
+/* 1) Force container to center horizontally & vertically */
+.auth-container {
+  display: flex !important; /* override any Bulma display */
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: calc(100vh - 4rem);
+  padding: 2rem;
+  margin-top: 6rem; /* push below navbar */
+}
+
+/* 2) Force heading to be centered & override Bulma's .content h2 rules */
+.auth-heading {
+  font-family: "Oswald", sans-serif !important;
+  font-size: 2.5rem !important;
+  color: var(--text-strong) !important;
+  text-align: center !important;
+  display: block !important;
+  margin: 0 auto 1.5rem auto !important;
+}
+
+/* 3) Ensure the auth box is centered & has a hover glow */
+.auth-box {
+  margin: 0 auto !important; /* center horizontally */
+  max-width: 500px;
+  width: 100%;
+
+  /* More rounded corners */
+  border-radius: 0.4em !important;
+
+  /* Padding & background gradient */
+  padding: 3rem !important;
+  background-color: var(--dark);
+  background-image: linear-gradient(153deg, rgba(36, 36, 36, 0.6) 6.73%, rgba(18, 18, 18, 0.6) 69.09%);
+
+  /* Hover neon effect */
+  transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* 2) Add a glow effect only on the input fields when hovered */
+.input:hover {
+  box-shadow: 0 0 8px rgba(15, 219, 128, 0.6);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+/* More spacing between form fields */
+.auth-box .field {
+  margin-bottom: 1.5rem !important; /* override Bulma's .field spacing */
+}
+
+/* 4) Rounder inputs & override Bulma's input radius */
+/* Normal state */
+.input {
+  background-color: #1f1f1f !important; /* always dark */
+  border: 1px solid #333 !important;
+  color: #fff !important; /* text always white */
+  border-radius: 0.4em !important;
+  transition: border-color 0.2s ease-in-out;
+
+  /* Ensure Chrome/Edge autofill doesn’t show white/yellow background */
+  -webkit-box-shadow: 0 0 0 30px #1f1f1f inset !important; /* vendor prefix */
+  box-shadow: 0 0 0 30px #1f1f1f inset !important; /* standard property */
+  -webkit-text-fill-color: #fff !important; /* autofill text color */
+  caret-color: #fff !important; /* cursor color */
+}
+
+/* Autofill override for hover/focus states */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px #1f1f1f inset !important; /* vendor prefix */
+  box-shadow: 0 0 0 30px #1f1f1f inset !important; /* standard property */
+  -webkit-text-fill-color: #fff !important;
+  caret-color: #fff !important;
+}
+
+/* Focus effect: subtle green glow, no white background */
+.input:focus {
+  background-color: #1f1f1f !important; /* remain dark */
+  border-color: var(--brand-strong) !important;
+  outline: none !important;
+  box-shadow: 0 0 5px rgba(15, 219, 128, 0.5) !important;
+
+  /* Keep autofill override on focus too */
+  -webkit-box-shadow: 0 0 0 30px #1f1f1f inset !important;
+  -webkit-text-fill-color: #fff !important;
+  caret-color: #fff !important;
+}
+
+/* Explicitly target Chrome/Edge/Opera autofill states */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  box-shadow: 0 0 0 30px #1f1f1f inset !important;
+  -webkit-text-fill-color: #fff !important;
+  caret-color: #fff !important;
+}
+
+/* Auth primary button (solid green) */
+.auth-button {
+  display: block !important;
+  width: 100% !important;
+  background-color: var(--brand) !important;
+  color: #fff !important;
+  font-family: "Poppins", sans-serif !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+  border: none !important;
+  border-radius: 1em !important;
+  padding: 0.8rem !important;
+  margin-top: 1rem !important;
+  cursor: pointer !important;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+.auth-button:hover {
+  background-color: var(--brand-strong) !important;
+  box-shadow: 0 0 8px rgba(15, 219, 128, 0.8) !important;
+}
+
+/* 5) "Already have an account?" + "Log in" closer together */
+.already-member {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  margin: 1.5rem auto 0 auto !important; /* slightly reduce top margin if desired */
+  font-family: "Poppins", sans-serif !important;
+  font-size: 0.9rem !important;
+  color: var(--gray-text) !important;
+  gap: 0.3rem !important; /* decrease spacing between text & button */
+}
+
+.already-member {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  margin: 1.5rem auto 0 auto !important; /* or 1rem if you want even less top space */
+  font-family: "Poppins", sans-serif !important;
+  font-size: 0.9rem !important;
+  color: var(--gray-text) !important;
+  gap: 0.3rem !important; /* reduces spacing between text & button */
+}
+
+/* Remove default margin from the paragraph & link 
+   so that gap controls spacing. */
+.already-member p,
+.already-member a {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 1) Match the navbar .button.is-primary style */
+.already-member .button.is-primary.auth-button {
+  /* 1) Force Bulma to let us control size */
+  display: inline-flex !important; /* Instead of inline-block, so we can align items vertically */
+  align-items: center !important; /* Centers text vertically */
+  justify-content: center !important;
+  height: auto !important; /* Override Bulma's forced 2.5em height */
+  line-height: 1 !important; /* Matches navbar's line-height */
+
+  /* 2) Duplicate the navbar .button.is-primary styling */
+  font-size: 1.125rem !important;
+  padding: 12px 24px !important;
+  border: 2px solid rgba(15, 219, 128, 0.8) !important;
+  background: rgba(15, 219, 128, 0.15) !important;
+  color: white !important;
+  box-shadow: 0 0 10px rgba(15, 219, 128, 0.5) !important;
+  border-radius: 6px !important;
+  transition: all 0.3s ease-in-out !important;
+  cursor: pointer !important;
+}
+
+/* Hover effect identical to .navbar-buttons .button.is-primary:hover */
+.already-member .button.is-primary.auth-button:hover {
+  background: rgba(15, 219, 128, 0.25) !important;
+  box-shadow: 0 0 20px rgba(15, 219, 128, 1) !important;
+}
+
+/* ============================== */
+/* ERROR MESSAGE BOX REFINEMENTS */
+/* ============================== */
+
+/* 1) Make the error box (notification) fill the same width as the .auth-box */
+.auth-box .notification.is-alert {
+  display: block; /* ensure it’s a block-level element */
+  width: 100%; /* match the .auth-box width */
+  box-sizing: border-box; /* include padding in total width */
+  margin-left: 0; /* align with the left edge of .auth-box */
+  margin-right: 0; /* remove any extra right margin */
+  margin-bottom: 1em; /* keep spacing below the box */
+}
+
+/* 2) Indent bullet points slightly so they don’t touch the box border */
+.auth-box .notification.is-alert ul {
+  list-style: disc outside; /* keep bullet points outside the text */
+  margin-left: 1.5em; /* indent bullets from the left border */
+  padding-left: 0; /* remove default padding */
+}
+
+/* 3) If you want spacing between each bullet item */
+.auth-box .notification.is-alert ul li {
+  margin: 0.3em 0; /* vertical spacing */
+}
+
+/* 4) The .is-alert variant with a fade burgundy background & burgundy text */
+.auth-box .notification.is-alert {
+  background: rgba(128, 0, 32, 0.2); /* fade burgundy background */
+  color: #800020; /* burgundy text */
+}
+
+/* ============================== */
+/* AI Coach Eve */
+/* ============================== */
+
+.ai-img           { max-width:100%; max-height:300px; border-radius:12px;
+                    box-shadow:0 0 30px rgba(0,255,0,.25); }
+
+.ai-chat-box      { background:#181818; border-radius:10px; padding:1.5rem;
+                    box-shadow:0 0 30px rgba(0,255,0,.05); max-width:650px;
+                    margin-inline:auto; }
+
+.ai-chat-input    { display:flex; gap:.75rem; align-items:flex-start; }
+
+.user-bubble, .ai-bubble { padding:.75rem 1rem; border-radius:8px; margin:.5rem 0; }
+.user-bubble      { background:#222; color:#9ecbff; }
+.ai-bubble        { background:#1a1f1a; color:#8aff8a; }
+
+.send-btn         { min-width:90px; }

@@ -84,5 +84,13 @@ namespace Tekhnologia.Services
             }
             return (false, result.Errors.Select(e => e.Description));
         }
+        /// <summary>
+        /// This uses the SignInManager.Context.User, which contains the currently authenticated user (based on the cookie).
+        /// </summary>        
+        public async Task<User?> GetCurrentUserAsync()
+        {
+            return await _userManager.GetUserAsync(_signInManager.Context.User);
+        }
+
     }
 }

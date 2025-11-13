@@ -5,40 +5,40 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.OpenApi.Models;
+using System.Text;
 using Tekhnologia.Services;
+using Tekhnologia.Services.ApiClients;
 using Tekhnologia.Services.Interfaces;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Authentication;
 
-var builder = WebApplication.CreateBuilder(args); // Create a web application
 
+var builder = WebApplication.CreateBuilder(args);
+
+// ─── 1) Load secret configuration (OpenAI key from user-secrets) ─────────────────
 var configuration = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .Build();
+var openAiKey = configuration["OpenAI:ApiKey"];
 
-var apiKey = configuration["OpenAI:ApiKey"];
+// ─── 2) Stripe setup ─────────────────────────────────────────────────────────────
+var stripeSecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY")
+                    ?? builder.Configuration["Stripe:SecretKey"];
+StripeConfiguration.ApiKey = stripeSecretKey;
 
+// ─── 3) HTTP client base address (for your GoalApiService) ─────────────────────
+var environment = builder.Environment.IsDevelopment() ? "Development" : "Production";
+var apiBaseUrl  = builder.Configuration[$"ApiBaseUrls:{environment}"]
+                 ?? "https://localhost:7136";
 
-// Configure Stripe API Key
-var stripeSecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
-var stripePublishableKey = Environment.GetEnvironmentVariable("STRIPE_PUBLISHABLE_KEY");
+// ─── 4) Register your application services ─────────────────────────────────────
+builder.Services.AddScoped<IAuthStateService, AuthStateService>();
+builder.Services.AddHttpClient<IBlazorAuthService, BlazorAuthService>();
 
-// Fallback to appsettings if environment variable is not found
-if (string.IsNullOrEmpty(stripeSecretKey))
-{
-    stripeSecretKey = builder.Configuration["Stripe:SecretKey"];
-}
-if (string.IsNullOrEmpty(stripePublishableKey))
-{
-    stripePublishableKey = builder.Configuration["Stripe:PublishableKey"];
-}
-
-StripeConfiguration.ApiKey = stripeSecretKey; // Set the Stripe secret key
-
-// Register services with their interfaces
-builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
-builder.Services.AddScoped<IDigitalResourceService, DigitalResourceService>(); 
+builder.Services.AddScoped<IDigitalResourceService, DigitalResourceService>();
 builder.Services.AddScoped<IAIService, AIService>();
 builder.Services.AddScoped<IGoalService, GoalService>();
 builder.Services.AddScoped<IJournalService, JournalService>();
@@ -46,174 +46,190 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IVisionBoardService, VisionBoardService>();
 
+// your typed HTTP client for the external API
+builder.Services.AddHttpClient<GoalApiService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
 
-// Register the database connection in the services container
+// ─── 5) Entity Framework & Identity ────────────────────────────────────────────
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-// Configure Identity for user authentication and role management
-builder.Services.AddIdentity<User, IdentityRole>()
+
+builder.Services.AddIdentity<User, IdentityRole>(options =>
+    {
+        options.Password.RequireNonAlphanumeric = false;
+    })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// Read JWT settings from `appsettings.json`
-var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = Encoding.UTF8.GetBytes(jwtSettings["Secret"] ?? "your-very-long-secret-key-1234567890!@#ABCDEF");
+// ─── 6) Authentication setup: Cookies + JWT Bearer ─────────────────────────────
+// builder.Services.AddAuthentication(options =>
+// {
+//     // interactive by default uses the Identity cookie
+//     options.DefaultScheme = IdentityConstants.ApplicationScheme;
+//     // for API endpoints [Authorize] with bearer
+//     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+// })
+// // JWT bearer for your Web API controllers
+// .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opts =>
+// {
+//     var jwtSection = builder.Configuration.GetSection("Jwt");
+//     var keyBytes   = Encoding.UTF8.GetBytes(jwtSection["Secret"] 
+//                            ?? throw new InvalidOperationException("Missing JWT secret"));
+//     opts.RequireHttpsMetadata = false;
+//     opts.SaveToken            = true;
+//     opts.TokenValidationParameters = new TokenValidationParameters
+//     {
+//         ValidateIssuerSigningKey = true,
+//         IssuerSigningKey         = new SymmetricSecurityKey(keyBytes),
+//         ValidateIssuer           = true,
+//         ValidIssuer              = jwtSection["Issuer"],
+//         ValidateAudience         = true,
+//         ValidAudience            = jwtSection["Audience"],
+//         ValidateLifetime         = true,
+//         ClockSkew                = TimeSpan.Zero
+//     };
+// });
 
-// Configure Authentication & JWT Bearer Token setup
-builder.Services.AddAuthentication(options =>
+// ─── 6) Authentication setup: Identity cookie only ─────────────────────────────
+//builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
+//    .AddCookie(IdentityConstants.ApplicationScheme);
+
+// configure the Identity cookie (login path, expiration, etc.)
+builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = false; // Disable HTTPS enforcement
-    options.SaveToken = true; // Saves the token in the authentication properties
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key), // Secure JWT key from config 
-        ValidateIssuer = true, // Validate the issuer (API)
-        ValidateAudience = true, // Validate the audience (clients)
-        ValidIssuer = jwtSettings["Issuer"], // Read from `appsettings.json` 
-        ValidAudience = jwtSettings["Audience"], // Read from `appsettings.json`
-        ValidateLifetime = true, // Ensure the token is not expired
-        ClockSkew = TimeSpan.Zero // Prevents expired tokens from being accepted due to time differences
-    };    
+    options.Cookie.Name = ".Tekhnologia.Identity";               // ✅ Give it a clear, visible name
+    options.Cookie.HttpOnly = true;                              // ✅ Security
+    options.Cookie.SameSite = SameSiteMode.Lax;                  // ✅ Prevent browser from blocking it
+    //options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;     // ✅ Ensure HTTPS sets it
+
+
+    options.LoginPath = "/signin";                                // ✅ This is your Blazor login route
+    options.LogoutPath = "/api/auth/logout";
+    options.AccessDeniedPath = "/unauthorized";                  // Optional, if you have this route
+    options.ExpireTimeSpan = TimeSpan.FromDays(14);
+    options.SlidingExpiration = true;
 });
 
-builder.Services.AddAuthorization(); // Enables authorization policies
 
-// Add CORS policy to allow frontend requests
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAllOrigins", builder =>
-    {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
-    });
-});
+builder.Services.AddAuthorization();
 
-
-// Register Controllers (for handling API requests)
+// ─── 7) MVC, CORS, Swagger, Blazor Server & SignalR ────────────────────────────
 builder.Services.AddControllers();
-
-
-// Enable API documentation via Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddScoped<AIService>();
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
+builder.Services.AddCors(opts =>
 {
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    opts.AddPolicy("AllowAllOrigins", p => 
+        p.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+});
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Enter 'Bearer' followed by your token.\nExample: Bearer YOUR_TOKEN_HERE"
+        Description = "JWT Authorization header using the Bearer scheme.\r\n\r\n" +
+                      "Enter: Bearer <token>",
+        Name   = "Authorization",
+        In     = ParameterLocation.Header,
+        Type   = SecuritySchemeType.Http,
+        Scheme = "Bearer"
     });
-
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
+            new OpenApiSecurityScheme 
+            { 
+                Reference = new OpenApiReference 
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
+                    Id   = "Bearer"
+                } 
+            }, 
+            Array.Empty<string>() 
         }
     });
 });
 
+builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor();
+builder.Services.AddScoped<IAuthStateService, AuthStateService>();
+//builder.Services.AddSignalR();
 
-var app = builder.Build(); // Build the application
-// Apply pending migrations automatically
+//  register HttpClient with a BaseAddress pointing to server
+builder.Services.AddScoped(sp =>
+{
+    var nav = sp.GetRequiredService<NavigationManager>();
+    return new HttpClient { BaseAddress = new Uri(nav.BaseUri) };
+});
+
+
+// ─── 8) Build and apply migrations + seed roles ────────────────────────────────
+var app = builder.Build();
+
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.Migrate();
-}
+    var db  = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
 
-// Roles are created when the app starts
-using (var scope = app.Services.CreateScope())
-{
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-
-    string[] roleNames = { "Admin", "User" };
-
-    foreach (var roleName in roleNames)
+    var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    foreach (var role in new[] { "Admin", "User" })
     {
-        if (!await roleManager.RoleExistsAsync(roleName))
-        {
-            await roleManager.CreateAsync(new IdentityRole(roleName));
-        }
+        if (!await roleMgr.RoleExistsAsync(role))
+            await roleMgr.CreateAsync(new IdentityRole(role));
     }
-}
 
-// This code creates an Admin user in the database if no admin exists.
-using (var scope = app.Services.CreateScope())
-{
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-    // Instead of checking by email, check if there are any users in the "Admin" role.
-    var admins = await userManager.GetUsersInRoleAsync("Admin");
+    // Create default admin user
+    var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+    var adminEmail = "admin@tekhnologia.co.uk";
+    var adminUser = await userMgr.FindByEmailAsync(adminEmail);
     
-    if (!admins.Any())
+    if (adminUser == null)
     {
-        string adminEmail = "admin@example.com";
-        string adminPassword = "Admin@1234";
-
-        var admin = await userManager.FindByEmailAsync(adminEmail);
-        if (admin == null)
+        adminUser = new User
         {
-            admin = new User
-            {
-                UserName = adminEmail,
-                Email = adminEmail,
-                Name = "Admin User",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-
-            var result = await userManager.CreateAsync(admin, adminPassword);
-            if (result.Succeeded)
-            {
-                // Assign the "Admin" role to the newly created admin user.
-                await userManager.AddToRoleAsync(admin, "Admin");
-            }
-            else
-            {
-                foreach (var error in result.Errors)
-                {
-                    Console.WriteLine(error.Description);
-                }
-            }
+            UserName = adminEmail,
+            Email = adminEmail,
+            Name = "System Administrator",
+            EmailConfirmed = true
+        };
+        
+        var result = await userMgr.CreateAsync(adminUser, "Admin123!");
+        if (result.Succeeded)
+        {
+            await userMgr.AddToRoleAsync(adminUser, "Admin");
         }
     }
 }
 
-
-// Enable API documentation when running in development mode
+// ─── 9) Middleware pipeline ───────────────────────────────────────────────────
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-if (!app.Environment.IsDevelopment()) // Enforce HTTPS only in production
+else
 {
-    app.UseHttpsRedirection();  // Redirect HTTP to HTTPS
+    app.UseHttpsRedirection();
 }
-app.UseCors("AllowAllOrigins"); // Enable CORS before authentication
-app.UseAuthentication(); // Ensure Authentication
-app.UseAuthorization(); // Enable Authorization Middleware
-app.MapControllers(); // Map API endpoints
 
-app.Run(); // Run the application
+app.UseStaticFiles();
+app.UseRouting();
+
+// CORS before auth
+app.UseCors("AllowAllOrigins");
+app.UseAuthentication();
+app.UseAuthorization();
+
+// ─── 10) plain GET /signout endpoint───────────────────────────────────────────────────
+app.MapGet("/signout", async (HttpContext ctx) =>
+{
+    await ctx.SignOutAsync(IdentityConstants.ApplicationScheme);
+    ctx.Response.Redirect("/signin");
+});
+
+app.MapControllers();
+app.MapBlazorHub();
+app.MapFallbackToPage("/_Host");
+
+app.Run();

@@ -1,0 +1,140 @@
+@page "/goaltracker"
+@using Tekhnologia.Services.Interfaces
+@inject IAuthStateService AuthState
+@inject NavigationManager Navigation
+
+@if (AuthState.IsLoggedIn)
+{
+    <!-- 🔒 Authenticated User Interface -->
+    <section class="home">
+        <div class="home-intro">
+            <h1 class="title is-1">Welcome to Your Goal Tracker</h1>
+            <hr class="hr" />
+            <p class="home-text">Set, manage, and visualize your career goals.</p>
+        </div>
+    </section>
+
+    <!-- Placeholder for actual goal tracker functionality -->
+    <section class="section">
+        <div class="box has-text-centered">
+            <p>This is where your interactive Goal Tracker UI will live 🧠💪</p>
+            <p>(e.g. goal cards, progress bars, goal-setting forms, etc.)</p>
+        </div>
+    </section>
+}
+else
+{
+    <!-- 🌐 Public Marketing Content -->
+    <section class="home">
+        <div class="home-intro">
+            <h1 class="title is-1">Goal Tracker</h1>
+            <hr class="hr" />
+            <p class="home-text">
+                Track your progress, stay motivated, and reach your career aspirations
+                with our free goal-tracking tool for women in tech.
+            </p>
+            <p class="home-subtext">
+                Start breaking big dreams into manageable milestones today.
+            </p>
+            <div class="home-buttons buttons">
+                <div class="home-buttons-shine">
+                    <a class="shine" href="/signup"><span>Get Started</span></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="title section-title has-text-centered">Why Use a Goal Tracker?</h2>
+        <div class="columns is-multiline">
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🚀 Boosts Productivity</h3>
+                    <p>Setting goals and tracking progress increases efficiency.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">💡 Enhances Motivation</h3>
+                    <p>Seeing your progress keeps you moving forward.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">✅ Helps with Prioritization</h3>
+                    <p>Organize career goals effectively.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🎉 Celebrates Achievements</h3>
+                    <p>Small wins lead to big success!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section has-text-centered">
+        <h2 class="title section-title">How It Works</h2>
+        <div class="feature-boxes-row">
+            <div class="feature-box">
+                <h3>Set Your Career Goals</h3>
+                <p class="feature-subtext">Define your objectives clearly.</p>
+            </div>
+            <div class="feature-box">
+                <h3>Track Your Progress</h3>
+                <p class="feature-subtext">Use checklists, progress bars, and milestones.</p>
+            </div>
+            <div class="feature-box">
+                <h3>Stay on Course</h3>
+                <p class="feature-subtext">Get personalized reminders and motivational insights.</p>
+            </div>
+            <div class="feature-box">
+                <h3>Celebrate Achievements</h3>
+                <p class="feature-subtext">Reflect on your journey and stay inspired.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="title section-title has-text-centered">What You Get</h2>
+        <div class="columns is-multiline">
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🎯 Set SMART Career Goals</h3>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">📈 Visual Progress Tracking</h3>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">⏳ Prioritize Tasks</h3>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🔔 Email Reminders & Updates</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section has-text-centered">
+        <h2 class="title section-title">Ready to take your career to the next level?</h2>
+        <div class="home-buttons buttons">
+            <div class="home-buttons-shine">
+                <a class="shine" href="/signup"><span>Get Started</span></a>
+            </div>
+        </div>
+    </section>
+}
+
+@code {
+    private void NavigateToSignup()
+    {
+        Navigation.NavigateTo("/signup");
+    }
+}

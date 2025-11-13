@@ -1,0 +1,70 @@
+@using Tekhnologia.Services.Interfaces
+@implements IDisposable
+@inject IAuthStateService AuthState
+@inject NavigationManager Navigation
+@inject HttpClient Http
+
+@{
+    var activeClass = isActive ? "is-active" : "";
+}
+
+<nav class="navbar is-transparent">
+    <div class="navbar-brand">
+        <a class="navbar-item has-text-weight-bold navbar-logo" href="/">
+            <img src="/favicon.png" alt="Logo" class="navbar-logo-icon" />
+            <span class="logo-text">TEKHNOLOGIA</span><span class="logo-gray">.CO.UK</span>
+        </a>
+        
+        <a role="button" class="navbar-burger" @onclick="ToggleMenu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </a>
+    </div>
+
+    <div class="navbar-menu @activeClass">
+        <div class="navbar-end">
+            <a class="navbar-item" href="/goaltracker">Goal Tracker</a>
+            <a class="navbar-item" href="/journal">Journal</a>
+            <a class="navbar-item" href="/visionboard">Vision Board</a>
+            <a class="navbar-item" href="/aicoach">AI Coach</a>
+            <a class="navbar-item" href="/resources">Resources</a>
+
+            <div class="navbar-buttons">
+                @if (AuthState.IsLoggedIn)
+                {
+                    <a class="button is-primary" href="/profile">View Profile</a>
+                    <button class="button is-light" onclick="auth.signout()">Sign Out</button>
+                }
+                else
+                {
+                    <a class="button is-outlined" href="/signup">Sign Up</a>
+                    <a class="button is-primary" href="/signin">Sign In</a>
+                }
+            </div>
+        </div>
+    </div>
+</nav>
+
+@code {
+    private bool isActive = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthState.OnChange += StateHasChanged;
+        await AuthState.CheckAuthStatus();
+    }
+
+    private async Task HandleSignout()
+    {
+        await Http.PostAsync("/api/auth/logout", null);
+        Navigation.NavigateTo("/", forceLoad: true);
+    }
+
+    private void ToggleMenu() => isActive = !isActive;
+
+    public void Dispose()
+    {
+        AuthState.OnChange -= StateHasChanged;
+    }
+}

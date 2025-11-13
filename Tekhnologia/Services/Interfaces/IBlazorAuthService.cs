@@ -3,7 +3,7 @@ using Tekhnologia.Models;
 
 namespace Tekhnologia.Services.Interfaces
 {
-    public interface IAuthService
+    public interface IBlazorAuthService
     {
         Task<IdentityResult> RegisterAsync(RegisterModel model);
         Task<string?> LoginAsync(LoginModel model);

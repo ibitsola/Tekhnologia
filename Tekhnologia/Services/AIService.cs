@@ -1,67 +1,41 @@
+// Services/AIService.cs
 using OpenAI.Chat;
 using Tekhnologia.Services.Interfaces;
+using Microsoft.Extensions.Configuration;
 
-namespace Tekhnologia.Services
+namespace Tekhnologia.Services;
+
+public class AIService : IAIService
 {
-    public class AIService : IAIService
+    private readonly ChatClient _chatClient;
+
+    public AIService(IConfiguration cfg)          // <-- inject merged configuration
     {
-        private readonly ChatClient _chatClient;
+        // 1️⃣  env-var wins, 2️⃣  then user-secrets / appsettings
+        var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY")
+                  ?? cfg["OpenAI:ApiKey"];
 
-        public AIService()
+        if (string.IsNullOrWhiteSpace(apiKey))
+            throw new Exception("OpenAI API key missing – set OPENAI_API_KEY or OpenAI:ApiKey.");
+
+        _chatClient = new ChatClient("gpt-3.5-turbo", apiKey);
+    }
+
+    public async Task<string> GetBusinessCoachingResponse(string userMessage)
+    {
+        var messages = new List<ChatMessage>
         {
-            // Retrieve the API key from environment variables (or your secrets)
-            var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
-            if (string.IsNullOrEmpty(apiKey))
-            {
-                throw new Exception("API Key is missing. Please set OPENAI_API_KEY as an environment variable.");
-            }
+            new SystemChatMessage("You are an AI business coach offering expert guidance."),
+            new UserChatMessage(userMessage)
+        };
 
-            // Use a model you have access to, e.g. "gpt-3.5-turbo"
-            _chatClient = new ChatClient(model: "gpt-3.5-turbo", apiKey: apiKey);
-        }
+        var completion = (await _chatClient.CompleteChatAsync(messages)).Value;
 
-        public async Task<string> GetBusinessCoachingResponse(string userMessage)
-        {
-            var messages = new List<ChatMessage>
-            {
-                new SystemChatMessage("You are an AI business coach offering expert guidance."),
-                new UserChatMessage(userMessage)
-            };
+        var text = string.Join(" ",
+            completion.Content.Select(p => p.Text).Where(t => !string.IsNullOrWhiteSpace(t)));
 
-            // Make the API call
-            var completionResult = await _chatClient.CompleteChatAsync(messages);
-
-            // Extract the ChatCompletion from the ClientResult
-            var chatCompletion = completionResult.Value;
-            if (chatCompletion == null)
-            {
-                return "Error: No response received from the AI service.";
-            }
-
-            // chatCompletion.Content is a ChatMessageContent object,
-            // which inherits from Collection<ChatMessageContentPart>.
-            // So you can iterate directly over chatCompletion.Content:
-            var contentCollection = chatCompletion.Content;
-
-            if (contentCollection == null || contentCollection.Count == 0)
-            {
-                return "I couldn't generate a response.";
-            }
-
-            // Each ChatMessageContentPart can contain text (part.Text), images, etc.
-            // We'll extract all non-empty text parts and join them.
-            var textParts = contentCollection
-                .Select(part => part.Text)
-                .Where(t => !string.IsNullOrWhiteSpace(t));
-
-            var responseText = string.Join(" ", textParts);
-
-            if (string.IsNullOrWhiteSpace(responseText))
-            {
-                return "I couldn't generate a response.";
-            }
-
-            return responseText;
-        }
+        return string.IsNullOrWhiteSpace(text)
+            ? "⚠️ I couldn’t generate a response."
+            : text;
     }
 }
