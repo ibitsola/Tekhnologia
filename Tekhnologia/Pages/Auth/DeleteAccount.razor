@@ -1,0 +1,153 @@
+@page "/profile/delete"
+@layout Tekhnologia.Views.Shared.MainLayout
+
+@using System.ComponentModel.DataAnnotations
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Authorization
+@using Tekhnologia.Services.Interfaces
+@inject IAuthStateService AuthState
+@inject IUserService UserService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+@if (loading)
+{
+    <div class="section has-text-centered">
+        <p>Loading...</p>
+    </div>
+}
+else
+{
+    <EditForm Model="@deleteModel" OnValidSubmit="@HandleValidSubmit" class="auth-container">
+        <DataAnnotationsValidator />
+
+        <div class="auth-box">
+            <h2 class="auth-heading">Delete Account</h2>
+
+            <div class="notification is-warning" style="margin-bottom: 1.5rem;">
+                <p><strong>Warning:</strong> This action cannot be undone!</p>
+                <p>All your data including goals, journal entries, and vision board items will be permanently deleted.</p>
+            </div>
+
+            <ValidationSummary class="notification is-alert" />
+
+            <p style="margin-bottom: 1.5rem;">Please confirm your email and password to delete your account:</p>
+
+            <!-- EMAIL -->
+            <div class="field">
+                <label class="label" for="email">Email</label>
+                <div class="control">
+                    <InputText id="email" class="input" @bind-Value="@deleteModel.Email" placeholder="Enter your email" />
+                </div>
+                <ValidationMessage For="@(() => deleteModel.Email)" />
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="field">
+                <label class="label" for="password">Password</label>
+                <div class="control">
+                    <InputText id="password" type="password" class="input" @bind-Value="@deleteModel.Password" placeholder="Enter your password" />
+                </div>
+                <ValidationMessage For="@(() => deleteModel.Password)" />
+            </div>
+
+            <div class="field is-grouped is-grouped-centered" style="margin-top:1.5rem;">
+                <p class="control">
+                    <button type="submit" class="button is-danger" disabled="@isSubmitting">
+                        @(isSubmitting ? "Deleting..." : "Delete Account")
+                    </button>
+                </p>
+                <p class="control">
+                    <a href="/profile" class="button is-light">Cancel</a>
+                </p>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="notification is-alert">@errorMessage</div>
+        }
+    </EditForm>
+}
+
+@code {
+    private DeleteAccountModel deleteModel = new();
+    private string? errorMessage;
+    private bool isSubmitting = false;
+    private bool loading = true;
+    private string? userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthState.CheckAuthStatus();
+
+        if (!AuthState.IsLoggedIn)
+        {
+            Navigation.NavigateTo("/signin");
+            return;
+        }
+
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                Navigation.NavigateTo("/signin");
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading page: {ex.Message}";
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (string.IsNullOrEmpty(userId))
+        {
+            errorMessage = "User ID not found. Please sign in again.";
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var (success, errors) = await UserService.DeleteCurrentUserAsync(userId, deleteModel.Email, deleteModel.Password);
+
+            if (!success)
+            {
+                errorMessage = string.Join("; ", errors);
+                isSubmitting = false;
+                return;
+            }
+
+            // Account deleted successfully - navigate to logout endpoint which will sign out and redirect
+            Navigation.NavigateTo("/api/auth/logout?returnUrl=/", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error deleting account: {ex.Message}";
+            isSubmitting = false;
+        }
+    }
+
+    public class DeleteAccountModel
+    {
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Please enter a valid email address")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Password is required")]
+        public string Password { get; set; } = string.Empty;
+    }
+}

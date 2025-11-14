@@ -92,5 +92,40 @@ namespace Tekhnologia.Services
             return await _userManager.GetUserAsync(_signInManager.Context.User);
         }
 
+        /// <summary>
+        /// Deletes the current user's account after verifying their credentials.
+        /// </summary>
+        public async Task<(bool Success, IEnumerable<string> Errors)> DeleteCurrentUserAsync(string userId, string email, string password)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return (false, new[] { "User not found" });
+            }
+
+            // Verify the email matches
+            if (user.Email != email)
+            {
+                return (false, new[] { "Email does not match" });
+            }
+
+            // Verify the password
+            var passwordCheck = await _userManager.CheckPasswordAsync(user, password);
+            if (!passwordCheck)
+            {
+                return (false, new[] { "Incorrect password" });
+            }
+
+            // Delete the user
+            var result = await _userManager.DeleteAsync(user);
+            if (result.Succeeded)
+            {
+                // Don't sign out here - let the API endpoint handle it
+                // Signing out in Blazor Server context causes "Headers are read-only" errors
+                return (true, Array.Empty<string>());
+            }
+            return (false, result.Errors.Select(e => e.Description));
+        }
+
     }
 }

@@ -8,41 +8,59 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Tekhnologia.Models;
 using Tekhnologia.Services;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Tekhnologia.Tests.Services
 {
     public class BlazorAuthServiceTests
     {
-        private HttpClient CreateMockHttpClient(HttpResponseMessage response)
+        private Mock<UserManager<User>> CreateMockUserManager()
         {
-            var handlerMock = new Mock<HttpMessageHandler>();
+            var store = new Mock<Microsoft.AspNetCore.Identity.IUserStore<User>>();
+            var options = new Mock<IOptions<IdentityOptions>>();
+            var passwordHasher = new Mock<IPasswordHasher<User>>();
+            var userValidators = new List<IUserValidator<User>>();
+            var pwdValidators = new List<IPasswordValidator<User>>();
+            var keyNormalizer = new Mock<ILookupNormalizer>();
+            var errors = new Mock<IdentityErrorDescriber>();
+            var services = new Mock<IServiceProvider>();
+            var logger = new Mock<ILogger<UserManager<User>>>();
 
-            handlerMock.Protected()
-                .Setup<Task<HttpResponseMessage>>(
-                    "SendAsync",
-                    ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(response);
+            var mgr = new Mock<UserManager<User>>(store.Object, options.Object, passwordHasher.Object, userValidators, pwdValidators, keyNormalizer.Object, errors.Object, services.Object, logger.Object);
+            return mgr;
+        }
 
-            return new HttpClient(handlerMock.Object)
-            {
-                BaseAddress = new Uri("https://localhost")
-            };
+        private Mock<SignInManager<User>> CreateMockSignInManager(Mock<UserManager<User>> userManagerMock)
+        {
+            var contextAccessor = new Mock<Microsoft.AspNetCore.Http.IHttpContextAccessor>();
+            var claimsFactory = new Mock<Microsoft.AspNetCore.Identity.IUserClaimsPrincipalFactory<User>>();
+            var options = new Mock<IOptions<IdentityOptions>>();
+            var logger = new Mock<ILogger<SignInManager<User>>>();
+            var schemes = new Mock<IAuthenticationSchemeProvider>();
+            var confirmation = new Mock<IUserConfirmation<User>>();
+
+            var signInMgr = new Mock<SignInManager<User>>(userManagerMock.Object, contextAccessor.Object, claimsFactory.Object, options.Object, logger.Object, schemes.Object, confirmation.Object);
+            return signInMgr;
         }
 
         [Fact]
         public async Task LoginAsync_ReturnsEmail_WhenLoginSucceeds()
         {
             // Arrange
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var httpClient = CreateMockHttpClient(response);
-            var service = new BlazorAuthService(httpClient);
+            // Arrange
+            var user = new User { Email = "user@example.com" };
+            var userManagerMock = CreateMockUserManager();
+            userManagerMock.Setup(m => m.FindByEmailAsync("user@example.com")).ReturnsAsync(user);
+            userManagerMock.Setup(m => m.CheckPasswordAsync(user, "ValidPassword")).ReturnsAsync(true);
 
-            var loginModel = new LoginModel
-            {
-                Email = "user@example.com",
-                Password = "ValidPassword"
-            };
+            var signInMock = CreateMockSignInManager(userManagerMock);
+            signInMock.Setup(s => s.SignInAsync(It.IsAny<User>(), It.IsAny<bool>(), It.IsAny<string?>())).Returns(Task.CompletedTask);
+
+            var service = new BlazorAuthService(userManagerMock.Object, signInMock.Object);
+
+            var loginModel = new LoginModel { Email = "user@example.com", Password = "ValidPassword" };
 
             // Act
             var result = await service.LoginAsync(loginModel);
@@ -55,15 +73,14 @@ namespace Tekhnologia.Tests.Services
         public async Task LoginAsync_ReturnsNull_WhenLoginFails()
         {
             // Arrange
-            var response = new HttpResponseMessage(HttpStatusCode.Unauthorized);
-            var httpClient = CreateMockHttpClient(response);
-            var service = new BlazorAuthService(httpClient);
+            // Arrange
+            var userManagerMock = CreateMockUserManager();
+            userManagerMock.Setup(m => m.FindByEmailAsync("wrong@example.com")).ReturnsAsync((User?)null);
 
-            var loginModel = new LoginModel
-            {
-                Email = "wrong@example.com",
-                Password = "WrongPassword"
-            };
+            var signInMock = CreateMockSignInManager(userManagerMock);
+            var service = new BlazorAuthService(userManagerMock.Object, signInMock.Object);
+
+            var loginModel = new LoginModel { Email = "wrong@example.com", Password = "WrongPassword" };
 
             // Act
             var result = await service.LoginAsync(loginModel);
@@ -76,16 +93,14 @@ namespace Tekhnologia.Tests.Services
         public async Task RegisterAsync_ReturnsSuccess_WhenServerResponds200()
         {
             // Arrange
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var httpClient = CreateMockHttpClient(response);
-            var service = new BlazorAuthService(httpClient);
+            // Arrange
+            var userManagerMock = CreateMockUserManager();
+            userManagerMock.Setup(m => m.CreateAsync(It.IsAny<User>(), "StrongPass123!")).ReturnsAsync(IdentityResult.Success);
 
-            var registerModel = new RegisterModel
-            {
-                Email = "new@example.com",
-                Password = "StrongPass123!",
-                Name = "New User"
-            };
+            var signInMock = CreateMockSignInManager(userManagerMock);
+            var service = new BlazorAuthService(userManagerMock.Object, signInMock.Object);
+
+            var registerModel = new RegisterModel { Email = "new@example.com", Password = "StrongPass123!", Name = "New User" };
 
             // Act
             var result = await service.RegisterAsync(registerModel);
@@ -98,25 +113,15 @@ namespace Tekhnologia.Tests.Services
         public async Task RegisterAsync_ReturnsFailure_WhenServerResponds400WithErrors()
         {
             // Arrange
-            var errorJson = JsonSerializer.Serialize(new List<IdentityError>
-            {
-                new IdentityError { Description = "Email already taken" }
-            });
+            // Arrange
+            var userManagerMock = CreateMockUserManager();
+            var identityError = new IdentityError { Description = "Email already taken" };
+            userManagerMock.Setup(m => m.CreateAsync(It.IsAny<User>(), "Pass123!")).ReturnsAsync(IdentityResult.Failed(identityError));
 
-            var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
-            {
-                Content = new StringContent(errorJson)
-            };
+            var signInMock = CreateMockSignInManager(userManagerMock);
+            var service = new BlazorAuthService(userManagerMock.Object, signInMock.Object);
 
-            var httpClient = CreateMockHttpClient(response);
-            var service = new BlazorAuthService(httpClient);
-
-            var registerModel = new RegisterModel
-            {
-                Email = "existing@example.com",
-                Password = "Pass123!",
-                Name = "Existing User"
-            };
+            var registerModel = new RegisterModel { Email = "existing@example.com", Password = "Pass123!", Name = "Existing User" };
 
             // Act
             var result = await service.RegisterAsync(registerModel);

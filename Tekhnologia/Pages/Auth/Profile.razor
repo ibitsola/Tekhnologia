@@ -1,7 +1,9 @@
 @page "/profile"
+@layout Tekhnologia.Views.Shared.MainLayout
 
 @using System.Security.Claims
-@using Microsoft.AspNetCore.Components.Authorization           
+@using Microsoft.AspNetCore.Components.Authorization          
+@using Microsoft.AspNetCore.Components.Forms
 @using Tekhnologia.Views.Shared                              
 @using Tekhnologia.Services.Interfaces
 @inject IAuthStateService AuthState
@@ -11,69 +13,93 @@
 @inject HttpClient Http
 
 
-@if (!AuthState.IsLoggedIn)
+@if (!authChecked || loading)
+{
+    <div class="section has-text-centered">
+        <p>Loading your information…</p>
+    </div>
+}
+else if (!AuthState.IsLoggedIn)
 {
     <RedirectToSignIn />
 }
-else if (loading)
+else if (loadError != null)
 {
-    <p>Loading your information…</p>
+    <div class="notification is-danger">@loadError</div>
+}
+else if (user == null)
+{
+    <div class="notification is-warning">
+        We couldn't find your profile. Please <a href="/signin">sign in</a> again.
+    </div>
 }
 else
 {
-    <h3>Your Profile</h3>
+    <div class="auth-container">
+        <div class="auth-box">
+            <h2 class="auth-heading">Your Profile</h2>
 
-    @if (loading)
-    {
-        <p>Loading your information…</p>
-    }
-    else if (loadError != null)
-    {
-        <div class="notification is-danger">@loadError</div>
-    }
-    else if (user == null)
-    {
-        <div class="notification is-warning">
-            We couldn’t find your profile. Please <a href="/singin">sign in</a> again.
-        </div>
-    }
-    else
-    {
-        <div class="box">
-            <p><strong>User ID:</strong> @user.Id</p>
-            <p><strong>Name:</strong> @(string.IsNullOrEmpty(user.Name) ? "(not set)" : user.Name)</p>
-            <p><strong>Email:</strong> @user.Email</p>
-            <p><strong>Username:</strong> @user.UserName</p>
-            <p><strong>Joined:</strong> @user.CreatedAt.ToLocalTime().ToString("f")</p>
-        </div>
+            <div class="field">
+                <label class="label">Name</label>
+                <p>@(user.Name ?? string.Empty)</p>
+            </div>
 
-        <button class="button is-primary" @onclick="EditProfile">Edit Profile</button>
-        <button class="button is-light" @onclick="SignOut">Sign Out</button>
-    }
+            <div class="field">
+                <label class="label">Email</label>
+                <p>@(user.Email ?? string.Empty)</p>
+            </div>
+
+            <div class="field">
+                <label class="label">Joined</label>
+                <p>@user.CreatedAt.ToLocalTime().ToString("f")</p>
+            </div>
+
+            <div class="field is-grouped is-grouped-centered" style="margin-top:1.5rem;">
+                <p class="control">
+                    <a href="/profile/edit" class="button is-primary">Edit</a>
+                </p>
+                <p class="control">
+                    <a href="/profile/delete" class="button is-danger">Delete</a>
+                </p>
+            </div>
+        </div>
+    </div>
 }
 
 @code {
     private Tekhnologia.Models.User? user;
     private bool loading = true;
     private string? loadError;
+    private bool authChecked = false;
 
     protected override async Task OnInitializedAsync()
     {
-        if (!AuthState.IsLoggedIn)
-            return;
-
         try
         {
+            // Ensure auth state is initialized
+            await AuthState.CheckAuthStatus();
+            authChecked = true;
+
+            if (!AuthState.IsLoggedIn)
+            {
+                loading = false;
+                StateHasChanged();
+                return;
+            }
+
             var authState = await AuthStateProvider.GetAuthenticationStateAsync();
             var id = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(id))
             {
                 loadError = "Unable to determine your user ID. Please sign in again.";
+                loading = false;
+                StateHasChanged();
                 return;
             }
 
             user = await UserService.GetUserProfileAsync(id);
+            
             if (user == null)
                 loadError = "Profile not found.";
         }
@@ -84,14 +110,19 @@ else
         finally
         {
             loading = false;
+            StateHasChanged();
         }
     }
 
-    private void EditProfile() => NavManager.NavigateTo("/profile/edit");
-
-    private async Task SignOut()
+    private void EditProfile()
     {
-        await Http.PostAsync("/api/auth/logout", null);
-        NavManager.NavigateTo("/", forceLoad: true);
+        Console.WriteLine("Edit button clicked - navigating to /profile/edit");
+        NavManager.NavigateTo("/profile/edit", forceLoad: true);
+    }
+
+    private void DeleteProfile()
+    {
+        Console.WriteLine("Delete button clicked - navigating to /profile/delete");
+        NavManager.NavigateTo("/profile/delete");
     }
 }

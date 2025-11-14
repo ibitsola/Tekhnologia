@@ -36,10 +36,18 @@ namespace Tekhnologia.Controllers
 
         // Logout route 
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
+        [HttpGet("logout")]
+        public async Task<IActionResult> Logout([FromQuery] string? returnUrl = null)
         {
             await _signInManager.SignOutAsync();
-            return Ok();
+            
+            // If there's a returnUrl, redirect to it, otherwise go to home
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+            
+            return Redirect("/");
         }
 
         // Register endpoint 
