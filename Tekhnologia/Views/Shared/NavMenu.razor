@@ -29,6 +29,10 @@
             <a class="navbar-item" href="/visionboard">Vision Board</a>
             <a class="navbar-item" href="/aicoach">AI Coach</a>
             <a class="navbar-item" href="/resources">Resources</a>
+            @if (AuthState.IsAdmin)
+            {
+                <a class="navbar-item" href="/admin/users">Admin</a>
+            }
 
             <div class="navbar-buttons">
                 @if (AuthState.IsLoggedIn)

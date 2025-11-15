@@ -8,6 +8,7 @@ namespace Tekhnologia.Services
         private readonly AuthenticationStateProvider _provider;
 
         public bool IsLoggedIn { get; private set; }
+        public bool IsAdmin { get; private set; }
 
         public event Action? OnChange;
 
@@ -22,6 +23,7 @@ namespace Tekhnologia.Services
         {
             var state = await _provider.GetAuthenticationStateAsync();
             IsLoggedIn = state.User.Identity?.IsAuthenticated ?? false;
+            IsAdmin = state.User.IsInRole("Admin");
             OnChange?.Invoke();
         }
 
@@ -29,6 +31,7 @@ namespace Tekhnologia.Services
         {
             var state = await task;
             IsLoggedIn = state.User.Identity?.IsAuthenticated ?? false;
+            IsAdmin = state.User.IsInRole("Admin");
             OnChange?.Invoke();
         }
     }
