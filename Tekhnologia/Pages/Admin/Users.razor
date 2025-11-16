@@ -25,10 +25,9 @@ else if (!isAdmin)
 }
 else
 {
-    <div class="section">
+    <div class="section admin-page">
         <div class="container">
             <h1 class="title">User Management</h1>
-            <p class="subtitle">Manage all users in the system</p>
 
             @if (!string.IsNullOrEmpty(errorMessage))
             {
@@ -72,25 +71,25 @@ else
                                     <td>@user.Name</td>
                                     <td>@user.Email</td>
                                     <td>
-                                        <span class="tag @(user.Role == "Admin" ? "is-danger" : "is-info")">
+                                        <span class="tag @(user.Role == "Admin" ? "admin-role-tag" : "user-role-tag")">
                                             @user.Role
                                         </span>
                                     </td>
                                     <td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
                                     <td>
                                         <div class="buttons are-small">
-                                            <button class="button is-info is-light" @onclick="() => ViewUserDetails(user.Id)">
+                                            <button class="button admin-action-btn" @onclick="() => ViewUserDetails(user.Id)">
                                                 View
                                             </button>
                                             @if (user.Role != "Admin")
                                             {
-                                                <button class="button is-warning is-light" @onclick="() => PromoteUser(user.Id)">
+                                                <button class="button admin-action-btn" @onclick="() => PromoteUser(user.Id)">
                                                     Promote
                                                 </button>
                                             }
                                             @if (user.Id != currentUserId)
                                             {
-                                                <button class="button is-danger is-light" @onclick="() => DeleteUser(user.Id, user.Name)">
+                                                <button class="button admin-action-btn" @onclick="() => DeleteUser(user.Id, user.Name)">
                                                     Delete
                                                 </button>
                                             }
@@ -119,7 +118,7 @@ else
                     <div class="content">
                         <p><strong>Name:</strong> @selectedUser.Name</p>
                         <p><strong>Email:</strong> @selectedUser.Email</p>
-                        <p><strong>Role:</strong> <span class="tag @(selectedUser.Role == "Admin" ? "is-danger" : "is-info")">@selectedUser.Role</span></p>
+                        <p><strong>Role:</strong> <span class="tag @(selectedUser.Role == "Admin" ? "admin-role-tag" : "user-role-tag")">@selectedUser.Role</span></p>
                         <p><strong>User ID:</strong> @selectedUser.Id</p>
                         <p><strong>Created:</strong> @selectedUser.CreatedAt.ToString("MMMM dd, yyyy 'at' h:mm tt")</p>
                         <p><strong>Last Updated:</strong> @selectedUser.UpdatedAt.ToString("MMMM dd, yyyy 'at' h:mm tt")</p>

@@ -305,6 +305,358 @@ h1,
   background: rgba(15, 219, 128, 0.25);
   box-shadow: 0 0 20px rgba(15, 219, 128, 1);
 }
+.navbar-buttons .button.is-admin {
+  background: rgba(255, 20, 147, 0.15);
+  color: white;
+  border: 2px solid rgba(255, 20, 147, 0.8);
+  box-shadow: 0 0 10px rgba(255, 20, 147, 0.5);
+}
+.navbar-buttons .button.is-admin:hover {
+  background: rgba(255, 20, 147, 0.25);
+  box-shadow: 0 0 20px rgba(255, 20, 147, 1);
+}
+
+/* ============================== */
+/* ADMIN PAGES */
+/* ============================== */
+.admin-page {
+  padding-top: 6rem;
+}
+
+/* Role Tags */
+.admin-role-tag {
+  background: rgba(255, 20, 147, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 20, 147, 0.8);
+  box-shadow: 0 0 8px rgba(255, 20, 147, 0.4);
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+}
+
+.user-role-tag {
+  background: rgba(15, 219, 128, 0.2);
+  color: white;
+  border: 1px solid rgba(15, 219, 128, 0.8);
+  box-shadow: 0 0 8px rgba(15, 219, 128, 0.4);
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+}
+
+/* Action Buttons */
+.admin-action-btn {
+  background: #000;
+  color: white;
+  border: 1px solid white;
+  border-radius: 1rem;
+  padding: 0.25rem 0.75rem;
+}
+
+.admin-action-btn:hover,
+.admin-action-btn:focus {
+  background: #1a1a1a;
+  color: white;
+  border-color: white;
+}
+
+/* ============================== */
+/* GOAL TRACKER PAGE */
+/* ============================== */
+.goal-tracker-page {
+  padding: 6rem 1rem 2rem 1rem;
+  min-height: 100vh;
+}
+
+.goal-tracker-container {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Left Sidebar: Goals List */
+.goals-sidebar {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  height: fit-content;
+  max-height: calc(100vh - 150px);
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.sidebar-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+
+.goals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.goal-list-item {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.goal-list-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(15, 219, 128, 0.5);
+}
+
+.goal-list-item.active {
+  background: rgba(15, 219, 128, 0.15);
+  border-color: rgba(15, 219, 128, 0.8);
+  box-shadow: 0 0 10px rgba(15, 219, 128, 0.3);
+}
+
+.goal-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.goal-item-title {
+  font-weight: 500;
+  color: white;
+  font-size: 1rem;
+}
+
+.goal-status-badge {
+  background: rgba(15, 219, 128, 0.3);
+  color: white;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+}
+
+.goal-item-meta {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.urgency-tag,
+.importance-tag {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  border: 1px solid;
+}
+
+.urgency-tag.urgent {
+  background: rgba(255, 20, 147, 0.2);
+  border-color: rgba(255, 20, 147, 0.6);
+  color: white;
+}
+
+.urgency-tag.not-urgent {
+  background: rgba(128, 128, 128, 0.2);
+  border-color: rgba(128, 128, 128, 0.6);
+  color: #ccc;
+}
+
+.importance-tag.important {
+  background: rgba(255, 165, 0, 0.2);
+  border-color: rgba(255, 165, 0, 0.6);
+  color: white;
+}
+
+.importance-tag.not-important {
+  background: rgba(128, 128, 128, 0.2);
+  border-color: rgba(128, 128, 128, 0.6);
+  color: #ccc;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #aaa;
+}
+
+/* Right Area: Goal Details */
+.goal-detail-area {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.empty-selection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  color: #aaa;
+  font-size: 1.2rem;
+}
+
+.goal-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.goal-header-text {
+  flex: 1;
+}
+
+.goal-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.goal-description {
+  color: #bbb;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.goal-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Stat Cards */
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.stat-label {
+  color: #aaa;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  color: white;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+/* Progress Section */
+.progress-section {
+  margin-top: 2rem;
+}
+
+.section-subtitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.timeline-visual {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.timeline-bar {
+  height: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.timeline-progress {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(15, 219, 128, 0.8), rgba(15, 219, 128, 1));
+  box-shadow: 0 0 10px rgba(15, 219, 128, 0.5);
+  transition: width 0.3s ease;
+  border-radius: 6px;
+}
+
+.timeline-labels {
+  display: flex;
+  justify-content: space-between;
+  color: #aaa;
+  font-size: 0.875rem;
+}
+
+/* Notification Toast */
+.notification-toast {
+  position: fixed;
+  top: 100px;
+  right: 20px;
+  min-width: 300px;
+  z-index: 1000;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+  .goal-tracker-container {
+    grid-template-columns: 1fr;
+  }
+
+  .goals-sidebar {
+    max-height: 400px;
+  }
+
+  .goal-detail-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .stat-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .stat-cards {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* ============================== */
 /* FOOTER */
