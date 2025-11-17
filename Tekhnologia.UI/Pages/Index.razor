@@ -1,0 +1,63 @@
+@page "/"
+@using Tekhnologia.UI.Services.Interfaces
+@inject IAuthStateService AuthState
+@inject IUserClient UserClient
+
+@if (!AuthState.Initialized)
+{
+    <p>Loading...</p>
+}
+else if (AuthState.IsLoggedIn)
+{
+    <section class="home">
+        <div class="home-intro">
+            <h1 class="title is-1">Welcome to Tekhnologia</h1>
+            <hr class="hr" />
+            <p class="home-text">Hi @firstName 👋, your tools for clarity and momentum are ready.</p>
+            <p class="home-subtext">
+                Jump into your <a class="link" href="/journal">Journal</a>,
+                refine your <a class="link" href="/visionboard">Vision Board</a>,
+                or catch up with your <a class="link" href="/aicoach">AI Coach</a>.
+            </p>
+            <div class="home-buttons buttons">
+                <div class="home-buttons-shine">
+                    <a class="shine" href="/goaltracker"><span>Go to Goal Tracker</span></a>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+else
+{
+    <section class="home">
+        <div class="home-intro">
+            <h1 class="title is-1">Advance Your Career</h1>
+            <hr class="hr" />
+            <p class="home-text">Empowering women in tech with evidence-based tools.</p>
+            <p class="home-subtext">
+                Leverage our <a class="link" href="/goaltracker">Goal Tracker</a>, reflective <a class="link" href="/journal">Journal</a>,
+                visionary <a class="link" href="/visionboard">Vision Board</a>, AI-powered <a class="link" href="/aicoach">AI Coach</a>,
+                and a rich <a class="link" href="/resources">Resource Hub</a> to unlock your full potential.
+            </p>
+            <div class="home-buttons buttons">
+                <div class="home-buttons-shine">
+                    <a class="shine" href="/signup"><span>Get Started for Free</span></a>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+@code {
+    private string? firstName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthState.RefreshAsync();
+        if (AuthState.IsLoggedIn)
+        {
+            var user = await UserClient.GetCurrentUserAsync();
+            firstName = user?.Name?.Split(' ')?.FirstOrDefault();
+        }
+    }
+}
