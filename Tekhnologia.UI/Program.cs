@@ -14,6 +14,9 @@ builder.Services.AddHttpClient();
 // Auth + user clients
 builder.Services.AddScoped<IAuthStateService, AuthStateService>();
 builder.Services.AddScoped<IUserClient, UserClient>();
+builder.Services.AddScoped<IAuthApiService, AuthApiService>();
+builder.Services.AddScoped<IUserProfileService, UserProfileService>();
+builder.Services.AddScoped<IGoalApiService, GoalApiService>();
 
 var app = builder.Build();
 
