@@ -17,6 +17,7 @@ builder.Services.AddScoped<IUserClient, UserClient>();
 builder.Services.AddScoped<IAuthApiService, AuthApiService>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<IGoalApiService, GoalApiService>();
+builder.Services.AddScoped<IAIApiService, AIApiService>();
 
 var app = builder.Build();
 
