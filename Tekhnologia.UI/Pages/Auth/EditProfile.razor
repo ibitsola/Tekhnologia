@@ -1,0 +1,132 @@
+@page "/profile/edit"
+@using Tekhnologia.UI.Components
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using Tekhnologia.UI.Services.Interfaces
+@inject IAuthStateService AuthState
+@inject IUserClient UserClient
+@inject IUserProfileService ProfileService
+@inject NavigationManager Nav
+
+@if (!AuthState.Initialized)
+{
+    <p>Loading...</p>
+}
+else if (!AuthState.IsLoggedIn)
+{
+    <RedirectToSignIn />
+}
+else if (loading)
+{
+    <p>Loading profile...</p>
+}
+else
+{
+    <EditForm Model="model" OnValidSubmit="HandleSubmit" class="auth-container">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="auth-box">
+            <h2 class="auth-heading">Edit Profile</h2>
+            <div class="field">
+                <label class="label" for="name">Name</label>
+                <InputText id="name" class="input" @bind-Value="model.Name" />
+                <ValidationMessage For="(()=>model.Name)" />
+            </div>
+            <div class="field">
+                <label class="label" for="old">Current Password (required if changing)</label>
+                <InputText id="old" type="password" class="input" @bind-Value="model.OldPassword" />
+            </div>
+            <div class="field">
+                <label class="label" for="new">New Password</label>
+                <InputText id="new" type="password" class="input" @bind-Value="model.NewPassword" />
+            </div>
+            <div class="field">
+                <label class="label" for="confirm">Confirm New Password</label>
+                <InputText id="confirm" type="password" class="input" @bind-Value="model.ConfirmPassword" />
+            </div>
+            <div class="field is-grouped is-grouped-centered" style="margin-top:1.5rem;">
+                <p class="control"><button type="submit" class="button is-primary" disabled="@busy">@(busy?"Updating...":"Update")</button></p>
+                <p class="control"><a href="/profile" class="button is-light">Cancel</a></p>
+            </div>
+        </div>
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="notification is-danger">@error</div>
+        }
+        @if (!string.IsNullOrEmpty(success))
+        {
+            <div class="notification is-success">@success</div>
+        }
+    </EditForm>
+}
+
+@code {
+    private EditProfileModel model = new();
+    private string? userId;
+    private bool loading = true;
+    private bool busy;
+    private string? error;
+    private string? success;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.Initialized)
+            await AuthState.RefreshAsync();
+        if (!AuthState.IsLoggedIn) return;
+        var user = await UserClient.GetCurrentUserAsync();
+        userId = user?.Id;
+        model.Name = user?.Name ?? string.Empty;
+        loading = false;
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (string.IsNullOrEmpty(userId)) { error = "User ID missing."; return; }
+        busy = true; error = success = null;
+
+        // Update name
+        if (!string.IsNullOrWhiteSpace(model.Name))
+        {
+            var (ok, errs) = await ProfileService.UpdateNameAsync(userId, model.Name);
+            if (!ok) { error = string.Join("; ", errs); busy = false; return; }
+        }
+
+        // Update password if provided
+        if (!string.IsNullOrWhiteSpace(model.NewPassword))
+        {
+            if (model.NewPassword != model.ConfirmPassword)
+            {
+                error = "New passwords do not match."; busy = false; return;
+            }
+            if (string.IsNullOrWhiteSpace(model.OldPassword))
+            {
+                error = "Current password required to change password."; busy = false; return;
+            }
+            var (passOk, passErrs) = await ProfileService.UpdatePasswordAsync(userId, model.OldPassword!, model.NewPassword!);
+            if (!passOk)
+            {
+                error = string.Join("; ", passErrs); busy = false; return;
+            }
+            success = "Password updated. Please sign in again.";
+            await Task.Delay(1200);
+            await AuthState.LogoutAsync();
+            Nav.NavigateTo("/signin", true);
+            busy = false; return;
+        }
+
+        success = "Profile updated successfully!";
+        await Task.Delay(800);
+        Nav.NavigateTo("/profile");
+        busy = false;
+    }
+
+    private sealed class EditProfileModel
+    {
+        [Required, StringLength(100)]
+        public string Name { get; set; } = string.Empty;
+        public string? OldPassword { get; set; }
+        [MinLength(8)]
+        public string? NewPassword { get; set; }
+        public string? ConfirmPassword { get; set; }
+    }
+}

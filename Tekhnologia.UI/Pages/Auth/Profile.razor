@@ -1,0 +1,51 @@
+@page "/profile"
+@using Tekhnologia.UI.Services.Interfaces
+@using Tekhnologia.UI.Components
+@inject IAuthStateService AuthState
+@inject IUserClient UserClient
+@inject NavigationManager Nav
+
+@if (!AuthState.Initialized)
+{
+    <p>Loading your information…</p>
+}
+else if (!AuthState.IsLoggedIn)
+{
+    <RedirectToSignIn />
+}
+else if (loading)
+{
+    <p>Loading profile…</p>
+}
+else if (user == null)
+{
+    <div class="notification is-warning">Profile not found.</div>
+}
+else
+{
+    <div class="auth-container">
+        <div class="auth-box">
+            <h2 class="auth-heading">Your Profile</h2>
+            <div class="field"><label class="label">Name</label><p>@user.Name</p></div>
+            <div class="field"><label class="label">Email</label><p>@user.Email</p></div>
+            <div class="field"><label class="label">Role</label><p>@user.Role</p></div>
+            <div class="field is-grouped is-grouped-centered" style="margin-top:1.5rem;">
+                <p class="control"><a href="/profile/edit" class="button is-primary">Edit</a></p>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private UserInfo? user;
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.Initialized)
+            await AuthState.RefreshAsync();
+        if (!AuthState.IsLoggedIn) return;
+        user = await UserClient.GetCurrentUserAsync();
+        loading = false;
+    }
+}
