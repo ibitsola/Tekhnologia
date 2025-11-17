@@ -1,0 +1,138 @@
+@page "/resources"
+@using Tekhnologia.UI.Services.Interfaces
+@inject IAuthStateService AuthState
+@inject NavigationManager Navigation
+
+@if (AuthState.IsLoggedIn)
+{
+    <!-- 🔒 Authenticated Resource Hub UI -->
+    <section class="home">
+        <div class="home-intro">
+            <h1 class="title is-1">Your Career Resources</h1>
+            <hr class="hr" />
+            <p class="home-text">Browse and download helpful guides for your tech journey.</p>
+        </div>
+    </section>
+
+    <section class="section has-text-centered">
+        <div class="box">
+            <p>PDF download/search UI goes here 📚</p>
+        </div>
+    </section>
+}
+else
+{
+    <!-- 🌐 Public Marketing Content -->
+    <section class="home">
+        <div class="home-intro">
+            <h1 class="title is-1">Career Resource Hub</h1>
+            <hr class="hr" />
+            <p class="home-text">
+                Curated tools and expert career guides to help you navigate the tech world with confidence.
+            </p>
+            <p class="home-subtext">
+                Whether you're pivoting, leveling up, or just starting out — find the right resource to fuel your journey.
+            </p>
+            <div class="home-buttons buttons">
+                <div class="home-buttons-shine">
+                    <a class="shine" href="/signup"><span>Get Started</span></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="title section-title has-text-centered">Why Use the Resource Hub?</h2>
+        <div class="columns is-multiline">
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">📚 Expert-Curated Guides</h3>
+                    <p>Every PDF is handpicked to support real career challenges faced by women in tech.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">💡 Practical Insights</h3>
+                    <p>Learn about resumes, negotiation, imposter syndrome, career pivots, and more.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">📥 Easy Access</h3>
+                    <p>Download and save resources at your convenience — no logins, no fuss.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🔄 Regularly Updated</h3>
+                    <p>New PDFs added regularly through a secure admin upload panel.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section has-text-centered">
+        <h2 class="title section-title">How It Works</h2>
+        <div class="feature-boxes-row">
+            <div class="feature-box">
+                <h3>Browse Topics</h3>
+                <p class="feature-subtext">Explore our collection of PDFs by category or keyword.</p>
+            </div>
+            <div class="feature-box">
+                <h3>Preview & Download</h3>
+                <p class="feature-subtext">Download guides instantly for offline reading and reuse.</p>
+            </div>
+            <div class="feature-box">
+                <h3>Stay Organized</h3>
+                <p class="feature-subtext">Build your own career toolkit by saving the ones that resonate most.</p>
+            </div>
+            <div class="feature-box">
+                <h3>Access Anytime</h3>
+                <p class="feature-subtext">Your downloaded PDFs are yours to keep — no expiration, no limits.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="title section-title has-text-centered">What You Get</h2>
+        <div class="columns is-multiline">
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">📎 Downloadable PDFs</h3>
+                    <p>Resume templates, confidence checklists, leadership playbooks & more.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🔍 Searchable Library</h3>
+                    <p>Find exactly what you need using keywords and categories.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🛡️ Secure Access</h3>
+                    <p>All uploads are moderated and stored securely with admin control.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">💼 Career-Ready Content</h3>
+                    <p>Each resource is focused on accelerating your path in tech.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section has-text-centered">
+        <h2 class="title section-title">Ready to build your career toolkit?</h2>
+        <div class="home-buttons buttons">
+            <div class="home-buttons-shine">
+                <a class="shine" href="/signup"><span>Get Started</span></a>
+            </div>
+        </div>
+    </section>
+}
+
+@code {
+    private void NavigateToSignup() => Navigation.NavigateTo("/signup");
+}

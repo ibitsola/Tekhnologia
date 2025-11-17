@@ -1,0 +1,138 @@
+@page "/visionboard"
+@using Tekhnologia.UI.Services.Interfaces
+@inject IAuthStateService AuthState
+@inject NavigationManager Navigation
+
+@if (AuthState.IsLoggedIn)
+{
+    <!-- 🔒 Authenticated Vision Board UI -->
+    <section class="home">
+        <div class="home-intro">
+            <h1 class="title is-1">Your Vision Board</h1>
+            <hr class="hr" />
+            <p class="home-text">Create and manage your inspiration space anytime 🌈</p>
+        </div>
+    </section>
+
+    <section class="section has-text-centered">
+        <div class="box">
+            <p>Board builder UI goes here — image uploads, theme cards, etc. 🖼️</p>
+        </div>
+    </section>
+}
+else
+{
+    <!-- 🌐 Public Marketing Content -->
+    <section class="home">
+        <div class="home-intro">
+            <h1 class="title is-1">Vision Board Builder</h1>
+            <hr class="hr" />
+            <p class="home-text">
+                Visualize your dreams and bring your tech career goals to life.
+            </p>
+            <p class="home-subtext">
+                Create a digital space for inspiration — upload images, add goals, and stay focused on what matters most.
+            </p>
+            <div class="home-buttons buttons">
+                <div class="home-buttons-shine">
+                    <a class="shine" href="/signup"><span>Get Started</span></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="title section-title has-text-centered">Why Use a Vision Board?</h2>
+        <div class="columns is-multiline">
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🌟 Clarifies Ambitions</h3>
+                    <p>Visual goals make your aspirations concrete and achievable.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🧠 Reinforces Mindset</h3>
+                    <p>Daily exposure to inspiring images strengthens your focus and confidence.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🎯 Keeps You Aligned</h3>
+                    <p>Stay aligned with your long-term goals and resist distractions.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">💡 Sparks Creativity</h3>
+                    <p>Let imagery inspire action and encourage new possibilities in your journey.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section has-text-centered">
+        <h2 class="title section-title">How It Works</h2>
+        <div class="feature-boxes-row">
+            <div class="feature-box">
+                <h3>Upload Visuals</h3>
+                <p class="feature-subtext">Add meaningful images and captions that represent your goals.</p>
+            </div>
+            <div class="feature-box">
+                <h3>Set Career Themes</h3>
+                <p class="feature-subtext">Organize your board by areas of focus — from leadership to creativity.</p>
+            </div>
+            <div class="feature-box">
+                <h3>Access Anytime</h3>
+                <p class="feature-subtext">Your board is always with you, accessible from any device.</p>
+            </div>
+            <div class="feature-box">
+                <h3>Update & Evolve</h3>
+                <p class="feature-subtext">As your goals grow, so does your board. Keep it fresh and relevant.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="title section-title has-text-centered">What You Get</h2>
+        <div class="columns is-multiline">
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🖼️ Visual Uploads</h3>
+                    <p>Drag and drop images to build your custom board.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🗂️ Goal Categorization</h3>
+                    <p>Group visuals by personal and professional themes.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">📦 Local Storage</h3>
+                    <p>Store images locally with future support for cloud backups.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🧩 Easy Management</h3>
+                    <p>View, update, and remove board items with ease.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section has-text-centered">
+        <h2 class="title section-title">Ready to turn your vision into action?</h2>
+        <div class="home-buttons buttons">
+            <div class="home-buttons-shine">
+                <a class="shine" href="/signup"><span>Get Started</span></a>
+            </div>
+        </div>
+    </section>
+}
+
+@code {
+    private void NavigateToSignup() => Navigation.NavigateTo("/signup");
+}
