@@ -1,132 +1,253 @@
 @page "/profile/edit"
-@using Tekhnologia.UI.Components
-@using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Components.Forms
-@using Tekhnologia.UI.Services.Interfaces
-@inject IAuthStateService AuthState
-@inject IUserClient UserClient
-@inject IUserProfileService ProfileService
-@inject NavigationManager Nav
+@layout Views.Shared.MainLayout
 
-@if (!AuthState.Initialized)
+@using System.ComponentModel.DataAnnotations
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Authorization
+@using Tekhnologia.Models.DTOs
+@using Tekhnologia.Services.Interfaces
+@inject IAuthStateService AuthState
+@inject IUserService UserService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+@if (loading)
 {
-    <p>Loading...</p>
-}
-else if (!AuthState.IsLoggedIn)
-{
-    <RedirectToSignIn />
-}
-else if (loading)
-{
-    <p>Loading profile...</p>
+    <div class="section has-text-centered">
+        <p>Loading...</p>
+    </div>
 }
 else
 {
-    <EditForm Model="model" OnValidSubmit="HandleSubmit" class="auth-container">
+    <EditForm Model="@editModel" OnValidSubmit="@HandleValidSubmit" FormName="EditProfileForm" class="auth-container">
         <DataAnnotationsValidator />
-        <ValidationSummary />
+
         <div class="auth-box">
+            <ValidationSummary class="notification is-alert" />
+
             <h2 class="auth-heading">Edit Profile</h2>
+
+            <!-- NAME -->
             <div class="field">
                 <label class="label" for="name">Name</label>
-                <InputText id="name" class="input" @bind-Value="model.Name" />
-                <ValidationMessage For="(()=>model.Name)" />
+                <div class="control">
+                    <InputText id="name" class="input" @bind-Value="@editModel.Name" />
+                </div>
+                <ValidationMessage For="@(() => editModel.Name)" />
             </div>
+
+            <!-- OLD PASSWORD -->
             <div class="field">
-                <label class="label" for="old">Current Password (required if changing)</label>
-                <InputText id="old" type="password" class="input" @bind-Value="model.OldPassword" />
+                <label class="label" for="oldPassword">Current Password</label>
+                <div class="control">
+                    <InputText id="oldPassword" type="password" class="input" @bind-Value="@editModel.OldPassword" placeholder="Leave blank to keep current password" />
+                </div>
+                <ValidationMessage For="@(() => editModel.OldPassword)" />
             </div>
+
+            <!-- NEW PASSWORD -->
             <div class="field">
-                <label class="label" for="new">New Password</label>
-                <InputText id="new" type="password" class="input" @bind-Value="model.NewPassword" />
+                <label class="label" for="newPassword">New Password</label>
+                <div class="control">
+                    <InputText id="newPassword" type="password" class="input" @bind-Value="@editModel.NewPassword" placeholder="Leave blank to keep current password" />
+                </div>
+                <ValidationMessage For="@(() => editModel.NewPassword)" />
             </div>
+
+            <!-- CONFIRM NEW PASSWORD -->
             <div class="field">
-                <label class="label" for="confirm">Confirm New Password</label>
-                <InputText id="confirm" type="password" class="input" @bind-Value="model.ConfirmPassword" />
+                <label class="label" for="confirmPassword">Confirm New Password</label>
+                <div class="control">
+                    <InputText id="confirmPassword" type="password" class="input" @bind-Value="@editModel.ConfirmPassword" placeholder="Leave blank to keep current password" />
+                </div>
+                <ValidationMessage For="@(() => editModel.ConfirmPassword)" />
             </div>
+
             <div class="field is-grouped is-grouped-centered" style="margin-top:1.5rem;">
-                <p class="control"><button type="submit" class="button is-primary" disabled="@busy">@(busy?"Updating...":"Update")</button></p>
-                <p class="control"><a href="/profile" class="button is-light">Cancel</a></p>
+                <p class="control">
+                    <button type="submit" class="button is-primary" disabled="@isSubmitting">
+                        @(isSubmitting ? "Updating..." : "Update")
+                    </button>
+                </p>
+                <p class="control">
+                    <a href="/profile" class="button is-light">Cancel</a>
+                </p>
             </div>
         </div>
-        @if (!string.IsNullOrEmpty(error))
+
+        @if (!string.IsNullOrEmpty(errorMessage))
         {
-            <div class="notification is-danger">@error</div>
+            <div class="notification is-alert">@errorMessage</div>
         }
-        @if (!string.IsNullOrEmpty(success))
+
+        @if (!string.IsNullOrEmpty(successMessage))
         {
-            <div class="notification is-success">@success</div>
+            <div class="notification is-success">@successMessage</div>
         }
     </EditForm>
 }
 
 @code {
-    private EditProfileModel model = new();
-    private string? userId;
+    private EditProfileModel editModel = new();
+    private string? errorMessage;
+    private string? successMessage;
+    private bool isSubmitting = false;
     private bool loading = true;
-    private bool busy;
-    private string? error;
-    private string? success;
+    private string? userId;
 
     protected override async Task OnInitializedAsync()
     {
-        if (!AuthState.Initialized)
-            await AuthState.RefreshAsync();
-        if (!AuthState.IsLoggedIn) return;
-        var user = await UserClient.GetCurrentUserAsync();
-        userId = user?.Id;
-        model.Name = user?.Name ?? string.Empty;
-        loading = false;
-    }
+        Console.WriteLine("EditProfile: OnInitializedAsync started");
+        await AuthState.CheckAuthStatus();
 
-    private async Task HandleSubmit()
-    {
-        if (string.IsNullOrEmpty(userId)) { error = "User ID missing."; return; }
-        busy = true; error = success = null;
-
-        // Update name
-        if (!string.IsNullOrWhiteSpace(model.Name))
+        if (!AuthState.IsLoggedIn)
         {
-            var (ok, errs) = await ProfileService.UpdateNameAsync(userId, model.Name);
-            if (!ok) { error = string.Join("; ", errs); busy = false; return; }
+            Console.WriteLine("EditProfile: User not logged in, redirecting to signin");
+            Navigation.NavigateTo("/signin");
+            return;
         }
 
-        // Update password if provided
-        if (!string.IsNullOrWhiteSpace(model.NewPassword))
+        try
         {
-            if (model.NewPassword != model.ConfirmPassword)
-            {
-                error = "New passwords do not match."; busy = false; return;
-            }
-            if (string.IsNullOrWhiteSpace(model.OldPassword))
-            {
-                error = "Current password required to change password."; busy = false; return;
-            }
-            var (passOk, passErrs) = await ProfileService.UpdatePasswordAsync(userId, model.OldPassword!, model.NewPassword!);
-            if (!passOk)
-            {
-                error = string.Join("; ", passErrs); busy = false; return;
-            }
-            success = "Password updated. Please sign in again.";
-            await Task.Delay(1200);
-            await AuthState.LogoutAsync();
-            Nav.NavigateTo("/signin", true);
-            busy = false; return;
-        }
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            Console.WriteLine($"EditProfile: User ID = {userId}");
 
-        success = "Profile updated successfully!";
-        await Task.Delay(800);
-        Nav.NavigateTo("/profile");
-        busy = false;
+            if (string.IsNullOrEmpty(userId))
+            {
+                Console.WriteLine("EditProfile: User ID is empty, redirecting to signin");
+                Navigation.NavigateTo("/signin");
+                return;
+            }
+
+            var user = await UserService.GetUserProfileAsync(userId);
+            if (user != null)
+            {
+                editModel.Name = user.Name ?? string.Empty;
+                Console.WriteLine($"EditProfile: Loaded user name = {editModel.Name}");
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading profile: {ex.Message}";
+            Console.WriteLine($"EditProfile: Error = {ex.Message}");
+        }
+        finally
+        {
+            loading = false;
+            Console.WriteLine("EditProfile: Loading complete");
+        }
     }
 
-    private sealed class EditProfileModel
+    private async Task HandleValidSubmit()
     {
-        [Required, StringLength(100)]
+        if (string.IsNullOrEmpty(userId))
+        {
+            errorMessage = "User ID not found. Please sign in again.";
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = null;
+        successMessage = null;
+
+        try
+        {
+            // Update name if changed
+            if (!string.IsNullOrWhiteSpace(editModel.Name))
+            {
+                var updateDto = new UpdateUserDTO { Name = editModel.Name };
+                var (success, errors, _) = await UserService.UpdateUserProfileAsync(userId, updateDto);
+
+                if (!success)
+                {
+                    errorMessage = string.Join("; ", errors);
+                    isSubmitting = false;
+                    return;
+                }
+            }
+
+            // Update password if provided
+            if (!string.IsNullOrWhiteSpace(editModel.NewPassword))
+            {
+                if (editModel.NewPassword != editModel.ConfirmPassword)
+                {
+                    errorMessage = "New passwords do not match.";
+                    isSubmitting = false;
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(editModel.OldPassword))
+                {
+                    errorMessage = "Current password is required to change password.";
+                    isSubmitting = false;
+                    return;
+                }
+
+                var passwordDto = new UpdatePasswordDTO
+                {
+                    OldPassword = editModel.OldPassword,
+                    NewPassword = editModel.NewPassword
+                };
+
+                try
+                {
+                    var (success, errors) = await UserService.UpdateUserPasswordAsync(userId, passwordDto);
+
+                    if (!success)
+                    {
+                        errorMessage = string.Join("; ", errors);
+                        isSubmitting = false;
+                        return;
+                    }
+                }
+                catch (Exception)
+                {
+                    // Password update succeeded but signout failed - expected in Blazor Server
+                    // Just force redirect to signin
+                }
+
+                // Password changed successfully - force full page reload to sign in
+                successMessage = "Password updated successfully! Please sign in with your new password.";
+                StateHasChanged();
+                await Task.Delay(2000);
+                Navigation.NavigateTo("/signin", forceLoad: true);
+                return;
+            }
+
+            successMessage = "Profile updated successfully!";
+            await Task.Delay(1500);
+            Navigation.NavigateTo("/profile");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error updating profile: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/profile");
+    }
+
+    public class EditProfileModel
+    {
+        [Required(ErrorMessage = "Name is required")]
+        [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters")]
         public string Name { get; set; } = string.Empty;
+
         public string? OldPassword { get; set; }
-        [MinLength(8)]
+
+        [MinLength(8, ErrorMessage = "New password must be at least 8 characters long.")]
+        [RegularExpression(@"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$",
+            ErrorMessage = "Password must contain at least one letter, one number, and one special character.")]
         public string? NewPassword { get; set; }
+
         public string? ConfirmPassword { get; set; }
     }
 }

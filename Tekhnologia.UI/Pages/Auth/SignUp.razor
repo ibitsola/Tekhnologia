@@ -1,100 +1,110 @@
 @page "/signup"
+
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Components.Forms
-@using Tekhnologia.UI.Services.Interfaces
-@inject IAuthApiService AuthApi
+@using Tekhnologia.Models
+@using Tekhnologia.Services.Interfaces
+@inject NavigationManager Navigation
 @inject IAuthStateService AuthState
-@inject NavigationManager Nav
+@inject IBlazorAuthService AuthService
 
-<h3 class="auth-heading">Sign Up</h3>
-
-<EditForm Model="model" OnValidSubmit="HandleSubmit" class="auth-container">
+<EditForm Model="@signupModel" OnValidSubmit="@HandleValidSubmit" FormName="SignUpForm" class="auth-container">
     <DataAnnotationsValidator />
-    <ValidationSummary />
+
     <div class="auth-box">
+        <ValidationSummary class="notification is-alert" />
+
+        <h2 class="auth-heading">Sign Up</h2>
+
+        <!-- NAME -->
         <div class="field">
             <label class="label" for="name">Name</label>
-            <InputText id="name" class="input" @bind-Value="model.Name" />
-            <ValidationMessage For="(()=>model.Name)" />
+            <div class="control">
+                <InputText id="name" class="input" @bind-Value="@signupModel.Name" />
+            </div>
+            <ValidationMessage For="@(() => signupModel.Name)" />
         </div>
+
+        <!-- EMAIL -->
         <div class="field">
             <label class="label" for="email">Email</label>
-            <InputText id="email" class="input" @bind-Value="model.Email" />
-            <ValidationMessage For="(()=>model.Email)" />
+            <div class="control">
+                <InputText id="email" class="input" @bind-Value="@signupModel.Email" />
+            </div>
+            <ValidationMessage For="@(() => signupModel.Email)" />
         </div>
+
+        <!-- PASSWORD -->
         <div class="field">
             <label class="label" for="password">Password</label>
-            <InputText id="password" type="password" class="input" @bind-Value="model.Password" />
-            <ValidationMessage For="(()=>model.Password)" />
+            <div class="control">
+                <InputText id="password" type="password" class="input" @bind-Value="@signupModel.Password" />
+            </div>
+            <ValidationMessage For="@(() => signupModel.Password)" />
         </div>
+
+        <!-- CONFIRM PASSWORD -->
         <div class="field">
-            <label class="label" for="confirm">Confirm Password</label>
-            <InputText id="confirm" type="password" class="input" @bind-Value="model.ConfirmPassword" />
-            <ValidationMessage For="(()=>model.ConfirmPassword)" />
+            <label class="label" for="confirmPassword">Confirm Password</label>
+            <div class="control">
+                <InputText id="confirmPassword" type="password" class="input" @bind-Value="@signupModel.ConfirmPassword" />
+            </div>
+            <ValidationMessage For="@(() => signupModel.ConfirmPassword)" />
         </div>
-        <button type="submit" class="button signup-button" disabled="@busy">@(busy?"Signing Up...":"Sign Up")</button>
+
+        <div class="field is-grouped is-grouped-centered" style="margin-top:1rem; justify-content:center;">
+            <div class="control">
+                <button type="submit" class="button signup-button" disabled="@isSubmitting">
+                    @(isSubmitting ? "Signing Up..." : "Sign Up")
+                </button>
+            </div>
+        </div>
     </div>
-    @if (!string.IsNullOrEmpty(error))
+
+    @if (!string.IsNullOrEmpty(errorMessage))
     {
-        <div class="notification is-danger">@error</div>
+        <div class="notification is-alert">@errorMessage</div>
     }
-    @if (!string.IsNullOrEmpty(success))
-    {
-        <div class="notification is-success">@success</div>
-    }
+
     <div class="already-member">
         <p>Already have an account?</p>
-        <a href="/signin" class="button is-primary auth-button">Log In</a>
+        <a href="/signin" class="button is-primary auth-button">Log in</a>
     </div>
 </EditForm>
 
 @code {
-    private readonly SignUpModel model = new();
-    private bool busy;
-    private string? error;
-    private string? success;
+    private RegisterModel signupModel = new();
+    private string? errorMessage;
+    private bool isSubmitting = false;
 
-    private async Task HandleSubmit()
+    private async Task HandleValidSubmit()
     {
-        busy = true; error = success = null;
-        var (ok, errs) = await AuthApi.RegisterAsync(new RegisterRequest
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
         {
-            Name = model.Name,
-            Email = model.Email,
-            Password = model.Password,
-            ConfirmPassword = model.ConfirmPassword
-        });
-        if (ok)
-        {
-            // Auto-login
-            var loginOk = await AuthState.LoginAsync(model.Email!, model.Password!);
-            if (loginOk)
+            var result = await AuthService.RegisterAsync(signupModel);
+
+            if (result.Succeeded)
             {
-                success = "Account created successfully! Redirecting...";
-                await Task.Delay(800);
-                Nav.NavigateTo("/profile", true);
+                // Redirect to server endpoint that can write cookies
+                var email = Uri.EscapeDataString(signupModel.Email);
+                var password = Uri.EscapeDataString(signupModel.Password);
+                Navigation.NavigateTo($"/api/auth/autologin?email={email}&password={password}", forceLoad: true);
             }
             else
             {
-                success = "Registered. Please sign in.";
+                errorMessage = string.Join("; ", result.Errors.Select(e => e.Description));
             }
         }
-        else
+        catch (Exception ex)
         {
-            error = string.Join("; ", errs);
+            errorMessage = $"Registration failed: {ex.Message}";
         }
-        busy = false;
-    }
-
-    private sealed class SignUpModel
-    {
-        [Required, StringLength(100)]
-        public string? Name { get; set; }
-        [Required, EmailAddress]
-        public string? Email { get; set; }
-        [Required, MinLength(8)]
-        public string? Password { get; set; }
-        [Required, Compare(nameof(Password), ErrorMessage="Passwords do not match")] 
-        public string? ConfirmPassword { get; set; }
+        finally
+        {
+            isSubmitting = false;
+        }
     }
 }

@@ -1,5 +1,5 @@
 @page "/resources"
-@using Tekhnologia.UI.Services.Interfaces
+@using Tekhnologia.Services.Interfaces
 @inject IAuthStateService AuthState
 @inject NavigationManager Navigation
 
@@ -134,5 +134,6 @@ else
 }
 
 @code {
-    private void NavigateToSignup() => Navigation.NavigateTo("/signup");
+    private void NavigateToSignup() =>
+        Navigation.NavigateTo("/signup");
 }

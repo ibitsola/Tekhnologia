@@ -1,6 +1,30 @@
-﻿<Router AppAssembly="typeof(Program).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
-    </Found>
-</Router>
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Web
+@using Tekhnologia.UI.Shared
+@using Tekhnologia.UI.Views.Shared
+@rendermode RenderMode.InteractiveServer
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(Program).Assembly">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="typeof(Views.Shared.MainLayout)">
+                <Authorizing>
+                    <p>Checking your authentication…</p>
+                </Authorizing>
+                <NotAuthorized>
+                    <RedirectToSignIn />
+                </NotAuthorized>
+            </AuthorizeRouteView>
+        </Found>
+        <NotFound>
+            <LayoutView Layout="typeof(Views.Shared.MainLayout)">
+                <h3>Sorry, the page was not found!</h3>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>
+
+@code {
+    
+}
