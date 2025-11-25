@@ -1,138 +1,329 @@
 @page "/journal"
-@using Tekhnologia.UI.Services.Interfaces
-@inject IAuthStateService AuthState
+@layout Views.Shared.MainLayout
+@rendermode RenderMode.InteractiveServer
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Tekhnologia.Services.Interfaces
+@using Tekhnologia.Models.DTOs
+@inject IJournalService JournalService
 @inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
 
-@if (AuthState.IsLoggedIn)
-{
-    <!-- 🔒 Authenticated Journal UI -->
-    <section class="home">
-        <div class="home-intro">
-            <h1 class="title is-1">Your Journal</h1>
-            <hr class="hr" />
-            <p class="home-text">Start reflecting on your thoughts and track your emotional growth.</p>
-        </div>
-    </section>
+<AuthorizeView Context="authContext">
+    <Authorized>
+        <div class="journal-page">
+            @if (loading)
+            {
+                <div class="section has-text-centered">
+                    <p>Loading your journal...</p>
+                </div>
+            }
+            else
+            {
+                <div class="journal-container">
+                    <div class="journal-sidebar">
+                        <div class="sidebar-header">
+                            <h2 class="sidebar-title">My Journal</h2>
+                            <button class="button is-small admin-action-btn" @onclick="ShowCreateModal">+ New Entry</button>
+                        </div>
 
-    <section class="section has-text-centered">
-        <div class="box">
-            <p>Here’s where the journal editor and entry list will go ✍️</p>
-        </div>
-    </section>
-}
-else
-{
-    <!-- 🌐 Public Marketing Content -->
-    <section class="home">
-        <div class="home-intro">
-            <h1 class="title is-1">Reflective Journal</h1>
-            <hr class="hr" />
-            <p class="home-text">
-                Reduce stress and build resilience through the power of reflection.
-            </p>
-            <p class="home-subtext">
-                Backed by research, journaling improves confidence, emotional clarity, and mental well-being — one entry at a time.
-            </p>
-            <div class="home-buttons buttons">
-                <div class="home-buttons-shine">
-                    <a class="shine" href="/signup"><span>Get Started</span></a>
-                </div>
-            </div>
-        </div>
-    </section>
+                        @if (!entries.Any())
+                        {
+                            <div class="empty-state">
+                                <p>No journal entries yet.</p>
+                                <p class="has-text-grey-light">Write your first thought to start reflecting.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="entries-list">
+                                @foreach (var e in entries.OrderByDescending(x => x.CreatedAt))
+                                {
+                                    <div class="entry-list-item @(selectedEntry?.EntryId == e.EntryId ? "active" : "")" @onclick="() => SelectEntry(e)">
+                                        <div class="entry-title">@e.Date.ToString("MMM dd")</div>
+                                        <div class="entry-snippet">@((e.EntryText.Length > 80) ? e.EntryText.Substring(0, 80) + "..." : e.EntryText)</div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
 
-    <section class="section">
-        <h2 class="title section-title has-text-centered">Why Journal?</h2>
-        <div class="columns is-multiline">
-            <div class="column is-half">
-                <div class="box">
-                    <h3 class="title is-5">💪 Builds Resilience</h3>
-                    <p>Self-affirmation reduces stress and increases resilience (Cascio et al., 2016).</p>
-                </div>
-            </div>
-            <div class="column is-half">
-                <div class="box">
-                    <h3 class="title is-5">💖 Boosts Mental Well-being</h3>
-                    <p>Gratitude journaling improves self-esteem and mental health (Emmons & McCullough, 2003).</p>
-                </div>
-            </div>
-            <div class="column is-half">
-                <div class="box">
-                    <h3 class="title is-5">🧭 Tracks Emotional Growth</h3>
-                    <p>Document your highs, lows, and everything in between to visualize your growth over time.</p>
-                </div>
-            </div>
-            <div class="column is-half">
-                <div class="box">
-                    <h3 class="title is-5">🧠 Clarifies Thoughts</h3>
-                    <p>Free your mind by organizing your thoughts and reducing overwhelm.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+                    <div class="journal-detail-area">
+                        @if (selectedEntry == null)
+                        {
+                            <div class="empty-selection">
+                                <p>Select an entry to view or edit</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="entry-detail-header">
+                                <div>
+                                    <h1 class="entry-date">@selectedEntry.Date.ToString("MMMM dd, yyyy")</h1>
+                                </div>
+                                <div class="entry-actions">
+                                    <button class="button admin-action-btn" @onclick="() => ShowEditModal(selectedEntry)">Edit</button>
+                                    <button class="button admin-action-btn" @onclick="() => ShowDeleteConfirm(selectedEntry)">Delete</button>
+                                </div>
+                            </div>
 
-    <section class="section has-text-centered">
-        <h2 class="title section-title">How It Works</h2>
-        <div class="feature-boxes-row">
-            <div class="feature-box">
-                <h3>Write Freely</h3>
-                <p class="feature-subtext">Open your journal and start writing — no pressure, no judgment.</p>
-            </div>
-            <div class="feature-box">
-                <h3>Get Sentiment Insights</h3>
-                <p class="feature-subtext">Each entry is scanned for emotional tone to help you reflect deeper.</p>
-            </div>
-            <div class="feature-box">
-                <h3>Track Over Time</h3>
-                <p class="feature-subtext">See how your emotional well-being evolves through your entries.</p>
-            </div>
-            <div class="feature-box">
-                <h3>Stay Private or Share</h3>
-                <p class="feature-subtext">You choose the visibility — your reflections stay yours unless you say otherwise.</p>
-            </div>
-        </div>
-    </section>
+                            <div class="entry-body">
+                                <p>@selectedEntry.EntryText</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
 
-    <section class="section">
-        <h2 class="title section-title has-text-centered">What You Get</h2>
-        <div class="columns is-multiline">
-            <div class="column is-half">
-                <div class="box">
-                    <h3 class="title is-5">📝 Flexible Daily Entries</h3>
-                    <p>Write freely and reflect on your own terms with unlimited text input.</p>
-                </div>
-            </div>
-            <div class="column is-half">
-                <div class="box">
-                    <h3 class="title is-5">💬 Emotional Insights</h3>
-                    <p>Get a sentiment score from your journal to reflect on your emotional state.</p>
-                </div>
-            </div>
-            <div class="column is-half">
-                <div class="box">
-                    <h3 class="title is-5">🔒 Private by Default</h3>
-                    <p>Choose visibility for each entry — keep it personal or share when you're ready.</p>
-                </div>
-            </div>
-            <div class="column is-half">
-                <div class="box">
-                    <h3 class="title is-5">📅 Date-based Sorting</h3>
-                    <p>All entries are time-stamped and easy to navigate.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+            @if (showModal)
+            {
+                <div class="modal is-active">
+                    <div class="modal-background" @onclick="CloseModal"></div>
+                    <div class="modal-card">
+                        <header class="modal-card-head">
+                            <p class="modal-card-title">@(isEditMode ? "Edit Entry" : "New Journal Entry")</p>
+                            <button class="delete" aria-label="close" @onclick="CloseModal"></button>
+                        </header>
+                        <section class="modal-card-body">
+                            <EditForm Model="@entryForm" OnValidSubmit="@SaveEntry">
+                                <DataAnnotationsValidator />
 
-    <section class="section has-text-centered">
-        <h2 class="title section-title">Ready to reflect and grow?</h2>
-        <div class="home-buttons buttons">
-            <div class="home-buttons-shine">
-                <a class="shine" href="/signup"><span>Get Started</span></a>
-            </div>
+                                <div class="field">
+                                    <label class="label">Entry</label>
+                                    <div class="control">
+                                        <InputTextArea class="textarea" @bind-Value="entryForm.EntryText" />
+                                    </div>
+                                    <ValidationMessage For="@(() => entryForm.EntryText)" />
+                                </div>
+
+                                <div class="field">
+                                    <label class="label">Visibility</label>
+                                    <div class="control">
+                                        <label class="checkbox">
+                                            <InputCheckbox @bind-Value="entryForm.Visibility" /> Public
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-right">
+                                    <div class="control">
+                                        <button class="button" type="button" @onclick="CloseModal">Cancel</button>
+                                    </div>
+                                    <div class="control">
+                                        <button class="button user-role-tag" type="submit" disabled="@isSaving">@(isSaving ? "Saving..." : "Save Entry")</button>
+                                    </div>
+                                </div>
+                            </EditForm>
+                        </section>
+                    </div>
+                </div>
+            }
+
+            @if (showDelete && entryToDelete != null)
+            {
+                <div class="modal is-active">
+                    <div class="modal-background" @onclick="CloseModal"></div>
+                    <div class="modal-card">
+                        <header class="modal-card-head">
+                            <p class="modal-card-title">Confirm Delete</p>
+                            <button class="delete" aria-label="close" @onclick="CloseModal"></button>
+                        </header>
+                        <section class="modal-card-body">
+                            <p>Delete this entry from @entryToDelete.Date.ToString("MMM dd, yyyy")?</p>
+                        </section>
+                        <footer class="modal-card-foot">
+                            <button class="button admin-action-btn" @onclick="ConfirmDelete" disabled="@isDeleting">@(isDeleting ? "Deleting..." : "Delete")</button>
+                            <button class="button" @onclick="CloseModal">Cancel</button>
+                        </footer>
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="notification is-success notification-toast">
+                    <button class="delete" @onclick="() => successMessage = null"></button>
+                    @successMessage
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="notification is-danger notification-toast">
+                    <button class="delete" @onclick="() => errorMessage = null"></button>
+                    @errorMessage
+                </div>
+            }
         </div>
-    </section>
+    </Authorized>
+
+    <NotAuthorized>
+        <section class="section has-text-centered">
+            <h1 class="title is-1">Journal</h1>
+            <p>Please <a href="/signin">sign in</a> to view your journal.</p>
+        </section>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private List<JournalEntryDTO> entries = new();
+    private JournalEntryDTO? selectedEntry;
+    private CreateJournalEntryDTO entryForm = new();
+    private JournalEntryDTO? entryToDelete;
+
+    private string? userId;
+    private string? successMessage;
+    private string? errorMessage;
+
+    private bool loading = true;
+    private bool showModal = false;
+    private bool showDelete = false;
+    private bool isEditMode = false;
+    private bool isSaving = false;
+    private bool isDeleting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            if (!authState.User.Identity?.IsAuthenticated ?? false)
+            {
+                return;
+            }
+
+            userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                Navigation.NavigateTo("/signin");
+                return;
+            }
+
+            await LoadEntries();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading journal: {ex.Message}";
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task LoadEntries()
+    {
+        if (string.IsNullOrEmpty(userId)) return;
+        entries = (await JournalService.GetUserJournalEntriesAsync(userId)).ToList();
+        if (entries.Any() && selectedEntry == null)
+            selectedEntry = entries.First();
+    }
+
+    private void SelectEntry(JournalEntryDTO e)
+    {
+        selectedEntry = e;
+    }
+
+    private void ShowCreateModal()
+    {
+        isEditMode = false;
+        entryForm = new CreateJournalEntryDTO { EntryText = string.Empty, Visibility = true, SentimentScore = null };
+        showModal = true;
+    }
+
+    private void ShowEditModal(JournalEntryDTO e)
+    {
+        isEditMode = true;
+        entryForm = new CreateJournalEntryDTO { EntryText = e.EntryText, Visibility = e.Visibility, SentimentScore = e.SentimentScore };
+        selectedEntry = e;
+        showModal = true;
+    }
+
+    private void ShowDeleteConfirm(JournalEntryDTO e)
+    {
+        entryToDelete = e;
+        showDelete = true;
+    }
+
+    private async Task SaveEntry()
+    {
+        if (string.IsNullOrEmpty(userId)) return;
+        isSaving = true;
+        try
+        {
+            if (isEditMode && selectedEntry != null)
+            {
+                var (success, error, updated) = await JournalService.UpdateJournalEntryAsync(selectedEntry.EntryId, entryForm, userId);
+                if (success)
+                {
+                    successMessage = "Entry updated";
+                    await LoadEntries();
+                    CloseModal();
+                }
+                else
+                {
+                    errorMessage = error;
+                }
+            }
+            else
+            {
+                var created = await JournalService.CreateJournalEntryAsync(userId, entryForm);
+                successMessage = "Entry created";
+                await LoadEntries();
+                CloseModal();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (entryToDelete == null || string.IsNullOrEmpty(userId)) return;
+        isDeleting = true;
+        try
+        {
+            var (success, error) = await JournalService.DeleteJournalEntryAsync(entryToDelete.EntryId, userId);
+            if (success)
+            {
+                successMessage = "Entry deleted";
+                await LoadEntries();
+                CloseModal();
+            }
+            else
+            {
+                errorMessage = error;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isDeleting = false;
+        }
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        showDelete = false;
+        entryToDelete = null;
+    }
 }
 
 @code {
-    private void NavigateToSignup() => Navigation.NavigateTo("/signup");
+    private void NavigateToSignup() =>
+        Navigation.NavigateTo("/signup");
 }

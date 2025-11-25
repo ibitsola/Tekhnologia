@@ -273,6 +273,30 @@ h1,
   z-index: 1000;
 }
 
+/* Ensure page content is pushed below the navbar so interactive
+   controls (buttons, inputs) are not obscured by it. Adjust value
+   if your navbar height changes. */
+.main-layout .content {
+  padding-top: 3.5rem; /* roughly matches navbar height + spacing */
+}
+
+/* Modal centering: make modal container full-height flexbox and center content
+   while ensuring it sits below the navbar. This uses a top padding equal to
+   the navbar area so modals are visually centered in the remaining viewport. */
+.modal.is-active {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 100vh; /* ensure it spans the full viewport */
+  padding-top: 4.5rem; /* push modal down from top/navbar — adjust if navbar grows */
+}
+
+/* Ensure the modal-card doesn't stick to the top on small screens */
+.modal-card {
+  max-height: calc(100vh - 7rem);
+  overflow-y: auto;
+}
+
 .navbar-buttons {
   display: flex;
   align-items: center;
@@ -1089,4 +1113,3 @@ input:-webkit-autofill:focus {
 .ai-bubble        { background:#1a1f1a; color:#8aff8a; }
 
 .send-btn         { min-width:90px; }
-

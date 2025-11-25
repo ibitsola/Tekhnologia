@@ -22,12 +22,17 @@ namespace Tekhnologia.Controllers
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Invalid input");
+            {
+                var allErrors = ModelState.Values.SelectMany(v => v.Errors)
+                                                .Select(e => e.ErrorMessage)
+                                                .ToList();
+                return BadRequest(new { errors = allErrors });
+            }
 
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                return Unauthorized("Invalid email or password.");
+                return Unauthorized(new { errors = new[] { "Invalid email or password." } });
             }
 
             await _signInManager.SignInAsync(user, isPersistent: false);

@@ -1,42 +1,60 @@
 @page "/signin"
+
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Components.Forms
-@using Tekhnologia.UI.Services.Interfaces
-@inject IAuthStateService AuthState
-@inject NavigationManager Nav
+@using Microsoft.JSInterop
+@using Tekhnologia.Models
+@using Tekhnologia.Services.Interfaces
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject IAuthStateService  AuthState
 
-<h3 class="auth-heading">Sign In</h3>
+@implements IDisposable
 
-@if (!AuthState.Initialized)
+
+@if (!hasCheckedSignin)
 {
     <p>Checking authentication...</p>
 }
 else if (AuthState.IsLoggedIn)
 {
-    <p>✅ You are logged in — redirecting...</p>
+    <p>✅ You are logged in — redirecting to profile...</p>
 }
 else
 {
-    <EditForm Model="model" OnValidSubmit="HandleSignIn" class="auth-container">
+    <EditForm Model="@signinModel" OnValidSubmit="@HandleSignin" FormName="SignInForm" class="auth-container">
         <DataAnnotationsValidator />
-        <ValidationSummary />
         <div class="auth-box">
+            <ValidationSummary class="notification is-alert" />
+
+            <h2 class="auth-heading">Signin</h2>
+
             <div class="field">
                 <label class="label" for="email">Email</label>
-                <InputText id="email" class="input" @bind-Value="model.Email" />
-                <ValidationMessage For="(()=>model.Email)" />
+                <div class="control">
+                    <InputText id="email" class="input" @bind-Value="signinModel.Email" />
+                </div>
+                <ValidationMessage For="@(() => signinModel.Email)" />
             </div>
+
             <div class="field">
                 <label class="label" for="password">Password</label>
-                <InputText id="password" type="password" class="input" @bind-Value="model.Password" />
-                <ValidationMessage For="(()=>model.Password)" />
+                <div class="control">
+                    <InputText id="password" type="password" class="input" @bind-Value="signinModel.Password" />
+                </div>
+                <ValidationMessage For="@(() => signinModel.Password)" />
             </div>
-            <button type="submit" class="button auth-button" disabled="@busy">@(busy?"Signing In...":"Sign In")</button>
+
+            <button type="submit" class="button auth-button" disabled="@isSubmitting">
+                @(isSubmitting ? "Signing In..." : "Signin")
+            </button>
         </div>
-        @if (!string.IsNullOrEmpty(error))
+
+        @if (!string.IsNullOrEmpty(errorMessage))
         {
-            <div class="notification is-danger">@error</div>
+            <div class="notification is-alert">@errorMessage</div>
         }
+
         <div class="already-member">
             <p>Don't have an account?</p>
             <a href="/signup" class="button is-primary auth-button">Sign Up</a>
@@ -45,38 +63,51 @@ else
 }
 
 @code {
-    private readonly SignInModel model = new();
-    private bool busy;
-    private string? error;
+    private LoginModel signinModel = new();
+    private string? errorMessage;
+    private bool isSubmitting = false;
+    private bool hasCheckedSignin = false;
+
+    private Action? authHandler;
 
     protected override async Task OnInitializedAsync()
     {
-        if (!AuthState.Initialized)
-            await AuthState.RefreshAsync();
-        if (AuthState.IsLoggedIn)
-            Nav.NavigateTo("/profile", true);
+        authHandler = () => InvokeAsync(() =>
+        {
+            if (AuthState.IsLoggedIn)
+            {
+                Navigation.NavigateTo("/profile");
+            }
+        });
+
+        AuthState.OnChange += authHandler;
+
+        await AuthState.CheckAuthStatus();
+        hasCheckedSignin = true;
     }
 
-    private async Task HandleSignIn()
+    public void Dispose()
     {
-        busy = true; error = null;
-        var success = await AuthState.LoginAsync(model.Email!, model.Password!);
-        if (success)
-        {
-            Nav.NavigateTo("/profile", forceLoad:true);
-        }
-        else
-        {
-            error = "Invalid credentials"; // backend returns text; could enhance parsing later
-        }
-        busy = false;
+        if (authHandler != null)
+            AuthState.OnChange -= authHandler;
     }
 
-    private sealed class SignInModel
+    private async Task HandleSignin()
     {
-        [Required, EmailAddress]
-        public string? Email { get; set; }
-        [Required]
-        public string? Password { get; set; }
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            // call the JS helper we just added
+            await JS.InvokeVoidAsync("auth.signin", signinModel);
+            // never returns – page reloads inside auth.signin
+        }
+        catch (JSException ex)
+        {
+            errorMessage = ex.Message;
+        }
+
+        isSubmitting = false;
     }
 }

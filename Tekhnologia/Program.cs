@@ -10,12 +10,19 @@ using System.Text;
 using Tekhnologia.Services;
 using Tekhnologia.Services.ApiClients;
 using Tekhnologia.Services.Interfaces;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.DataProtection;
+using System.IO;
 using Microsoft.AspNetCore.Authentication;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure data protection to persist keys to a shared folder at the repository root
+var dpKeysFolder = Path.Combine(Directory.GetParent(builder.Environment.ContentRootPath)!.FullName, "DataProtection-Keys");
+Directory.CreateDirectory(dpKeysFolder);
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(dpKeysFolder))
+    .SetApplicationName("Tekhnologia");
 
 // ─── 1) Load secret configuration (OpenAI key from user-secrets) ─────────────────
 var configuration = new ConfigurationBuilder()
@@ -34,8 +41,9 @@ var apiBaseUrl  = builder.Configuration[$"ApiBaseUrls:{environment}"]
                  ?? "https://localhost:7136";
 
 // ─── 4) Register your application services ─────────────────────────────────────
-builder.Services.AddScoped<IAuthStateService, AuthStateService>();
-builder.Services.AddScoped<IBlazorAuthService, BlazorAuthService>();
+// AuthStateService and BlazorAuthService are only needed for Blazor frontend
+// builder.Services.AddScoped<IAuthStateService, AuthStateService>();
+// builder.Services.AddScoped<IBlazorAuthService, BlazorAuthService>();
 
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IDigitalResourceService, DigitalResourceService>();
@@ -99,16 +107,29 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 // configure the Identity cookie (login path, expiration, etc.)
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.Cookie.Name = ".Tekhnologia.Identity";               // ✅ Give it a clear, visible name
-    options.Cookie.HttpOnly = true;                              // ✅ Security
-    options.Cookie.SameSite = SameSiteMode.Lax;                  // ✅ Prevent browser from blocking it
-    //options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;     // ✅ Ensure HTTPS sets it
+    options.Cookie.Name = ".Tekhnologia.Identity";
+    options.Cookie.HttpOnly = true;
+    // Use Lax in development so browsers accept the cookie over HTTP during local dev.
+    // Use None in non-development so the cookie works across origins in production.
+    options.Cookie.SameSite = builder.Environment.IsDevelopment()
+        ? SameSiteMode.Lax
+        : SameSiteMode.None;                 // ✅ Required for cross-origin with YARP proxy
 
+    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+        ? CookieSecurePolicy.SameAsRequest
+        : CookieSecurePolicy.Always;      // Use SameAsRequest in dev so cookies work over HTTP
 
-    options.LoginPath = "/signin";                                // ✅ This is your Blazor login route
+    // Do not set Cookie.Domain for localhost (host-only cookies). If you need to
+    // share cookies across subdomains in production, set the domain via configuration
+    var cookieDomain = builder.Configuration["Cookie:Domain"];
+    if (!string.IsNullOrWhiteSpace(cookieDomain) && !builder.Environment.IsDevelopment())
+    {
+        options.Cookie.Domain = cookieDomain;
+    }
+
+    options.LoginPath = "/signin";
     options.LogoutPath = "/api/auth/logout";
-    options.AccessDeniedPath = "/unauthorized";                  // Optional, if you have this route
+    options.AccessDeniedPath = "/unauthorized";
     options.ExpireTimeSpan = TimeSpan.FromDays(14);
     options.SlidingExpiration = true;
 });
@@ -120,8 +141,11 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddCors(opts =>
 {
-    opts.AddPolicy("AllowAllOrigins", p => 
-        p.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+    opts.AddPolicy("AllowFrontend", p => 
+        p.WithOrigins("http://localhost:5145", "https://localhost:5145")
+         .AllowAnyHeader()
+         .AllowAnyMethod()
+         .AllowCredentials()); // Important: Allow cookies to be sent
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -150,11 +174,6 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-
-builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
-//builder.Services.AddSignalR();
-
 
 // ─── 8) Build and apply migrations + seed roles ────────────────────────────────
 var app = builder.Build();
@@ -208,8 +227,8 @@ else
 app.UseStaticFiles();
 app.UseRouting();
 
-// CORS before auth
-app.UseCors("AllowAllOrigins");
+// CORS before auth - allow frontend to send cookies
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -221,7 +240,5 @@ app.MapGet("/signout", async (HttpContext ctx) =>
 });
 
 app.MapControllers();
-app.MapBlazorHub();
-app.MapFallbackToPage("/_Host");
 
 app.Run();
