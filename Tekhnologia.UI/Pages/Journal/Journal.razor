@@ -28,14 +28,14 @@
                     <div class="journal-sidebar">
                         <div class="sidebar-header">
                             <h2 class="sidebar-title">My Journal</h2>
-                            <button class="button is-small admin-action-btn" @onclick="ShowCreateModal">+ New Entry</button>
+                            <button type="button" class="button is-small admin-action-btn" @onclick="ShowCreateModal">+ New Entry</button>
                         </div>
 
                         @if (!entries.Any())
                         {
                             <div class="empty-state">
-                                <p>No journal entries yet.</p>
-                                <p class="has-text-grey-light">Write your first thought to start reflecting.</p>
+                                <p>No entries yet!</p>
+                                <p class="has-text-grey-light">Write your first reflection to get started.</p>
                             </div>
                         }
                         else
