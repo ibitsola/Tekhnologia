@@ -3,6 +3,7 @@
 @using Tekhnologia.UI.Views.Shared
 @using Tekhnologia.Models.DTOs
 @using Tekhnologia.Services.Interfaces
+@using Microsoft.JSInterop
 @inject IAIService Ai
 @inject IAuthStateService Auth
 @inject IJSRuntime JSRuntime
@@ -25,7 +26,7 @@ else
                 </div>
             </aside>
 
-            <main class="ai-chat-panel box">
+            <main class="ai-chat-panel box ai-chat-bg">
                 <div class="chat-header">
                     <h3>AI Coach</h3>
                     <small class="muted">Personalised career & business coaching</small>

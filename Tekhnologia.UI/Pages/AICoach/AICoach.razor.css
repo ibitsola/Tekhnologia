@@ -1,0 +1,30 @@
+/* Scoped styles for AICoach.razor - background image + overlay */
+.ai-chat-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.ai-chat-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(3,6,8,0.6), rgba(3,6,8,0.6)), url('/images/AICoachEve.png');
+  background-size: cover;
+  background-position: center center;
+  opacity: 0.18; /* base faded intensity */
+  filter: blur(2px) saturate(0.8);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Ensure content sits above the background */
+.ai-chat-bg > * { position: relative; z-index: 1; }
+
+/* Slightly increase contrast for bubbles against background */
+.ai-chat-bg .bubble {
+  backdrop-filter: blur(2px);
+}
+
+@media (max-width: 900px) {
+  .ai-chat-bg::before { opacity: 0.12; }
+}
