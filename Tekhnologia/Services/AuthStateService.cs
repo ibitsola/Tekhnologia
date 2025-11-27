@@ -34,7 +34,7 @@ namespace Tekhnologia.Services
                 {
                     var name = state?.User?.Identity?.Name ?? "(no name)";
                     var isAuth = state?.User?.Identity?.IsAuthenticated ?? false;
-                    Console.WriteLine($"[DEBUG] CheckAuthStatus - IsAuthenticated={isAuth}, Name={name}");
+                    // Debug log removed for cleaner output
                 }
                 catch { }
                 var wasLoggedIn = IsLoggedIn;

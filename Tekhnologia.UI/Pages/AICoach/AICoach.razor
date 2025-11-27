@@ -4,6 +4,7 @@
 @using Tekhnologia.Models.DTOs
 @using Tekhnologia.Services.Interfaces
 @using Microsoft.JSInterop
+@using Microsoft.AspNetCore.Components.Web
 @inject IAIService Ai
 @inject IAuthStateService Auth
 @inject IJSRuntime JSRuntime
@@ -14,28 +15,35 @@
 }
 else
 {
-    <section class="section ai-coach-wrapper">
-        <div class="ai-coach-container">
-            <aside class="ai-aside">
-                <div class="ai-image-container">
-                    <div class="ai-avatar" aria-hidden="true"></div>
+    <div class="goal-tracker-page">
+        <div class="goal-tracker-container">
+            <div class="goals-sidebar vision-board-sidebar">
+                <div class="sidebar-header">
+                    <h2 class="sidebar-title">My Eva</h2>
+                    <button type="button" class="button is-small admin-action-btn">New Chat</button>
                 </div>
+
                 <div class="ai-intro">
-                    <h2>Your AI Coach</h2>
                     <p>Ask career coaching questions. Clear, kind, practical guidance.</p>
                 </div>
-            </aside>
 
-            <main class="ai-chat-panel box ai-chat-bg">
-                <div class="chat-header">
-                    <h3>AI Coach</h3>
-                    <small class="muted">Personalised career & business coaching</small>
+                <div class="ai-recent box">
+                    <h4>Recent Conversations</h4>
+                    <div class="history-empty">No conversations yet.</div>
+                </div>
+            </div>
+
+            <div class="goal-detail-area ai-chat-panel ai-chat-bg">
+                <div class="ai-chat-bg-layer" aria-hidden="true"></div>
+                <div class="board-header chat-header">
+                    <h1 class="board-title">Eva Your AI Coach</h1>
+                    <p class="board-subtitle muted">Personalised career & business coaching</p>
                 </div>
 
                 <div class="chat-messages" @ref="messagesContainer">
                     @if (!log.Any())
                     {
-                        <div class="chat-empty">Start the conversation — ask your coach a question.</div>
+                        <div class="chat-empty">Start the conversation with Eva.</div>
                     }
 
                     @foreach (var l in log)
@@ -55,11 +63,11 @@ else
 
                 <div class="chat-input-bar">
                     <EditForm Model="@model" OnSubmit="Send" FormName="AIChatForm" class="chat-form">
-                        <InputTextArea @bind-Value="model.Message"
-                                       class="chat-input"
-                                       placeholder="Ask your AI coach anything…"
-                                       rows="1" />
-                        <button type="submit" class="button is-primary send-btn" disabled="@busy">
+                        <textarea @bind="model.Message"
+                                  class="chat-input" id="aicoach-input"
+                                  placeholder="Ask your AI coach anything…"
+                                  rows="1" @onkeydown="OnInputKey"></textarea>
+                        <button type="submit" class="send-btn" id="aicoach-send" disabled="@busy">
                             @(busy ? "Sending…" : "Send")
                         </button>
                     </EditForm>
@@ -68,9 +76,10 @@ else
                         <div class="notification is-danger mt-2">@error</div>
                     }
                 </div>
-            </main>
+            </div>
+            <!-- right column removed; recent conversations moved to left aside -->
         </div>
-    </section>
+    </div>
 }
 
 @code {
@@ -90,6 +99,9 @@ else
         busy = true;
         log.Add(new("You", msg));
         model.Message = string.Empty;
+        // Immediately re-render so the user's message appears while AI is processing
+        await InvokeAsync(StateHasChanged);
+        try { await JSRuntime.InvokeVoidAsync("import", "/js/chat.js"); await JSRuntime.InvokeVoidAsync("scrollToBottom", messagesContainer); } catch { }
 
         try
         {
@@ -108,12 +120,26 @@ else
         }
     }
 
+    private async Task OnInputKey(KeyboardEventArgs e)
+    {
+        // Send on Enter key (but allow Shift+Enter for newline)
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+            await Send();
+        }
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            // ensure container is scrolled to bottom on first render
-            try { await JSRuntime.InvokeVoidAsync("import", "/js/chat.js"); await JSRuntime.InvokeVoidAsync("scrollToBottom", messagesContainer); } catch { }
+            // ensure container is scrolled to bottom on first render and bind Enter to send
+            try {
+                var chatModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "/js/chat.js");
+                await chatModule.InvokeVoidAsync("scrollToBottom", messagesContainer);
+            } catch { }
+
+            // Using the Blazor @onkeydown handler (OnInputKey) as the single Enter handler
         }
     }
 }

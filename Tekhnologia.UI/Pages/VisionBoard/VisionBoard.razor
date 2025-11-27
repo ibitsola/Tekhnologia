@@ -18,7 +18,7 @@
 
 <AuthorizeView Context="authContext">
     <Authorized>
-        <div class="vision-board-page">
+        <div class="goal-tracker-page">
             @if (loading)
             {
                 <div class="section has-text-centered">
@@ -27,11 +27,11 @@
             }
             else
             {
-                <div class="vision-board-container">
+                <div class="goal-tracker-container">
                     <!-- Left Sidebar: Image Library -->
-                    <div class="vision-board-sidebar">
+                    <div class="goals-sidebar vision-board-sidebar">
                         <div class="sidebar-header">
-                            <h2 class="sidebar-title">Image Library</h2>
+                            <h2 class="sidebar-title">My Images</h2>
                             <button type="button" class="button is-small admin-action-btn" @onclick="ShowUploadModal">+ Add Image</button>
                         </div>
 
@@ -65,7 +65,7 @@
                     </div>
 
                     <!-- Right Area: Vision Board Canvas -->
-                    <div class="vision-board-canvas" 
+                    <div class="goal-detail-area vision-board-canvas" 
                         @ondrop="OnDrop" 
                         @ondragover="OnDragOver"
                         @ondragover:preventDefault="true"
@@ -83,7 +83,7 @@
                             @if (!items.Any(i => i.PositionX != 0 || i.PositionY != 0))
                             {
                                 <div class="empty-board">
-                                    <p>✨ Drag images here to start building your vision board ✨</p>
+                                    <p>Drag images here to start building your vision board</p>
                                 </div>
                             }
                             else
