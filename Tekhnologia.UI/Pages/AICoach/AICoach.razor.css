@@ -8,7 +8,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(rgba(3,6,8,0.6), rgba(3,6,8,0.6)), url('/images/AICoachEve.png');
+  background-image: linear-gradient(rgba(3,6,8,0.6), rgba(3,6,8,0.6)), url('../wwwroot/images/AICoachEve.png');
   background-size: cover;
   background-position: center center;
   opacity: 0.18; /* base faded intensity */
@@ -27,4 +27,16 @@
 
 @media (max-width: 900px) {
   .ai-chat-bg::before { opacity: 0.12; }
+}
+
+/* avatar using the same source (scaled) */
+.ai-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  background-image: url('../wwwroot/images/AICoachEve.png');
+  background-size: cover;
+  background-position: center center;
+  border: 3px solid rgba(15,219,128,0.12);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
 }
