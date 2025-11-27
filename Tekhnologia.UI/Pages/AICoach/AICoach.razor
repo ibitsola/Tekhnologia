@@ -5,6 +5,7 @@
 @using Tekhnologia.Services.Interfaces
 @inject IAIService Ai
 @inject IAuthStateService Auth
+@inject IJSRuntime JSRuntime
 
 @if (!Auth.IsLoggedIn)
 {
@@ -13,31 +14,60 @@
 else
 {
     <section class="section ai-coach-wrapper">
-        <div class="ai-image-container">
-            <img class="ai-img" src="images/AICoachEve.png" alt="AI coach" />
-        </div>
+        <div class="ai-coach-container">
+            <aside class="ai-aside">
+                <div class="ai-image-container">
+                    <img class="ai-img" src="images/AICoachEve.png" alt="AI coach" />
+                </div>
+                <div class="ai-intro">
+                    <h2>Your AI Coach</h2>
+                    <p>Ask career coaching questions. Clear, kind, practical guidance.</p>
+                </div>
+            </aside>
 
-        <div class="ai-chat-box box">
-            @foreach (var l in log)
-            {
-                <p><strong>@l.Role:</strong> @l.Text</p>
-            }
+            <main class="ai-chat-panel box">
+                <div class="chat-header">
+                    <h3>AI Coach</h3>
+                    <small class="muted">Personalised career & business coaching</small>
+                </div>
 
-            <EditForm Model="@model" OnSubmit="Send" FormName="AIChatForm">
-                <InputTextArea @bind-Value="model.Message"
-                               class="textarea"
-                               placeholder="Ask your AI coach anything…" />
-                <button type="submit"
-                        class="button is-primary send-btn"
-                        disabled="@busy">
-                    @(busy ? "Sending…" : "Send")
-                </button>
-            </EditForm>
+                <div class="chat-messages" @ref="messagesContainer">
+                    @if (!log.Any())
+                    {
+                        <div class="chat-empty">Start the conversation — ask your coach a question.</div>
+                    }
 
-            @if (!string.IsNullOrWhiteSpace(error))
-            {
-                <div class="notification is-danger mt-2">@error</div>
-            }
+                    @foreach (var l in log)
+                    {
+                        var isUser = l.Role == "You";
+                        <div class="chat-message @(isUser ? "user" : "ai")">
+                            <div class="bubble">
+                                @if (!isUser)
+                                {
+                                    <div class="bubble-role">AI</div>
+                                }
+                                <div class="bubble-text">@((MarkupString)System.Net.WebUtility.HtmlEncode(l.Text).Replace("\n", "<br/>"))</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="chat-input-bar">
+                    <EditForm Model="@model" OnSubmit="Send" FormName="AIChatForm" class="chat-form">
+                        <InputTextArea @bind-Value="model.Message"
+                                       class="chat-input"
+                                       placeholder="Ask your AI coach anything…"
+                                       rows="1" />
+                        <button type="submit" class="button is-primary send-btn" disabled="@busy">
+                            @(busy ? "Sending…" : "Send")
+                        </button>
+                    </EditForm>
+                    @if (!string.IsNullOrWhiteSpace(error))
+                    {
+                        <div class="notification is-danger mt-2">@error</div>
+                    }
+                </div>
+            </main>
         </div>
     </section>
 }
@@ -49,6 +79,7 @@ else
     List<Line> log = new();
     bool busy;
     string? error;
+    private ElementReference messagesContainer;
 
     async Task Send()
     {
@@ -71,6 +102,17 @@ else
         finally
         {
             busy = false;
+            // Scroll to bottom after update
+            try { await JSRuntime.InvokeVoidAsync("import", "/js/chat.js"); await JSRuntime.InvokeVoidAsync("scrollToBottom", messagesContainer); } catch { }
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // ensure container is scrolled to bottom on first render
+            try { await JSRuntime.InvokeVoidAsync("import", "/js/chat.js"); await JSRuntime.InvokeVoidAsync("scrollToBottom", messagesContainer); } catch { }
         }
     }
 }
