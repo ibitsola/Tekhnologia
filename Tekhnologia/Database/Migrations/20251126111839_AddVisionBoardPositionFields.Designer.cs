@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Tekhnologia.Data;
 
@@ -10,9 +11,11 @@ using Tekhnologia.Data;
 namespace Tekhnologia.Database.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251126111839_AddVisionBoardPositionFields")]
+    partial class AddVisionBoardPositionFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.2");
@@ -386,9 +389,6 @@ namespace Tekhnologia.Database.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("Height")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -402,9 +402,6 @@ namespace Tekhnologia.Database.Migrations
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<int?>("Width")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("VisionId");
 

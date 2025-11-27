@@ -10,6 +10,10 @@ using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load the API project's user-secrets (shared UserSecretsId) so UI can
+// read the same OpenAI key during local development.
+builder.Configuration.AddUserSecrets("50e5a782-e909-437d-840d-ad0f7bf60032");
+
 // Shared data protection keys for local development so both UI and backend can
 // decrypt the same Identity cookie. Keys stored at repo root in DataProtection-Keys.
 var dpKeysFolder = Path.Combine(Directory.GetParent(builder.Environment.ContentRootPath)!.FullName, "DataProtection-Keys");
