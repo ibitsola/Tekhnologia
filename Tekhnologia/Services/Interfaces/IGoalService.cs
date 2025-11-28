@@ -9,6 +9,7 @@ namespace Tekhnologia.Services.Interfaces
         Task<List<GoalResponseDTO>> GetUserGoalsAsync(string userId);
         Task<(bool Success, string Error, Goal? UpdatedGoal)> UpdateGoalAsync(Guid goalId, CreateGoalDTO dto, string userId);
         Task<(bool Success, string Error, Goal? UpdatedGoal)> MarkGoalAsCompletedAsync(Guid goalId, string userId);
+        Task<(bool Success, string Error, Goal? UpdatedGoal)> UnmarkGoalAsCompletedAsync(Guid goalId, string userId);
         Task<(bool Success, string Error)> DeleteGoalAsync(Guid goalId, string userId);
     }
 }

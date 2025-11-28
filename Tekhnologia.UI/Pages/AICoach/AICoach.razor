@@ -1,4 +1,7 @@
 @page "/aicoach"
+@rendermode RenderMode.InteractiveServer
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Tekhnologia.UI.Views.Shared
 @using Tekhnologia.Models.DTOs
@@ -7,20 +10,18 @@
 @using Microsoft.AspNetCore.Components.Web
 @inject IAIService Ai
 @inject IAuthStateService Auth
+@inject AuthenticationStateProvider AuthStateProvider
 @inject IJSRuntime JSRuntime
+@inject HttpClient Http
 
-@if (!Auth.IsLoggedIn)
-{
-    <RedirectToSignIn />
-}
-else
-{
-    <div class="goal-tracker-page">
+<AuthorizeView Context="authContext">
+    <Authorized Context="authContext">
+        <div class="goal-tracker-page">
         <div class="goal-tracker-container">
             <div class="goals-sidebar vision-board-sidebar">
                 <div class="sidebar-header">
                     <h2 class="sidebar-title">My Eva</h2>
-                    <button type="button" class="button is-small admin-action-btn">New Chat</button>
+                    <button type="button" class="button is-small admin-action-btn" @onclick="NewChat">+ New Chat</button>
                 </div>
 
                 <div class="ai-intro">
@@ -28,8 +29,36 @@ else
                 </div>
 
                 <div class="ai-recent box">
-                    <h4>Recent Conversations</h4>
-                    <div class="history-empty">No conversations yet.</div>
+                    <div class="sidebar-header">
+                        <h4>Recent Conversations</h4>
+                    </div>
+                    @if (conversations is null)
+                    {
+                        <div>Loading…</div>
+                    }
+                    else if (!conversations.Any())
+                    {
+                        <div class="history-empty">No conversations yet.</div>
+                    }
+                    else
+                    {
+                        <ul class="conversation-list">
+                            @foreach (var c in conversations)
+                            {
+                                <li class="conversation-item @(selectedConversationId == c.ConversationId ? "selected" : "")">
+                                    <div class="conv-row">
+                                        <button class="link-button conv-link" @onclick="() => LoadConversation(c.ConversationId)">
+                                            <div class="conv-title">@c.Title</div>
+                                            <div class="conv-meta muted">@c.UpdatedAt.ToLocalTime().ToString("g")</div>
+                                        </button>
+                                        <div class="conv-actions">
+                                            <button class="button is-small admin-action-btn" title="Delete" @onclick:stopPropagation="true" @onclick="() => DeleteConversation(c.ConversationId)">Delete</button>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
                 </div>
             </div>
 
@@ -43,7 +72,7 @@ else
                 <div class="chat-messages" @ref="messagesContainer">
                     @if (!log.Any())
                     {
-                        <div class="chat-empty">Start the conversation with Eva.</div>
+                        <!-- Empty state intentionally blank (instruction removed) -->
                     }
 
                     @foreach (var l in log)
@@ -75,12 +104,30 @@ else
                     {
                         <div class="notification is-danger mt-2">@error</div>
                     }
+                    
                 </div>
             </div>
             <!-- right column removed; recent conversations moved to left aside -->
         </div>
     </div>
 }
+
+    </Authorized>
+    <NotAuthorized>
+        <section class="home">
+            <div class="home-intro">
+                <h1 class="title is-1">Eva — AI Coach</h1>
+                <hr class="hr" />
+                <p class="home-text">Personalised career coaching for women in tech. Please sign in to access your conversations and AI coach features.</p>
+                <div class="home-buttons buttons">
+                    <div class="home-buttons-shine">
+                        <a class="shine" href="/signin"><span>Sign In</span></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     record Line(string Role, string Text);
@@ -90,6 +137,11 @@ else
     bool busy;
     string? error;
     private ElementReference messagesContainer;
+    private List<ConversationSummaryDTO>? conversations;
+    private Guid? selectedConversationId;
+    private List<Dictionary<string,string>> messagesBacking = new();
+    private IJSObjectReference? aicoachApiModule;
+    private bool isNewChat = false;
 
     async Task Send()
     {
@@ -105,8 +157,13 @@ else
 
         try
         {
+            // record user message in backing store
+            messagesBacking.Add(new Dictionary<string,string> { ["role"] = "You", ["text"] = msg });
             var reply = await Ai.GetBusinessCoachingResponse(msg);
             log.Add(new("AI", reply));
+            messagesBacking.Add(new Dictionary<string,string> { ["role"] = "AI", ["text"] = reply });
+            // after AI reply, save conversation
+            await SaveConversationIfNeeded();
         }
         catch (Exception ex)
         {
@@ -139,7 +196,112 @@ else
                 await chatModule.InvokeVoidAsync("scrollToBottom", messagesContainer);
             } catch { }
 
+            // load recent conversations
+            await LoadRecentConversations();
             // Using the Blazor @onkeydown handler (OnInputKey) as the single Enter handler
         }
+    }
+
+    // JS module reference (declared once)
+
+    private async Task LoadRecentConversations()
+    {
+        try
+        {
+            if (aicoachApiModule == null) aicoachApiModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "/js/aicoach-api.js");
+            var list = await aicoachApiModule.InvokeAsync<ConversationSummaryDTO[]>("fetchConversations");
+            conversations = list?.ToList() ?? new List<ConversationSummaryDTO>();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch
+        {
+            conversations = new List<ConversationSummaryDTO>();
+        }
+    }
+
+    private async Task LoadConversation(Guid id)
+    {
+        try
+        {
+            if (aicoachApiModule == null) aicoachApiModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "/js/aicoach-api.js");
+            var dto = await aicoachApiModule.InvokeAsync<ConversationDetailDTO>("fetchConversation", id.ToString());
+            if (dto != null)
+            {
+                selectedConversationId = dto.ConversationId;
+                log.Clear();
+                messagesBacking.Clear();
+                if (!string.IsNullOrEmpty(dto.MessagesJson))
+                {
+                    var items = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string,string>>>(dto.MessagesJson);
+                    if (items != null)
+                    {
+                        foreach (var it in items)
+                        {
+                            var role = it.ContainsKey("role") ? it["role"] : "You";
+                            var text = it.ContainsKey("text") ? it["text"] : string.Empty;
+                            log.Add(new Line(role, text));
+                            messagesBacking.Add(new Dictionary<string,string> { ["role"] = role, ["text"] = text });
+                        }
+                    }
+                }
+                isNewChat = false;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch { }
+    }
+
+    private async Task DeleteConversation(Guid id)
+    {
+        try
+        {
+            if (aicoachApiModule == null) aicoachApiModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "/js/aicoach-api.js");
+            var result = await aicoachApiModule.InvokeAsync<object>("deleteConversation", id.ToString());
+            if (selectedConversationId == id) { selectedConversationId = null; log.Clear(); messagesBacking.Clear(); }
+            await LoadRecentConversations();
+        }
+        catch { }
+    }
+
+    private async Task NewChat()
+    {
+        // Local-only: clear state, do not create or save anything until the user sends the first message
+        selectedConversationId = null;
+        log.Clear();
+        messagesBacking.Clear();
+        isNewChat = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task SaveConversationIfNeeded()
+    {
+        // Called after AI reply — serialize messagesBacking and post
+        try
+        {
+            if (aicoachApiModule == null) aicoachApiModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "/js/aicoach-api.js");
+            var title = "New Chat";
+            // find first user message
+            var firstUser = messagesBacking.FirstOrDefault(m => m.ContainsKey("role") && m["role"] == "You");
+            if (firstUser != null && !string.IsNullOrWhiteSpace(firstUser.GetValueOrDefault("text"))) title = firstUser["text"].Length > 60 ? firstUser["text"].Substring(0,60) + "..." : firstUser["text"];
+            var payloadObj = new { Title = title, MessagesJson = System.Text.Json.JsonSerializer.Serialize(messagesBacking) };
+            var payload = System.Text.Json.JsonSerializer.Serialize(payloadObj);
+            ConversationDetailDTO? saved = null;
+            if (selectedConversationId.HasValue)
+            {
+                // update existing conversation
+                saved = await aicoachApiModule.InvokeAsync<ConversationDetailDTO>("updateConversation", selectedConversationId.Value.ToString(), payload);
+            }
+            else
+            {
+                // create new conversation
+                saved = await aicoachApiModule.InvokeAsync<ConversationDetailDTO>("postConversation", payload);
+            }
+            if (saved != null)
+            {
+                selectedConversationId = saved.ConversationId;
+                await LoadRecentConversations();
+            }
+        }
+        catch { }
     }
 }

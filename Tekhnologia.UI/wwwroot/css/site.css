@@ -410,6 +410,43 @@ h1,
 }
 
 /* ============================== */
+
+/* AI coach conversation list */
+.ai-recent .conversation-list { list-style: none; margin: 0; padding: 0; }
+.ai-recent .conversation-item { padding: 6px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.ai-recent .conversation-item.selected { background: rgba(255,255,255,0.02); }
+.ai-recent .conv-row { display:flex; align-items:center; justify-content:space-between; }
+.ai-recent .conv-link { background:transparent; border:0; text-align:left; padding:6px; width:100%; color:inherit; }
+.ai-recent .conv-title { font-weight:600; font-size:0.95rem; color:var(--text-strong); }
+.ai-recent .conv-meta { font-size:0.8rem; color:var(--gray-text); }
+.ai-recent .conv-actions { margin-left:8px; }
+.ai-recent .history-empty { padding:8px; color:var(--gray-text); }
+
+/* Match the small rounded white-bordered CTA used for + New Goal */
+.sidebar-header .admin-action-btn {
+  background: transparent;
+  color: var(--text-strong);
+  border: 2px solid white;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+.sidebar-header .admin-action-btn:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+/* Conversation delete button: smaller rounded, same theme as Delete in GoalTracker */
+.ai-recent .conv-actions .admin-action-btn {
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+}
+.ai-recent .conv-actions .admin-action-btn:hover {
+  background: rgba(255,255,255,0.04);
+}
 /* GOAL TRACKER PAGE */
 /* ============================== */
 .goal-tracker-page {
@@ -1246,9 +1283,45 @@ h1,
 }
 
 .board-subtitle {
-  color: #999;
+  color: rgba(15, 219, 128, 0.9); /* AI Coach green */
   font-size: 1rem;
 }
+
+/* Sidebar tokens (used by AI Coach and replicated pages) */
+.side-card {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+/* Ensure sidebar header/title tokens are consistent */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+.sidebar-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+
+/* Instructional/empty text matching AI Coach */
+.start-instruction, .chat-empty {
+  color: var(--shine-highlight-subtle);
+  font-size: 1rem;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+/* Zoom control styling */
+.board-zoom-bottom-right { position: absolute; right: 1.25rem; bottom: 1.25rem; display:flex; align-items:center; gap:0.5rem; }
+.zoom-label { font-family: var(--font-stack); color: rgba(15,219,128,0.9); margin:0; }
+.zoom-value { font-family: var(--font-stack); color: rgba(15,219,128,0.9); }
 
 .empty-board {
   display: flex;
@@ -1438,6 +1511,24 @@ h1,
 
 .remove-from-board:hover {
   background: rgba(255, 0, 0, 1);
+}
+
+/* Rounded small edit button used in sidebars */
+.round-edit-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.round-edit-btn:hover {
+  background: rgba(15,219,128,0.95);
+  color: #041b11;
 }
 
 /* Vision Board Responsive */

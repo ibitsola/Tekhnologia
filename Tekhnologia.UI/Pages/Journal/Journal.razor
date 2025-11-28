@@ -24,35 +24,43 @@
             }
             else
             {
-                <div class="journal-container">
-                    <div class="journal-sidebar">
+                    <div class="goal-tracker-container">
+                    <div class="goals-sidebar vision-board-sidebar">
                         <div class="sidebar-header">
                             <h2 class="sidebar-title">My Journal</h2>
                             <button type="button" class="button is-small admin-action-btn" @onclick="ShowCreateModal">+ New Entry</button>
                         </div>
 
-                        @if (!entries.Any())
-                        {
-                            <div class="empty-state">
-                                <p>No entries yet!</p>
-                                <p class="has-text-grey-light">Write your first reflection to get started.</p>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="entries-list">
-                                @foreach (var e in entries.OrderByDescending(x => x.CreatedAt))
-                                {
-                                    <div class="entry-list-item @(selectedEntry?.EntryId == e.EntryId ? "active" : "")" @onclick="() => SelectEntry(e)">
-                                        <div class="entry-title">@e.Date.ToString("MMM dd")</div>
-                                        <div class="entry-snippet">@((e.EntryText.Length > 80) ? e.EntryText.Substring(0, 80) + "..." : e.EntryText)</div>
-                                    </div>
-                                }
-                            </div>
-                        }
+                        <div class="ai-intro">
+                            <p>Capture reflections and progress — private and secure.</p>
+                        </div>
+
+                        <div class="ai-recent box">
+                            <h4>Journal Entries</h4>
+                            @if (!entries.Any())
+                            {
+                                <div class="history-empty">No recent entries.</div>
+                            }
+                            else
+                            {
+                                <div class="entries-list">
+                                    @foreach (var e in entries.OrderByDescending(x => x.CreatedAt).Take(5))
+                                    {
+                                        <div class="entry-list-item @(selectedEntry?.EntryId == e.EntryId ? "active" : "")" @onclick="() => SelectEntry(e)">
+                                            <div class="entry-title">@e.Date.ToString("MMM dd")</div>
+                                            <div class="entry-snippet">@((e.EntryText.Length > 80) ? e.EntryText.Substring(0, 80) + "..." : e.EntryText)</div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
                     </div>
 
-                    <div class="journal-detail-area">
+                    <div class="goal-detail-area">
+                        <div class="board-header chat-header">
+                            <h1 class="board-title">Journal</h1>
+                            <p class="board-subtitle muted">Personal reflections and notes</p>
+                        </div>
                         @if (selectedEntry == null)
                         {
                             <div class="empty-selection">
@@ -66,7 +74,7 @@
                                     <h1 class="entry-date">@selectedEntry.Date.ToString("MMMM dd, yyyy")</h1>
                                 </div>
                                 <div class="entry-actions">
-                                    <button class="button admin-action-btn" @onclick="() => ShowEditModal(selectedEntry)">Edit</button>
+                                    <button class="button admin-action-btn round-edit-btn" @onclick="() => ShowEditModal(selectedEntry)">✎</button>
                                     <button class="button admin-action-btn" @onclick="() => ShowDeleteConfirm(selectedEntry)">Delete</button>
                                 </div>
                             </div>

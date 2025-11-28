@@ -70,6 +70,19 @@ namespace Tekhnologia.Controllers
             return Ok(new { message = "Goal marked as completed", goal = updatedGoal });
         }
 
+        // Unmark goal as completed (reversible)
+        [HttpPut("{goalId}/incomplete")]
+        [Authorize]
+        public async Task<IActionResult> UnmarkGoalAsCompleted(Guid goalId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var (success, error, updatedGoal) = await _goalService.UnmarkGoalAsCompletedAsync(goalId, userId!);
+            if (!success)
+                return NotFound(error);
+
+            return Ok(new { message = "Goal marked as incomplete", goal = updatedGoal });
+        }
+
         // Delete a goal
         [HttpDelete("{goalId}")]
         [Authorize]

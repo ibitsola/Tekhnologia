@@ -53,6 +53,7 @@ builder.Services.AddScoped<IJournalService, JournalService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IVisionBoardService, VisionBoardService>();
+builder.Services.AddScoped<IConversationService, ConversationService>();
 
 // your typed HTTP client for the external API
 builder.Services.AddHttpClient<GoalApiService>(client =>

@@ -40,8 +40,8 @@ namespace Tekhnologia.Services
                 var wasLoggedIn = IsLoggedIn;
                 var wasAdmin = IsAdmin;
 
-                IsLoggedIn = state.User.Identity?.IsAuthenticated ?? false;
-                IsAdmin = state.User.IsInRole("Admin");
+                IsLoggedIn = state?.User?.Identity?.IsAuthenticated ?? false;
+                IsAdmin = (state?.User != null) ? state.User.IsInRole("Admin") : false;
 
                 // Only raise change if state actually changed to avoid recursive notification loops
                 if (wasLoggedIn != IsLoggedIn || wasAdmin != IsAdmin)
@@ -70,8 +70,8 @@ namespace Tekhnologia.Services
                 var wasLoggedIn = IsLoggedIn;
                 var wasAdmin = IsAdmin;
 
-                IsLoggedIn = state.User.Identity?.IsAuthenticated ?? false;
-                IsAdmin = state.User.IsInRole("Admin");
+                IsLoggedIn = state?.User?.Identity?.IsAuthenticated ?? false;
+                IsAdmin = (state?.User != null) ? state.User.IsInRole("Admin") : false;
 
                 if (wasLoggedIn != IsLoggedIn || wasAdmin != IsAdmin)
                 {

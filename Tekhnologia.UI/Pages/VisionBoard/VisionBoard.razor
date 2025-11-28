@@ -35,56 +35,58 @@
                             <button type="button" class="button is-small admin-action-btn" @onclick="ShowUploadModal">+ Add Image</button>
                         </div>
 
-                        @if (!items.Any())
-                        {
-                            <div class="empty-state">
-                                <p>No images yet!</p>
-                                <p class="has-text-grey-light">Upload your first inspirational image.</p>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="images-list">
-                                @foreach (var item in items.Where(i => i.PositionX == 0 && i.PositionY == 0))
-                                {
-                                         <div class="image-list-item" draggable="true" data-vision-id="@item.VisionId"
+                        <div class="ai-intro">
+                            <p>Upload inspirational visuals for your vision board.</p>
+                        </div>
+
+                        <div class="ai-recent box">
+                            <h4>My Image Gallery</h4>
+                            @if (!items.Any(i => i.PositionX == 0 && i.PositionY == 0))
+                            {
+                                <div class="history-empty">No images yet.</div>
+                            }
+                            else
+                            {
+                                <div class="images-list">
+                                    @foreach (var item in items.Where(i => i.PositionX == 0 && i.PositionY == 0))
+                                    {
+                                        <div class="image-list-item" draggable="true" data-vision-id="@item.VisionId"
                                              @ondragstart="@(e => OnDragStart(item, e))"
                                              @onclick="@(() => SelectImage(item))">
                                             <img src="@item.ImageUrl" alt="@item.Caption" />
-                                        <div class="image-item-info">
-                                            <div class="image-caption">@(string.IsNullOrEmpty(item.Caption) ? "Untitled" : item.Caption)</div>
-                                            <div class="image-actions">
-                                                <button class="button is-small" @onclick="@(() => ShowEditModal(item))" @onclick:stopPropagation="true">Edit</button>
-                                                <button class="button is-small admin-action-btn" @onclick="@(() => ShowDeleteConfirm(item))" @onclick:stopPropagation="true">Delete</button>
+                                            <div class="image-item-info">
+                                                <div class="image-caption">@(string.IsNullOrEmpty(item.Caption) ? "Untitled" : item.Caption)</div>
+                                                <div class="image-actions">
+                                                    <button class="button is-small round-edit-btn" @onclick="@(() => ShowEditModal(item))" @onclick:stopPropagation="true">✎</button>
+                                                    <button class="button is-small admin-action-btn" @onclick="@(() => ShowDeleteConfirm(item))" @onclick:stopPropagation="true">Delete</button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                }
-                            </div>
-                        }
+                                    }
+                                </div>
+                            }
+                        </div>
                     </div>
 
                     <!-- Right Area: Vision Board Canvas -->
-                    <div class="goal-detail-area vision-board-canvas" 
-                        @ondrop="OnDrop" 
+                    <div class="goal-detail-area vision-board-canvas"
+                        @ondrop="OnDrop"
                         @ondragover="OnDragOver"
                         @ondragover:preventDefault="true"
                         @ondragleave="OnDragLeave"
                         @ondragenter="OnDragEnter"
                         @ref="canvasElement">
-                        <!-- top controls removed (Reset button removed per UX request) -->
-                        <div class="board-header">
+                        <div class="board-header chat-header">
                             <h1 class="board-title">Your Vision Board</h1>
-                            <p class="board-subtitle">Drag images from the library to create your inspiring board</p>
+                            <p class="board-subtitle muted">Drag images from the library to create your inspiring board</p>
                         </div>
+                        <!-- top controls removed (Reset button removed per UX request) -->
 
                                 <div class="board-canvas-inner" style="transform: scale(@zoomLevel); transform-origin: top left;"
                                             @onmousemove="OnResizeMove" @onmouseup="OnResizeEnd">
                             @if (!items.Any(i => i.PositionX != 0 || i.PositionY != 0))
                             {
-                                <div class="empty-board">
-                                    <p>Drag images here to start building your vision board</p>
-                                </div>
+                                <!-- Empty board placeholder removed per request -->
                             }
                             else
                             {
@@ -122,9 +124,9 @@
                         </div>
                         <!-- bottom-right zoom controls -->
                         <div class="board-zoom-bottom-right">
-                            <label class="label">Zoom</label>
+                            <label class="label zoom-label">Zoom</label>
                             <input class="zoom-slider" type="range" min="0.5" max="2.0" step="0.01" value="@zoomLevel" @oninput="@(e => OnZoomSliderChange(e))" />
-                            <span class="zoom-level">@((int)(zoomLevel * 100))%</span>
+                            <span class="zoom-level zoom-value">@((int)(zoomLevel * 100))%</span>
                         </div>
                     </div>
                 </div>

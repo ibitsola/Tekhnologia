@@ -43,6 +43,12 @@ namespace Tekhnologia.Services.ApiClients
             return response.IsSuccessStatusCode;
         }
 
+        public async Task<bool> UnmarkGoalAsCompletedAsync(Guid goalId)
+        {
+            var response = await _httpClient.PutAsync($"api/goals/{goalId}/incomplete", null);
+            return response.IsSuccessStatusCode;
+        }
+
         public async Task<bool> DeleteGoalAsync(Guid goalId)
         {
             var response = await _httpClient.DeleteAsync($"api/goals/{goalId}");

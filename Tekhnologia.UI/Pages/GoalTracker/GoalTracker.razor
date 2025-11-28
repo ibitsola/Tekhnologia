@@ -27,45 +27,57 @@
         {
             <div class="goal-tracker-container">
                 <!-- Left Sidebar: Goals List -->
-                <div class="goals-sidebar">
+                <div class="goals-sidebar vision-board-sidebar">
                     <div class="sidebar-header">
                         <h2 class="sidebar-title">My Goals</h2>
                         <button type="button" class="button is-small admin-action-btn" @onclick="ShowCreateModal">+ New Goal</button>
                     </div>
 
-                    @if (!goals.Any())
-                    {
-                        <div class="empty-state">
-                            <p>No goals yet!</p>
-                            <p class="has-text-grey-light">Create your first goal to get started.</p>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="goals-list">
-                            @foreach (var goal in goals)
-                            {
-                                <div class="goal-list-item @(selectedGoal?.GoalId == goal.GoalId ? "active" : "")"
-                                     @onclick="() => SelectGoal(goal)">
-                                    <div class="goal-item-header">
-                                        <span class="goal-item-title">@goal.Title</span>
-                                        @if (goal.IsCompleted)
-                                        {
-                                            <span class="goal-status-badge completed">✓</span>
-                                        }
+                    <div class="ai-intro">
+                        <p>Plan and prioritise your career goals with clarity.</p>
+                    </div>
+
+                    <div class="ai-recent box">
+                        <h4>Goal List</h4>
+                        @if (!goals.Any())
+                        {
+                            <div class="history-empty">No goals yet.</div>
+                        }
+                        else
+                        {
+                            <div class="goals-list">
+                                @foreach (var goal in goals.OrderByDescending(g => g.CreatedAt))
+                                {
+                                    <div class="goal-list-item @(selectedGoal?.GoalId == goal.GoalId ? "active" : "")"
+                                         draggable="true"
+                                         @ondragstart="@(e => OnGoalDragStart(goal))"
+                                         @ondragover="@(e => OnGoalDragOver(goal))"
+                                         @ondrop="@(e => OnGoalDrop())"
+                                         @onclick="() => SelectGoal(goal)">
+                                        <div class="goal-item-header">
+                                            <span class="goal-item-title">@goal.Title</span>
+                                            @if (goal.IsCompleted)
+                                            {
+                                                <span class="goal-status-badge completed">✓</span>
+                                            }
+                                        </div>
+                                        <div class="goal-item-meta">
+                                            <span class="urgency-tag @goal.Urgency.Replace(" ", "-").ToLower()">@goal.Urgency</span>
+                                            <span class="importance-tag @goal.Importance.Replace(" ", "-").ToLower()">@goal.Importance</span>
+                                        </div>
                                     </div>
-                                    <div class="goal-item-meta">
-                                        <span class="urgency-tag @goal.Urgency.Replace(" ", "-").ToLower()">@goal.Urgency</span>
-                                        <span class="importance-tag @goal.Importance.Replace(" ", "-").ToLower()">@goal.Importance</span>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    }
+                                }
+                            </div>
+                        }
+                    </div>
                 </div>
 
                 <!-- Right Main Area: Selected Goal Details -->
                 <div class="goal-detail-area">
+                    <div class="board-header chat-header">
+                        <h1 class="board-title">My Goals</h1>
+                        <p class="board-subtitle muted">Track progress, deadlines and priorities</p>
+                    </div>
                     @if (selectedGoal == null)
                     {
                         <div class="empty-selection">
@@ -80,10 +92,14 @@
                                 <p class="goal-description">@selectedGoal.Description</p>
                             </div>
                             <div class="goal-actions">
+                                <button class="button admin-action-btn" @onclick="() => ShowEditModal(selectedGoal)">Edit</button>
                                 @if (!selectedGoal.IsCompleted)
                                 {
-                                    <button class="button admin-action-btn" @onclick="() => ShowEditModal(selectedGoal)">Edit</button>
-                                    <button class="button user-role-tag" @onclick="() => MarkComplete(selectedGoal.GoalId)">Complete</button>
+                                    <button class="button user-role-tag" @onclick="async () => await MarkComplete(selectedGoal.GoalId)">Complete</button>
+                                }
+                                else
+                                {
+                                    <button class="button user-role-tag is-warning" @onclick="async () => await UnmarkComplete(selectedGoal.GoalId)">Undo Complete</button>
                                 }
                                 <button class="button admin-action-btn" @onclick="() => ShowDeleteConfirm(selectedGoal)">Delete</button>
                             </div>
@@ -371,17 +387,17 @@
     {
         if (string.IsNullOrEmpty(userId)) return;
 
+        // Preserve the currently selected goal (by id) when reloading
+        var prevSelectedId = selectedGoal?.GoalId;
         goals = await GoalService.GetUserGoalsAsync(userId);
 
-        // Auto-select first goal if none selected
-        if (goals.Any() && selectedGoal == null)
+        if (prevSelectedId != null)
+        {
+            selectedGoal = goals.FirstOrDefault(g => g.GoalId == prevSelectedId) ?? goals.FirstOrDefault();
+        }
+        else if (goals.Any() && selectedGoal == null)
         {
             selectedGoal = goals.First();
-        }
-        // If selected goal was deleted, clear selection
-        else if (selectedGoal != null && !goals.Any(g => g.GoalId == selectedGoal.GoalId))
-        {
-            selectedGoal = goals.FirstOrDefault();
         }
     }
 
@@ -487,6 +503,63 @@
             errorMessage = $"Error completing goal: {ex.Message}";
         }
     }
+
+    private async Task UnmarkComplete(Guid goalId)
+    {
+        if (string.IsNullOrEmpty(userId)) return;
+
+        try
+        {
+            var (success, error, _) = await GoalService.UnmarkGoalAsCompletedAsync(goalId, userId);
+            if (success)
+            {
+                successMessage = "Goal marked as incomplete.";
+                await LoadGoals();
+            }
+            else
+            {
+                errorMessage = error;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error updating goal: {ex.Message}";
+        }
+    }
+
+    // Drag and drop reorder (client-side visual only)
+    private int? dragSourceIndex = null;
+    private int? dragTargetIndex = null;
+
+    private void OnGoalDragStart(GoalResponseDTO goal)
+    {
+        dragSourceIndex = goals.FindIndex(g => g.GoalId == goal.GoalId);
+    }
+
+    private void OnGoalDragOver(GoalResponseDTO goal)
+    {
+        dragTargetIndex = goals.FindIndex(g => g.GoalId == goal.GoalId);
+    }
+
+    private void OnGoalDrop()
+    {
+        if (dragSourceIndex.HasValue && dragTargetIndex.HasValue && dragSourceIndex.Value != dragTargetIndex.Value)
+        {
+            var item = goals[dragSourceIndex.Value];
+            goals.RemoveAt(dragSourceIndex.Value);
+            // Adjust target index if source was before target and removed
+            var insertIndex = dragTargetIndex.Value;
+            if (dragSourceIndex.Value < dragTargetIndex.Value) insertIndex--;
+            goals.Insert(insertIndex, item);
+            // re-select moved item
+            selectedGoal = goals.FirstOrDefault(g => g.GoalId == item.GoalId);
+            StateHasChanged();
+        }
+        dragSourceIndex = null;
+        dragTargetIndex = null;
+    }
+
+    
 
     private async Task ConfirmDelete()
     {
