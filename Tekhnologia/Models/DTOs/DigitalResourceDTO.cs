@@ -22,9 +22,5 @@ namespace Tekhnologia.Models.DTOs
         public string? ExternalUrl { get; set; }  // For courses: external link
 
         public DateTime UploadDate { get; set; }
-
-        public string? ThumbnailUrl { get; set; }
-
-        public string? ExternalUrl { get; set; }
     }
 }

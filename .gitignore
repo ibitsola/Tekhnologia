@@ -20,3 +20,8 @@ obj/
 # Environment files
 .env
 .env.local
+
+# Configuration files with secrets
+appsettings.json
+appsettings.Development.json
+appsettings.Production.json

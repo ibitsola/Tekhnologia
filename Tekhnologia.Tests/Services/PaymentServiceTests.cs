@@ -4,6 +4,9 @@ using Tekhnologia.Data;
 using Tekhnologia.Models;
 using Tekhnologia.Services;
 using Tekhnologia.Services.Interfaces;
+using Moq;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 
 namespace Tekhnologia.Tests.Services
 {
@@ -19,8 +22,17 @@ namespace Tekhnologia.Tests.Services
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
             _context = new ApplicationDbContext(options);
+            
+            // Mock IWebHostEnvironment
+            var mockEnv = new Mock<IWebHostEnvironment>();
+            mockEnv.Setup(m => m.EnvironmentName).Returns("Development");
+            
+            // Mock IConfiguration for Stripe webhook secret
+            var mockConfig = new Mock<IConfiguration>();
+            mockConfig.Setup(c => c["Stripe:WebhookSecret"]).Returns("whsec_test_secret");
+            
             // Instantiate the concrete PaymentService (which implements IPaymentService)
-            _paymentService = new PaymentService(_context);
+            _paymentService = new PaymentService(_context, mockEnv.Object, mockConfig.Object);
         }
 
         [Fact]
