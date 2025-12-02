@@ -28,3 +28,6 @@ appsettings.Production.json
 
 # Data Protection Keys - contain encryption keys for cookies/tokens
 DataProtection-Keys/
+
+# Cookie files from development/testing
+cookiejar.txt
