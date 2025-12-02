@@ -7,8 +7,7 @@ namespace Tekhnologia.Models.DTOs
         [Required]
         public string Title { get; set; } = string.Empty;
 
-        [Required]
-        public required IFormFile File { get; set; }  // Uploaded file
+        public IFormFile? File { get; set; }  // Uploaded file (optional for courses)
 
         public string? Category { get; set; }
 

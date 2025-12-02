@@ -39,6 +39,8 @@ namespace Tekhnologia.Services
                 IsFree = r.IsFree,
                 Price = r.Price,
                 FilePath = r.FilePath,
+                ThumbnailUrl = r.ThumbnailUrl,
+                ExternalUrl = r.ExternalUrl,
                 UploadDate = r.UploadDate
             }).ToList();
 
@@ -47,30 +49,67 @@ namespace Tekhnologia.Services
 
         public async Task<DigitalResource> UploadResourceAsync(CreateDigitalResourceDTO resourceDTO, string uploaderName)
         {
-            if (resourceDTO.File == null || resourceDTO.File.Length == 0)
-                throw new ArgumentException("File is missing.");
+            string? uniqueFileName = null;
+            string? webPath = null;
+            string? fileExtension = null;
+            string? thumbnailUrl = resourceDTO.ThumbnailUrl;
 
-            string uploadPath = Path.Combine(_env.WebRootPath, "digital-resources");
-            if (!Directory.Exists(uploadPath))
-                Directory.CreateDirectory(uploadPath);
-
-            string uniqueFileName = $"{Guid.NewGuid()}_{resourceDTO.File.FileName}";
-            string filePath = Path.Combine(uploadPath, uniqueFileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            // Handle file upload (optional for courses)
+            if (resourceDTO.File != null && resourceDTO.File.Length > 0)
             {
-                await resourceDTO.File.CopyToAsync(stream);
+                string uploadPath = Path.Combine(_env.WebRootPath, "digital-resources");
+                if (!Directory.Exists(uploadPath))
+                    Directory.CreateDirectory(uploadPath);
+
+                uniqueFileName = $"{Guid.NewGuid()}_{resourceDTO.File.FileName}";
+                string filePath = Path.Combine(uploadPath, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await resourceDTO.File.CopyToAsync(stream);
+                }
+
+                fileExtension = Path.GetExtension(resourceDTO.File.FileName).TrimStart('.').ToLower();
+                webPath = $"/digital-resources/{uniqueFileName}";
+                
+                // Auto-set thumbnail for image files (jpg, jpeg, png, gif, webp)
+                if (string.IsNullOrEmpty(thumbnailUrl))
+                {
+                    var imageExtensions = new[] { "jpg", "jpeg", "png", "gif", "webp" };
+                    if (imageExtensions.Contains(fileExtension))
+                    {
+                        thumbnailUrl = webPath; // Use the uploaded image itself as thumbnail
+                    }
+                }
+            }
+            else if (resourceDTO.Category != "Courses")
+            {
+                // Non-course resources require a file
+                throw new ArgumentException("File is required for non-course resources.");
+            }
+
+            // For courses without file upload, set appropriate defaults
+            if (resourceDTO.Category == "Courses" && string.IsNullOrEmpty(webPath))
+            {
+                if (string.IsNullOrEmpty(resourceDTO.ExternalUrl))
+                    throw new ArgumentException("External URL is required for courses.");
+                
+                fileExtension = "course";
+                uniqueFileName = "external-course";
+                webPath = resourceDTO.ExternalUrl; // Use external URL as the "path"
             }
 
             var newResource = new DigitalResource
             {
                 Title = resourceDTO.Title,
-                FileName = uniqueFileName,
-                FilePath = $"/digital-resources/{uniqueFileName}",
-                FileType = Path.GetExtension(resourceDTO.File.FileName).Substring(1),
+                FileName = uniqueFileName ?? "external-course",
+                FilePath = webPath ?? resourceDTO.ExternalUrl ?? string.Empty,
+                FileType = fileExtension ?? "course",
                 IsFree = resourceDTO.IsFree,
                 Price = resourceDTO.IsFree ? null : resourceDTO.Price,
                 Category = resourceDTO.Category,
+                ThumbnailUrl = thumbnailUrl,
+                ExternalUrl = resourceDTO.ExternalUrl,
                 UploadedBy = uploaderName
             };
 
@@ -125,6 +164,8 @@ namespace Tekhnologia.Services
             resource.IsFree = updatedResource.IsFree;
             resource.Price = updatedResource.IsFree ? null : updatedResource.Price;
             resource.Category = updatedResource.Category;
+            resource.ThumbnailUrl = updatedResource.ThumbnailUrl;
+            resource.ExternalUrl = updatedResource.ExternalUrl;
 
             await _context.SaveChangesAsync();
         }

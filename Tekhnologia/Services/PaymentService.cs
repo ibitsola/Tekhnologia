@@ -17,11 +17,13 @@ namespace Tekhnologia.Services
         private readonly string _domain;
         private readonly string _stripeWebhookSecret;
 
-        public PaymentService(ApplicationDbContext context)
+        public PaymentService(ApplicationDbContext context, IWebHostEnvironment env)
         {
             _context = context;
-            // You may want to move these settings to configuration.
-            _domain = "https://tekhnologia.co.uk/";
+            // Use localhost for development, production domain for production
+            _domain = env.IsDevelopment() 
+                ? "http://localhost:5145" 
+                : "https://tekhnologia.co.uk";
             _stripeWebhookSecret = "whsec_e00cf0870ce25d56148f90592eb041ee5e3deb605821308fb24a370b1c25290e";
         }
 

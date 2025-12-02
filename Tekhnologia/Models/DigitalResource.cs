@@ -28,6 +28,10 @@ namespace Tekhnologia.Models
 
         public decimal? Price { get; set; }  // Nullable price field if not free
 
+        public string? ThumbnailUrl { get; set; }  // Optional thumbnail image URL
+
+        public string? ExternalUrl { get; set; }  // For courses: external link instead of file
+
         public string UploadedBy { get; set; } = string.Empty;  // Name or ID of the uploader
     }
 }
