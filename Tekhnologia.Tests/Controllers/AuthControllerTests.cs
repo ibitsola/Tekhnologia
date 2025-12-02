@@ -76,8 +76,11 @@ namespace Tekhnologia.Tests.Controllers
 
             var result = await controller.Login(loginModel);
 
-            result.Should().BeOfType<UnauthorizedObjectResult>()
-                  .Which.Value.Should().Be("Invalid email or password.");
+            var unauthorizedResult = result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
+            var value = unauthorizedResult.Value;
+            
+            // The controller returns an object with an errors property containing an array
+            value.Should().BeEquivalentTo(new { errors = new[] { "Invalid email or password." } });
         }
 
         [Fact]
