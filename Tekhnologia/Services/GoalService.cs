@@ -108,6 +108,23 @@ namespace Tekhnologia.Services
         }
 
         /// <summary>
+        /// Marks the goal as not completed (reverses completion).
+        /// </summary>
+        public async Task<(bool Success, string Error, Goal? UpdatedGoal)> UnmarkGoalAsCompletedAsync(Guid goalId, string userId)
+        {
+            var goal = await _context.Goals.FindAsync(goalId);
+            if (goal == null || goal.UserId != userId)
+                return (false, "Goal not found or access denied", null);
+
+            goal.IsCompleted = false;
+            goal.UpdatedAt = DateTime.UtcNow;
+
+            _context.Goals.Update(goal);
+            await _context.SaveChangesAsync();
+            return (true, string.Empty, goal);
+        }
+
+        /// <summary>
         /// Deletes the goal for the specified user.
         /// </summary>
         public async Task<(bool Success, string Error)> DeleteGoalAsync(Guid goalId, string userId)

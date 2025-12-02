@@ -1,0 +1,1031 @@
+@page "/visionboard"
+@layout Views.Shared.MainLayout
+@rendermode RenderMode.InteractiveServer
+
+@using System.Security.Claims
+@using System.IO
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@using Tekhnologia.Services.Interfaces
+@using Tekhnologia.Models.DTOs
+@inject IVisionBoardService VisionBoardService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JSRuntime
+
+<AuthorizeView Context="authContext">
+    <Authorized>
+        <div class="goal-tracker-page">
+            @if (loading)
+            {
+                <div class="section has-text-centered">
+                    <p>Loading your vision board...</p>
+                </div>
+            }
+            else
+            {
+                <div class="goal-tracker-container">
+                    <!-- Left Sidebar: Image Library -->
+                    <div class="goals-sidebar vision-board-sidebar">
+                        <div class="sidebar-header">
+                            <h2 class="sidebar-title">My Images</h2>
+                            <button type="button" class="button is-small admin-action-btn" @onclick="ShowUploadModal">+ Add Image</button>
+                        </div>
+
+                        <div class="ai-intro">
+                            <p>Upload inspirational visuals for your vision board.</p>
+                        </div>
+
+                        <div class="ai-recent box">
+                            <h4>My Image Gallery</h4>
+                            @if (!items.Any(i => i.PositionX == 0 && i.PositionY == 0))
+                            {
+                                <div class="history-empty">No images yet.</div>
+                            }
+                            else
+                            {
+                                <div class="images-list">
+                                    @foreach (var item in items.Where(i => i.PositionX == 0 && i.PositionY == 0))
+                                    {
+                                        <div class="image-list-item" draggable="true" data-vision-id="@item.VisionId"
+                                             @ondragstart="@(e => OnDragStart(item, e))"
+                                             @onclick="@(() => SelectImage(item))">
+                                            <img src="@item.ImageUrl" alt="@item.Caption" />
+                                            <div class="image-item-info">
+                                                <div class="image-caption">@(string.IsNullOrEmpty(item.Caption) ? "Untitled" : item.Caption)</div>
+                                                <div class="image-actions">
+                                                    <button class="button is-small round-edit-btn" @onclick="@(() => ShowEditModal(item))" @onclick:stopPropagation="true">✎</button>
+                                                    <button class="button is-small admin-action-btn" @onclick="@(() => ShowDeleteConfirm(item))" @onclick:stopPropagation="true">Delete</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Right Area: Vision Board Canvas -->
+                    <div class="goal-detail-area vision-board-canvas"
+                        @ondrop="OnDrop"
+                        @ondragover="OnDragOver"
+                        @ondragover:preventDefault="true"
+                        @ondragleave="OnDragLeave"
+                        @ondragenter="OnDragEnter"
+                        @ref="canvasElement">
+                        <div class="board-header chat-header">
+                            <h1 class="board-title">Your Vision Board</h1>
+                            <p class="board-subtitle muted">Drag images from the library to create your inspiring board</p>
+                        </div>
+                        <!-- top controls removed (Reset button removed per UX request) -->
+
+                                <div class="board-canvas-inner" style="transform: scale(@zoomLevel); transform-origin: top left;"
+                                            @onmousemove="OnResizeMove" @onmouseup="OnResizeEnd">
+                            @if (!items.Any(i => i.PositionX != 0 || i.PositionY != 0))
+                            {
+                                <!-- Empty board placeholder removed per request -->
+                            }
+                            else
+                            {
+                                @foreach (var item in items.Where(i => i.PositionX != 0 || i.PositionY != 0))
+                                {
+                                                                                                <div class="board-item @(selectedImage?.VisionId == item.VisionId ? "selected" : "") @(isResizing && selectedImage?.VisionId == item.VisionId ? "resizing" : "")"
+                                                                                                            data-vision-id="@item.VisionId"
+                                                                                                            style="left: @(item.PositionX)px; top: @(item.PositionY)px; width: @(item.PositionX > 0 ? GetImageWidth(item) : 200)px;@(imageHeights.ContainsKey(item.VisionId) ? $" height: {imageHeights[item.VisionId]}px;" : "")"
+                                                                                 draggable="@(!isResizing)"
+                                                                                    @ondragstart="@(e => OnDragStart(item, e))"
+                                                                                    @onclick="@(() => SelectImage(item))">
+                                                                                <img src="@item.ImageUrl" alt="@item.Caption" style="width:100%; height:100%; display:block; object-fit:contain;" />
+                                        @if (!string.IsNullOrEmpty(item.Caption))
+                                        {
+                                            <div class="board-item-caption">@item.Caption</div>
+                                        }
+                                        <button class="remove-from-board" @onclick="@(() => RemoveFromBoard(item))" @onclick:stopPropagation="true">×</button>
+                                        @if (selectedImage?.VisionId == item.VisionId)
+                                        {
+                                            <div class="resize-handles">
+                                                <div class="resize-controls">
+                                                    <!-- single proportional corner handle -->
+                                                    <div class="resize-handle resize-se" draggable="false"
+                                                        title="Resize proportionally"
+                                                        @ondragstart:preventDefault="true"
+                                                        @onmousedown="@(e => StartResize(item, e, "both"))" @onmousedown:stopPropagation="true">
+                                                        <span class="resize-icon">⤢</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            }
+                        </div>
+                        <!-- bottom-right zoom controls -->
+                        <div class="board-zoom-bottom-right">
+                            <label class="label zoom-label">Zoom</label>
+                            <input class="zoom-slider" type="range" min="0.5" max="2.0" step="0.01" value="@zoomLevel" @oninput="@(e => OnZoomSliderChange(e))" />
+                            <span class="zoom-level zoom-value">@((int)(zoomLevel * 100))%</span>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Upload/Edit Image Modal -->
+            @if (showImageModal)
+            {
+                <div class="modal is-active">
+                    <div class="modal-background" @onclick="CloseModal"></div>
+                    <div class="modal-card">
+                        <header class="modal-card-head">
+                            <p class="modal-card-title">@(isEditMode ? "Edit Image" : "Add New Image")</p>
+                            <button class="delete" aria-label="close" @onclick="CloseModal"></button>
+                        </header>
+                        <section class="modal-card-body">
+                            <EditForm Model="@imageForm" OnValidSubmit="@SaveImage">
+                                <DataAnnotationsValidator />
+
+                                <div class="field">
+                                    <label class="label">Upload Image</label>
+                                    <div class="control">
+                                        <div class="file-upload-wrapper">
+                                            <InputFile OnChange="HandleFileSelected" class="file-input" accept="image/*" id="fileUpload" />
+                                            <label for="fileUpload" class="file-upload-label">
+                                                <span class="file-upload-icon">📁</span>
+                                                <span>Choose File</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <p class="help">Upload an image from your computer (max 5MB)</p>
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(uploadedImagePreview))
+                                {
+                                    <div class="field">
+                                        <img src="@uploadedImagePreview" alt="Preview" style="max-width: 100%; max-height: 200px; border-radius: 8px;" />
+                                    </div>
+                                }
+
+                                <div class="field">
+                                    <label class="label">Or Image URL</label>
+                                    <div class="control">
+                                        <InputText class="input" @bind-Value="imageForm.ImageUrl" placeholder="https://..." />
+                                    </div>
+                                    <p class="help">Or enter the URL of an image from the web</p>
+                                </div>
+
+                                <div class="field">
+                                    <label class="label">Caption / Notes</label>
+                                    <div class="control">
+                                        <InputTextArea class="textarea" @bind-Value="imageForm.Caption" placeholder="What does this image represent?" />
+                                    </div>
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(modalError))
+                                {
+                                    <div class="notification is-danger is-light">
+                                        @modalError
+                                    </div>
+                                }
+
+                                <div class="field is-grouped is-grouped-right" style="margin-top: 1.5rem;">
+                                    <div class="control">
+                                        <button type="button" class="button" @onclick="CloseModal">Cancel</button>
+                                    </div>
+                                    <div class="control">
+                                        <button type="submit" class="button user-role-tag" disabled="@isSaving">
+                                            @(isSaving ? "Saving..." : "Save Image")
+                                        </button>
+                                    </div>
+                                </div>
+                            </EditForm>
+                        </section>
+                    </div>
+                </div>
+            }
+
+            <!-- Delete Confirmation Modal -->
+            @if (showDeleteModal && imageToDelete != null)
+            {
+                <div class="modal is-active">
+                    <div class="modal-background" @onclick="CloseModal"></div>
+                    <div class="modal-card">
+                        <header class="modal-card-head">
+                            <p class="modal-card-title">Confirm Delete</p>
+                            <button class="delete" aria-label="close" @onclick="CloseModal"></button>
+                        </header>
+                        <section class="modal-card-body">
+                            <p>Delete this image?</p>
+                            <p class="has-text-danger">This action cannot be undone.</p>
+                        </section>
+                        <footer class="modal-card-foot">
+                            <button class="button admin-action-btn" @onclick="ConfirmDelete" disabled="@isDeleting">
+                                @(isDeleting ? "Deleting..." : "Delete")
+                            </button>
+                            <button class="button" @onclick="CloseModal">Cancel</button>
+                        </footer>
+                    </div>
+                </div>
+            }
+
+            <!-- Success/Error Notifications -->
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="notification is-success notification-toast">
+                    <button class="delete" @onclick="() => successMessage = null"></button>
+                    @successMessage
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="notification is-danger notification-toast">
+                    <button class="delete" @onclick="() => errorMessage = null"></button>
+                    @errorMessage
+                </div>
+            }
+        </div>
+    </Authorized>
+
+    <NotAuthorized>
+        <!-- 🌐 Public Marketing Content -->
+        <section class="home">
+        <div class="home-intro">
+            <h1 class="title is-1">Vision Board Builder</h1>
+            <hr class="hr" />
+            <p class="home-text">
+                Visualize your dreams and bring your tech career goals to life.
+            </p>
+            <p class="home-subtext">
+                Create a digital space for inspiration — upload images, add goals, and stay focused on what matters most.
+            </p>
+            <div class="home-buttons buttons">
+                <div class="home-buttons-shine">
+                    <a class="shine" href="/signup"><span>Get Started</span></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="title section-title has-text-centered">Why Use a Vision Board?</h2>
+        <div class="columns is-multiline">
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🌟 Clarifies Ambitions</h3>
+                    <p>Visual goals make your aspirations concrete and achievable.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🧠 Reinforces Mindset</h3>
+                    <p>Daily exposure to inspiring images strengthens your focus and confidence.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🎯 Keeps You Aligned</h3>
+                    <p>Stay aligned with your long-term goals and resist distractions.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">💡 Sparks Creativity</h3>
+                    <p>Let imagery inspire action and encourage new possibilities in your journey.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section has-text-centered">
+        <h2 class="title section-title">How It Works</h2>
+        <div class="feature-boxes-row">
+            <div class="feature-box">
+                <h3>Upload Visuals</h3>
+                <p class="feature-subtext">Add meaningful images and captions that represent your goals.</p>
+            </div>
+            <div class="feature-box">
+                <h3>Set Career Themes</h3>
+                <p class="feature-subtext">Organize your board by areas of focus — from leadership to creativity.</p>
+            </div>
+            <div class="feature-box">
+                <h3>Access Anytime</h3>
+                <p class="feature-subtext">Your board is always with you, accessible from any device.</p>
+            </div>
+            <div class="feature-box">
+                <h3>Update & Evolve</h3>
+                <p class="feature-subtext">As your goals grow, so does your board. Keep it fresh and relevant.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="title section-title has-text-centered">What You Get</h2>
+        <div class="columns is-multiline">
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🖼️ Visual Uploads</h3>
+                    <p>Drag and drop images to build your custom board.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🗂️ Goal Categorization</h3>
+                    <p>Group visuals by personal and professional themes.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">📦 Local Storage</h3>
+                    <p>Store images locally with future support for cloud backups.</p>
+                </div>
+            </div>
+            <div class="column is-half">
+                <div class="box">
+                    <h3 class="title is-5">🧩 Easy Management</h3>
+                    <p>View, update, and remove board items with ease.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section has-text-centered">
+        <h2 class="title section-title">Ready to turn your vision into action?</h2>
+        <div class="home-buttons buttons">
+            <div class="home-buttons-shine">
+                <a class="shine" href="/signup"><span>Get Started</span></a>
+            </div>
+        </div>
+    </section>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private List<VisionBoardItemDTO> items = new();
+    private VisionBoardItemDTO? selectedImage;
+    private VisionBoardItemDTO? draggedItem;
+    private CreateVisionBoardItemDTO imageForm = new();
+    private VisionBoardItemDTO? imageToDelete;
+
+    private string? userId;
+    private string? successMessage;
+    private string? errorMessage;
+    private string? modalError;
+    private string? uploadedImagePreview;
+    private string? uploadedImageData;
+
+    private bool loading = true;
+    private bool showImageModal = false;
+    private bool showDeleteModal = false;
+    private bool isEditMode = false;
+    private bool isSaving = false;
+    private bool isDeleting = false;
+    private bool isResizing = false;
+
+    private double zoomLevel = 1.0;
+    private Dictionary<Guid, int> imageSizes = new();
+    private Dictionary<Guid, int> imageHeights = new();
+    private Dictionary<Guid, double> imageAspects = new();
+    
+    private int resizeStartX;
+    private int resizeStartY;
+    private int resizeStartWidth;
+    
+    private ElementReference canvasElement;
+
+    private int dragOffsetX;
+    private int dragOffsetY;
+    private string? currentResizeMode;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            if (!authState.User.Identity?.IsAuthenticated ?? false)
+            {
+                return;
+            }
+
+            userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                Navigation.NavigateTo("/signin");
+                return;
+            }
+
+            await LoadItems();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading vision board: {ex.Message}";
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // wheel zoom removed - no JS wheel locking required
+            }
+            catch
+            {
+                // Ignore if JS not available yet
+            }
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            // nothing to clean up for wheel lock
+        }
+        catch
+        {
+            // ignore
+        }
+    }
+
+    private async Task LoadItems()
+    {
+        if (string.IsNullOrEmpty(userId)) return;
+        items = await VisionBoardService.GetUserVisionBoardAsync(userId);
+        // hydrate in-memory size dictionaries from persisted values
+        imageSizes.Clear();
+        imageHeights.Clear();
+        imageAspects.Clear();
+        foreach (var it in items)
+        {
+            if (it.Width.HasValue) imageSizes[it.VisionId] = it.Width.Value;
+            if (it.Height.HasValue) imageHeights[it.VisionId] = it.Height.Value;
+            // aspect ratio will be filled when resizing starts via JS
+        }
+    }
+
+    private void SelectImage(VisionBoardItemDTO item)
+    {
+        selectedImage = item;
+    }
+
+    private void ShowUploadModal()
+    {
+        isEditMode = false;
+        imageForm = new CreateVisionBoardItemDTO();
+        modalError = null;
+        showImageModal = true;
+    }
+
+    private void ShowEditModal(VisionBoardItemDTO item)
+    {
+        isEditMode = true;
+        imageForm = new CreateVisionBoardItemDTO
+        {
+            ImageUrl = item.ImageUrl,
+            Caption = item.Caption,
+            PositionX = item.PositionX,
+            PositionY = item.PositionY
+        };
+        selectedImage = item;
+        modalError = null;
+        showImageModal = true;
+    }
+
+    private void ShowDeleteConfirm(VisionBoardItemDTO item)
+    {
+        imageToDelete = item;
+        showDeleteModal = true;
+    }
+
+    private async Task SaveImage()
+    {
+        if (string.IsNullOrEmpty(userId)) return;
+
+        isSaving = true;
+        modalError = null;
+
+        try
+        {
+            if (isEditMode && selectedImage != null)
+            {
+                var (success, error, _) = await VisionBoardService.UpdateVisionBoardItemAsync(
+                    selectedImage.VisionId, imageForm, userId);
+                if (success)
+                {
+                    successMessage = "Image updated successfully!";
+                    await LoadItems();
+                    CloseModal();
+                }
+                else
+                {
+                    modalError = error;
+                }
+            }
+            else
+            {
+                await VisionBoardService.CreateVisionBoardItemAsync(userId, imageForm);
+                successMessage = "Image added successfully!";
+                await LoadItems();
+                CloseModal();
+            }
+        }
+        catch (Exception ex)
+        {
+            modalError = $"Error saving image: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (imageToDelete == null || string.IsNullOrEmpty(userId)) return;
+
+        isDeleting = true;
+
+        try
+        {
+            var (success, error) = await VisionBoardService.DeleteVisionBoardItemAsync(
+                imageToDelete.VisionId, userId);
+            if (success)
+            {
+                successMessage = "Image deleted successfully!";
+                await LoadItems();
+                CloseModal();
+            }
+            else
+            {
+                errorMessage = error;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error deleting image: {ex.Message}";
+        }
+        finally
+        {
+            isDeleting = false;
+        }
+    }
+
+    private void CloseModal()
+    {
+        showImageModal = false;
+        showDeleteModal = false;
+        imageToDelete = null;
+        modalError = null;
+        uploadedImagePreview = null;
+        uploadedImageData = null;
+    }
+
+    // File Upload Handler
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            // Limit file size to 5MB
+            if (file.Size > 5 * 1024 * 1024)
+            {
+                modalError = "File size must be less than 5MB";
+                return;
+            }
+
+            try
+            {
+                // Read file as base64
+                using var stream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024);
+                using var ms = new MemoryStream();
+                await stream.CopyToAsync(ms);
+                var bytes = ms.ToArray();
+                var base64 = Convert.ToBase64String(bytes);
+                uploadedImageData = $"data:{file.ContentType};base64,{base64}";
+                uploadedImagePreview = uploadedImageData;
+                imageForm.ImageUrl = uploadedImageData;
+                modalError = null;
+            }
+            catch (Exception ex)
+            {
+                modalError = $"Error uploading file: {ex.Message}";
+            }
+        }
+    }
+
+    // Zoom Controls
+    private void ZoomIn()
+    {
+        if (zoomLevel < 2.0)
+        {
+            zoomLevel += 0.1;
+            StateHasChanged();
+        }
+    }
+
+    private void ZoomOut()
+    {
+        if (zoomLevel > 0.5)
+        {
+            zoomLevel -= 0.1;
+            StateHasChanged();
+        }
+    }
+
+    private void ResetZoom()
+    {
+        zoomLevel = 1.0;
+        StateHasChanged();
+    }
+
+    // Zoom slider handler
+    private void OnZoomSliderChange(ChangeEventArgs e)
+    {
+        if (double.TryParse(Convert.ToString(e.Value), out var v))
+        {
+            zoomLevel = Math.Clamp(v, 0.5, 2.0);
+            StateHasChanged();
+        }
+    }
+
+    // Horizontal resize (+/-) and Vertical resize (+/-)
+    private void ResizeHorizontal(VisionBoardItemDTO item, int delta)
+    {
+        var newWidth = GetImageWidth(item) + delta;
+        SetImageWidth(item, newWidth);
+        StateHasChanged();
+    }
+
+    private void ResizeVertical(VisionBoardItemDTO item, int delta)
+    {
+        if (!imageHeights.ContainsKey(item.VisionId))
+        {
+            // approximate from width/aspect
+            var w = GetImageWidth(item);
+            var aspect = imageAspects.ContainsKey(item.VisionId) ? imageAspects[item.VisionId] : 4.0/3.0;
+            imageHeights[item.VisionId] = (int)(w / aspect);
+        }
+        var newHeight = imageHeights[item.VisionId] + delta;
+        if (newHeight < 50) newHeight = 50;
+        if (newHeight > 1200) newHeight = 1200;
+        imageHeights[item.VisionId] = newHeight;
+        StateHasChanged();
+    }
+
+    // Drag and Drop Handlers
+    private async Task OnDragStart(VisionBoardItemDTO item, DragEventArgs e)
+    {
+        draggedItem = item;
+
+        // Capture pointer offset relative to the item using JS (bounding rect)
+        try
+        {
+            // get the bounding rect of the specific dragged element using its data-vision-id
+            var rect = await JSRuntime.InvokeAsync<BoundingClientRect>("getBoundingClientRect", $"[data-vision-id='{item.VisionId}']");
+            if (rect != null)
+            {
+                // dragOffset in element-local pixels
+                dragOffsetX = (int)(e.ClientX - rect.Left);
+                dragOffsetY = (int)(e.ClientY - rect.Top);
+            }
+        }
+        catch
+        {
+            dragOffsetX = 0;
+            dragOffsetY = 0;
+        }
+    }
+
+    // Mouse move while resizing
+    private void OnResizeMove(MouseEventArgs e)
+    {
+        if (!isResizing || selectedImage == null) return;
+
+        // Calculate raw delta in viewport pixels
+        var rawDeltaX = ((int)e.ClientX - resizeStartX);
+        var rawDeltaY = ((int)e.ClientY - resizeStartY);
+
+        // Convert viewport delta to inner (unscaled) space by dividing by zoomLevel
+        var deltaX = (int)(rawDeltaX / zoomLevel);
+        var deltaY = (int)(rawDeltaY / zoomLevel);
+
+        if (currentResizeMode == "horizontal")
+        {
+            var newWidth = resizeStartWidth + deltaX;
+            SetImageWidth(selectedImage, newWidth);
+            // update height to keep aspect if known
+            if (imageAspects.ContainsKey(selectedImage.VisionId))
+            {
+                var aspect = imageAspects[selectedImage.VisionId];
+                imageHeights[selectedImage.VisionId] = (int)(newWidth / aspect);
+            }
+        }
+        else if (currentResizeMode == "vertical")
+        {
+            // compute new height from start height + deltaY (we may not have start height stored, compute from startWidth + aspect)
+            int startHeight = imageHeights.ContainsKey(selectedImage.VisionId) ? imageHeights[selectedImage.VisionId] : (int)(resizeStartWidth / (imageAspects.ContainsKey(selectedImage.VisionId) ? imageAspects[selectedImage.VisionId] : 4.0/3.0));
+            var newHeight = startHeight + deltaY;
+            SetImageHeight(selectedImage, newHeight);
+            // Optionally update width to keep aspect
+            if (imageAspects.ContainsKey(selectedImage.VisionId))
+            {
+                var aspect = imageAspects[selectedImage.VisionId];
+                imageSizes[selectedImage.VisionId] = (int)(newHeight * aspect);
+            }
+        }
+        else // both (diagonal/proportional)
+        {
+            // Use the larger delta magnitude to scale proportionally
+            var delta = Math.Abs(deltaX) > Math.Abs(deltaY) ? deltaX : deltaY;
+            var newWidth = resizeStartWidth + delta;
+            SetImageWidth(selectedImage, newWidth);
+
+            // Ensure height updated using aspect ratio if known
+            if (imageAspects.ContainsKey(selectedImage.VisionId))
+            {
+                var aspect = imageAspects[selectedImage.VisionId];
+                imageHeights[selectedImage.VisionId] = (int)(newWidth / aspect);
+            }
+        }
+
+        StateHasChanged();
+    }
+
+    // End resize operation
+    private async void OnResizeEnd(MouseEventArgs e)
+    {
+        if (!isResizing || selectedImage == null) return;
+        isResizing = false;
+
+        // Optionally persist new width somewhere or trigger save
+        // Currently we only store width in-memory (imageSizes dictionary)
+        try
+        {
+            dotNetRefForResize?.Dispose();
+            dotNetRefForResize = null;
+        }
+        catch { }
+
+        // Persist width/height to backend so sizing survives refresh
+        if (!string.IsNullOrEmpty(userId) && selectedImage != null)
+        {
+            var dto = new CreateVisionBoardItemDTO
+            {
+                ImageUrl = selectedImage.ImageUrl,
+                Caption = selectedImage.Caption,
+                PositionX = selectedImage.PositionX,
+                PositionY = selectedImage.PositionY,
+                Width = imageSizes.ContainsKey(selectedImage.VisionId) ? imageSizes[selectedImage.VisionId] : (int?)selectedImage.Width,
+                Height = imageHeights.ContainsKey(selectedImage.VisionId) ? imageHeights[selectedImage.VisionId] : (int?)selectedImage.Height
+            };
+
+            try
+            {
+                var (success, error, _) = await VisionBoardService.UpdateVisionBoardItemAsync(selectedImage.VisionId, dto, userId);
+                if (success)
+                {
+                    await LoadItems();
+                }
+                else
+                {
+                    errorMessage = error;
+                }
+            }
+            catch { /* ignore persistence errors for now */ }
+        }
+
+        await Task.Yield();
+    }
+
+    private void OnDragEnter(DragEventArgs e)
+    {
+    }
+
+    private void OnDragLeave(DragEventArgs e)
+    {
+    }
+
+    private void OnDragOver(DragEventArgs e)
+    {
+        // Required to allow drop
+    }
+
+    private async Task OnDrop(DragEventArgs e)
+    {
+        if (draggedItem == null || string.IsNullOrEmpty(userId)) return;
+
+        try
+        {
+            // Get the bounding rect of the inner board area (the element that is scaled)
+            var innerRect = await JSRuntime.InvokeAsync<BoundingClientRect>("getBoundingClientRect", ".board-canvas-inner");
+
+            // Cursor position relative to inner board (unscaled)
+            double clientX = e.ClientX;
+            double clientY = e.ClientY;
+
+            // Coordinates in inner (untransformed) space: subtract inner left/top then divide by zoom
+            double relX = (clientX - innerRect.Left) / zoomLevel;
+            double relY = (clientY - innerRect.Top) / zoomLevel;
+
+            // Use the dragOffset captured for the dragged element (measured in page pixels)
+            // Convert dragOffset to inner-space by dividing by zoomLevel
+            int x = (int)(relX - (dragOffsetX / zoomLevel));
+            int y = (int)(relY - (dragOffsetY / zoomLevel));
+
+            // Clamp within canvas positive area
+            if (x < 10) x = 10;
+            if (y < 10) y = 10;
+
+            // Update position
+            var updateDto = new CreateVisionBoardItemDTO
+            {
+                ImageUrl = draggedItem.ImageUrl,
+                Caption = draggedItem.Caption,
+                PositionX = x,
+                PositionY = y
+            };
+
+            var (success, error, _) = await VisionBoardService.UpdateVisionBoardItemAsync(
+                draggedItem.VisionId, updateDto, userId);
+
+            if (success)
+            {
+                await LoadItems();
+                StateHasChanged();
+            }
+            else
+            {
+                errorMessage = error;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error positioning image: {ex.Message}";
+        }
+        finally
+        {
+            draggedItem = null;
+        }
+    }
+
+    private async Task RemoveFromBoard(VisionBoardItemDTO item)
+    {
+        if (string.IsNullOrEmpty(userId)) return;
+
+        // Reset position to 0,0 (back to library)
+        var updateDto = new CreateVisionBoardItemDTO
+        {
+            ImageUrl = item.ImageUrl,
+            Caption = item.Caption,
+            PositionX = 0,
+            PositionY = 0
+        };
+
+        var (success, error, _) = await VisionBoardService.UpdateVisionBoardItemAsync(
+            item.VisionId, updateDto, userId);
+
+        if (success)
+        {
+            successMessage = "Image moved back to library";
+            // clear any stored custom size so it resets in the library
+            imageSizes.Remove(item.VisionId);
+            imageHeights.Remove(item.VisionId);
+            // also persist clearing width/height
+            updateDto.Width = null;
+            updateDto.Height = null;
+            await LoadItems();
+        }
+        else
+        {
+            errorMessage = error;
+        }
+    }
+
+    // Resize Handlers
+    private async void StartResize(VisionBoardItemDTO item, MouseEventArgs e, string mode)
+    {
+        isResizing = true;
+        selectedImage = item;
+        resizeStartX = (int)e.ClientX;
+        resizeStartY = (int)e.ClientY;
+        resizeStartWidth = GetImageWidth(item);
+        int resizeStartHeight = imageHeights.ContainsKey(item.VisionId) ? imageHeights[item.VisionId] : (item.Height ?? (int)(resizeStartWidth / (imageAspects.ContainsKey(item.VisionId) ? imageAspects[item.VisionId] : 4.0/3.0)));
+
+        // Get aspect ratio via JS so we scale proportionally
+        try
+        {
+            var size = await JSRuntime.InvokeAsync<DomSize?>("getImageSizeForVisionId", item.VisionId.ToString());
+            if (size != null && size.Height > 0)
+            {
+                imageAspects[item.VisionId] = size.Width / size.Height;
+                // if persisted height exists prefer that, otherwise compute from DOM size
+                if (!imageHeights.ContainsKey(item.VisionId) && item.Height.HasValue)
+                {
+                    imageHeights[item.VisionId] = item.Height.Value;
+                }
+                else
+                {
+                    imageHeights[item.VisionId] = (int)(size.Height / zoomLevel);
+                }
+            }
+        }
+        catch
+        {
+            // ignore - we'll approximate aspect ratio later
+        }
+
+        // record mode and start global JS listeners so resize continues if pointer leaves the handle
+        currentResizeMode = mode;
+        try
+        {
+            dotNetRefForResize?.Dispose();
+            dotNetRefForResize = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("startGlobalResize", dotNetRefForResize);
+        }
+        catch
+        {
+            // ignore JS interop failures
+        }
+    }
+
+    // wrappers for simpler markup binding
+    private void StartResizeHorizontal(VisionBoardItemDTO item, MouseEventArgs e) => StartResize(item, e, "horizontal");
+    private void StartResizeVertical(VisionBoardItemDTO item, MouseEventArgs e) => StartResize(item, e, "vertical");
+
+    private void SetImageHeight(VisionBoardItemDTO item, int height)
+    {
+        if (height < 50) height = 50;
+        if (height > 1200) height = 1200;
+        imageHeights[item.VisionId] = height;
+    }
+
+    private void ResetSelectedSize()
+    {
+        if (selectedImage == null) return;
+        // reset to default
+        imageSizes.Remove(selectedImage.VisionId);
+        imageHeights.Remove(selectedImage.VisionId);
+        StateHasChanged();
+    }
+
+    private DotNetObjectReference<VisionBoard>? dotNetRefForResize;
+
+    [JSInvokable]
+    public void OnGlobalResizeMove(int clientX, int clientY)
+    {
+        // Create a synthetic MouseEventArgs-like wrapper by only passing client coords
+        var e = new MouseEventArgs { ClientX = clientX, ClientY = clientY };
+        OnResizeMove(e);
+    }
+
+    [JSInvokable]
+    public void OnGlobalResizeEnd(int clientX, int clientY)
+    {
+        var e = new MouseEventArgs { ClientX = clientX, ClientY = clientY };
+        OnResizeEnd(e);
+    }
+
+    private int GetImageWidth(VisionBoardItemDTO item)
+    {
+        // Store custom widths, default to 200px
+        return imageSizes.ContainsKey(item.VisionId) ? imageSizes[item.VisionId] : 200;
+    }
+
+    private void SetImageWidth(VisionBoardItemDTO item, int width)
+    {
+        if (width < 100) width = 100; // Minimum width
+        if (width > 600) width = 600; // Maximum width
+        imageSizes[item.VisionId] = width;
+        // If we know aspect ratio, compute and store height to keep proportional
+        if (imageAspects.ContainsKey(item.VisionId))
+        {
+            var aspect = imageAspects[item.VisionId];
+            imageHeights[item.VisionId] = (int)(width / aspect);
+        }
+    }
+
+    // Helper class for JS interop
+    public class BoundingClientRect
+    {
+        public double Left { get; set; }
+        public double Top { get; set; }
+        public double Right { get; set; }
+        public double Bottom { get; set; }
+        public double Width { get; set; }
+        public double Height { get; set; }
+    }
+
+    // For image size returned from JS
+    public class DomSize
+    {
+        public double Width { get; set; }
+        public double Height { get; set; }
+    }
+}

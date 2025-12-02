@@ -1,0 +1,62 @@
+@using Tekhnologia.Services.Interfaces
+@implements IDisposable
+@inject IAuthStateService AuthState
+
+<footer class="footer">
+    <div class="footer-logo">
+        <a href="/">
+            <img src="/favicon.png" alt="Logo" class="footer-logo-icon" />
+            <span class="logo-text">TEKHNOLOGIA</span><span class="logo-gray">.CO.UK</span>
+        </a>
+    </div>
+
+    <nav class="footer-nav">
+        <a class="navbar-item" href="/goaltracker">Goal Tracker</a>
+        <a class="navbar-item" href="/journal">Journal</a>
+        <a class="navbar-item" href="/visionboard">Vision Board</a>
+        <a class="navbar-item" href="/aicoach">AI Coach</a>
+        <a class="navbar-item" href="/resources">Resources</a>
+    </nav>
+
+    <div class="footer-buttons">
+        @if (AuthState.IsLoggedIn)
+        {
+            @if (AuthState.IsAdmin)
+            {
+                <a class="button is-admin" href="/adminpanel">Admin Panel</a>
+            }
+            <a class="button is-primary" href="/profile">View Profile</a>
+            <button class="button is-light" onclick="auth.signout()">Sign Out</button>
+        }
+        else
+        {
+            <a class="button is-outlined" href="/signup">Sign Up</a>
+            <a class="button is-primary" href="/signin">Sign In</a>
+        }
+    </div>
+
+    <div class="footer-legal">
+        <p>
+            <span>© 2025 Tekhnologia. Built for women in tech.</span>
+            <a class="link" href="/terms-of-service" target="_blank">Terms of Service</a>
+            <a class="link" href="/privacy-policy" target="_blank">Privacy Policy</a>
+        </p>
+    </div>
+</footer>
+
+@code {
+    private Action? authHandler;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authHandler = () => InvokeAsync(StateHasChanged);
+        AuthState.OnChange += authHandler;
+        await AuthState.CheckAuthStatus();
+    }
+
+    public void Dispose()
+    {
+        if (authHandler != null)
+            AuthState.OnChange -= authHandler;
+    }
+}

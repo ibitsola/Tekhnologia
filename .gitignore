@@ -1,0 +1,22 @@
+# Private development documentation
+notes/
+sdlc/
+.github/copilot-instructions.md
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# Build outputs
+bin/
+obj/
+
+# IDE files
+.vs/
+.vscode/
+.idea/
+
+# Environment files
+.env
+.env.local

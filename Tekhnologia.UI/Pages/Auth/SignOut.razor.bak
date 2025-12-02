@@ -1,0 +1,17 @@
+@page "/signout"
+
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+
+<p>Signing you out…</p>
+
+@code
+{
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("auth.signout");
+        }
+    }
+}

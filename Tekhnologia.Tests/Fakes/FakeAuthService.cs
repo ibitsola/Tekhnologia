@@ -4,7 +4,7 @@ using Tekhnologia.Services.Interfaces;
 
 namespace Tekhnologia.Tests.Fakes
 {
-    public class FakeAuthService : IAuthService
+    public class FakeAuthService : IBlazorAuthService
     {
         public Task<IdentityResult> RegisterAsync(RegisterModel model)
         {

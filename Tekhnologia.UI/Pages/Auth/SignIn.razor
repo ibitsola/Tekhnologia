@@ -1,0 +1,113 @@
+@page "/signin"
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@using Tekhnologia.Models
+@using Tekhnologia.Services.Interfaces
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject IAuthStateService  AuthState
+
+@implements IDisposable
+
+
+@if (!hasCheckedSignin)
+{
+    <p>Checking authentication...</p>
+}
+else if (AuthState.IsLoggedIn)
+{
+    <p>✅ You are logged in — redirecting to profile...</p>
+}
+else
+{
+    <EditForm Model="@signinModel" OnValidSubmit="@HandleSignin" FormName="SignInForm" class="auth-container">
+        <DataAnnotationsValidator />
+        <div class="auth-box">
+            <ValidationSummary class="notification is-alert" />
+
+            <h2 class="auth-heading">Signin</h2>
+
+            <div class="field">
+                <label class="label" for="email">Email</label>
+                <div class="control">
+                    <InputText id="email" class="input" @bind-Value="signinModel.Email" />
+                </div>
+                <ValidationMessage For="@(() => signinModel.Email)" />
+            </div>
+
+            <div class="field">
+                <label class="label" for="password">Password</label>
+                <div class="control">
+                    <InputText id="password" type="password" class="input" @bind-Value="signinModel.Password" />
+                </div>
+                <ValidationMessage For="@(() => signinModel.Password)" />
+            </div>
+
+            <button type="submit" class="button auth-button" disabled="@isSubmitting">
+                @(isSubmitting ? "Signing In..." : "Signin")
+            </button>
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="notification is-alert">@errorMessage</div>
+        }
+
+        <div class="already-member">
+            <p>Don't have an account?</p>
+            <a href="/signup" class="button is-primary auth-button">Sign Up</a>
+        </div>
+    </EditForm>
+}
+
+@code {
+    private LoginModel signinModel = new();
+    private string? errorMessage;
+    private bool isSubmitting = false;
+    private bool hasCheckedSignin = false;
+
+    private Action? authHandler;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authHandler = () => InvokeAsync(() =>
+        {
+            if (AuthState.IsLoggedIn)
+            {
+                Navigation.NavigateTo("/profile");
+            }
+        });
+
+        AuthState.OnChange += authHandler;
+
+        await AuthState.CheckAuthStatus();
+        hasCheckedSignin = true;
+    }
+
+    public void Dispose()
+    {
+        if (authHandler != null)
+            AuthState.OnChange -= authHandler;
+    }
+
+    private async Task HandleSignin()
+    {
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            // call the JS helper we just added
+            await JS.InvokeVoidAsync("auth.signin", signinModel);
+            // never returns – page reloads inside auth.signin
+        }
+        catch (JSException ex)
+        {
+            errorMessage = ex.Message;
+        }
+
+        isSubmitting = false;
+    }
+}

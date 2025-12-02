@@ -15,5 +15,9 @@ namespace Tekhnologia.Models.DTOs
         public bool IsFree { get; set; }
 
         public decimal? Price { get; set; }  // Nullable price field
+
+        public string? ThumbnailUrl { get; set; }
+
+        public string? ExternalUrl { get; set; }
     }
 }

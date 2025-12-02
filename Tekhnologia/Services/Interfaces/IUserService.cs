@@ -8,5 +8,8 @@ namespace Tekhnologia.Services.Interfaces
         Task<User?> GetUserProfileAsync(string userId);
         Task<(bool Success, IEnumerable<string> Errors, User? UpdatedUser)> UpdateUserProfileAsync(string userId, UpdateUserDTO model);
         Task<(bool Success, IEnumerable<string> Errors)> UpdateUserPasswordAsync(string userId, UpdatePasswordDTO model);
+        Task<(bool Success, IEnumerable<string> Errors)> DeleteCurrentUserAsync(string userId, string email, string password);
+
+        Task<User?> GetCurrentUserAsync();
     }
 }

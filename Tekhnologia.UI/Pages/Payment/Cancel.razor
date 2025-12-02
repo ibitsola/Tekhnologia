@@ -1,0 +1,33 @@
+@page "/cancel"
+@layout Views.Shared.MainLayout
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+@rendermode Microsoft.AspNetCore.Components.Web.RenderMode.InteractiveServer
+@inject NavigationManager Navigation
+
+<div class="goal-tracker-page">
+    <div class="goal-tracker-container" style="max-width: 600px; margin: 0 auto; padding: 2rem;">
+        <div class="box" style="text-align: center;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">❌</div>
+            <h1 class="title is-3" style="color: var(--text-muted);">Payment Cancelled</h1>
+            <p class="subtitle" style="margin-top: 1rem;">
+                Your payment was cancelled. No charges have been made.
+            </p>
+            <p style="margin-top: 1rem; color: var(--text-muted);">
+                You can return to the Resources page to try again or browse other resources.
+            </p>
+            <div style="margin-top: 2rem;">
+                <button class="button user-role-tag is-large" @onclick="GoToResources">
+                    Back to Resources
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private void GoToResources()
+    {
+        Navigation.NavigateTo("/resources");
+    }
+}

@@ -18,6 +18,13 @@ namespace Tekhnologia.Models
 
         public string Caption { get; set; } = string.Empty;
 
+        public int PositionX { get; set; } = 0;
+        public int PositionY { get; set; } = 0;
+
+        // Optional persisted width/height for saved sizing
+        public int? Width { get; set; }
+        public int? Height { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

@@ -1,6 +1,6 @@
-using Tekhnologia.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Tekhnologia.Services.Interfaces;
+using Tekhnologia.Models;
 
 namespace Tekhnologia.Controllers
 {
@@ -8,34 +8,94 @@ namespace Tekhnologia.Controllers
     [Route("api/auth")]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthService _authService;
+        private readonly SignInManager<User> _signInManager;
+        private readonly UserManager<User> _userManager;
 
-        public AuthController(IAuthService authService)
+        public AuthController(SignInManager<User> signInManager, UserManager<User> userManager)
         {
-            _authService = authService;
+            _signInManager = signInManager;
+            _userManager = userManager;
         }
 
+        // Login API for Blazor
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var allErrors = ModelState.Values.SelectMany(v => v.Errors)
+                                                .Select(e => e.ErrorMessage)
+                                                .ToList();
+                return BadRequest(new { errors = allErrors });
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
+            {
+                return Unauthorized(new { errors = new[] { "Invalid email or password." } });
+            }
+
+            await _signInManager.SignInAsync(user, isPersistent: false);
+            return Ok();
+        }
+
+        // Logout route 
+        [HttpPost("logout")]
+        [HttpGet("logout")]
+        public async Task<IActionResult> Logout([FromQuery] string? returnUrl = null)
+        {
+            await _signInManager.SignOutAsync();
+            
+            // If there's a returnUrl, redirect to it, otherwise go to home
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+            
+            return Redirect("/");
+        }
+
+        // Register endpoint 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            {
+                var allErrors = ModelState.Values.SelectMany(v => v.Errors)
+                                                .Select(e => e.ErrorMessage)
+                                                .ToList();
+                return BadRequest(new { errors = allErrors });
+            }
 
-            var result = await _authService.RegisterAsync(model);
+            var user = new User
+            {
+                Email = model.Email,
+                UserName = model.Email,
+                Name = model.Name
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
 
             return Ok(new { message = "User registered successfully" });
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginModel model)
+        // Auto-login endpoint after registration (GET to allow cookie write)
+        [HttpGet("autologin")]
+        public async Task<IActionResult> AutoLogin([FromQuery] string email, [FromQuery] string password)
         {
-            var token = await _authService.LoginAsync(model);
-            if (string.IsNullOrEmpty(token))
-                return Unauthorized("Invalid credentials");
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+                return Redirect("/signin");
 
-            return Ok(new { Token = token });
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null && await _userManager.CheckPasswordAsync(user, password))
+            {
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return Redirect("/");
+            }
+
+            return Redirect("/signin");
         }
     }
 }

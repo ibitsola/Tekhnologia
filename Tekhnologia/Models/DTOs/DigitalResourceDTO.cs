@@ -18,5 +18,9 @@ namespace Tekhnologia.Models.DTOs
         public string FilePath { get; set; } = string.Empty; // URL for the file
 
         public DateTime UploadDate { get; set; }
+
+        public string? ThumbnailUrl { get; set; }
+
+        public string? ExternalUrl { get; set; }
     }
 }

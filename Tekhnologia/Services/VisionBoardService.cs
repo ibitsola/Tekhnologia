@@ -28,6 +28,10 @@ namespace Tekhnologia.Services
                 UserId = userId,
                 ImageUrl = dto.ImageUrl,
                 Caption = dto.Caption,
+                PositionX = dto.PositionX,
+                PositionY = dto.PositionY,
+                Width = dto.Width,
+                Height = dto.Height,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -49,6 +53,10 @@ namespace Tekhnologia.Services
                     VisionId = v.VisionId,
                     ImageUrl = v.ImageUrl,
                     Caption = v.Caption,
+                    PositionX = v.PositionX,
+                    PositionY = v.PositionY,
+                    Width = v.Width,
+                    Height = v.Height,
                     CreatedAt = v.CreatedAt
                 })
                 .ToListAsync();
@@ -76,6 +84,10 @@ namespace Tekhnologia.Services
 
             item.ImageUrl = dto.ImageUrl;
             item.Caption = dto.Caption;
+            item.PositionX = dto.PositionX;
+            item.PositionY = dto.PositionY;
+            item.Width = dto.Width;
+            item.Height = dto.Height;
             _context.VisionBoardItems.Update(item);
             await _context.SaveChangesAsync();
 

@@ -1,0 +1,38 @@
+@page "/adminpanel"
+@layout Views.Shared.MainLayout
+@using Microsoft.AspNetCore.Components
+@rendermode Microsoft.AspNetCore.Components.Web.RenderMode.InteractiveServer
+
+@using Microsoft.AspNetCore.Components.Authorization
+@using Tekhnologia.UI.Components
+@inject NavigationManager Navigation
+
+<AuthorizeView Roles="Admin" Context="authContext">
+    <Authorized>
+        <div class="admin-page">
+            <div class="container">
+                <h1 class="title">Admin Panel</h1>
+                <p class="subtitle">Manage users and resources</p>
+
+                <!-- User Management Section -->
+                <AdminUsers />
+
+                <!-- Resource Management Section -->
+                <AdminResources />
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="section">
+            <div class="container has-text-centered">
+                <h1 class="title">Access Denied</h1>
+                <p>You do not have permission to view this page.</p>
+                <a class="button is-primary" href="/">Go Home</a>
+            </div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    // No state management needed - both sections always visible
+}

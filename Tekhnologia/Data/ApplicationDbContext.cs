@@ -14,6 +14,7 @@ namespace Tekhnologia.Data
         public DbSet<JournalEntry> JournalEntries { get; set;} // Stores users' journal entries
         public DbSet<VisionBoardItem> VisionBoardItems { get; set;} // Stores vision board items (images & text)
         public DbSet<Goal> Goals { get; set; } // Stores users career goals
+        public DbSet<Conversation> Conversations { get; set; } // Stores AI coach conversations
         public DbSet<DigitalResource> DigitalResources { get; set; }  // New table for digital resources
         public DbSet<Purchase> Purchases { get; set; }
 

@@ -1,0 +1,110 @@
+@page "/signup"
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using Tekhnologia.Models
+@using Tekhnologia.Services.Interfaces
+@inject NavigationManager Navigation
+@inject IAuthStateService AuthState
+@inject IBlazorAuthService AuthService
+
+<EditForm Model="@signupModel" OnValidSubmit="@HandleValidSubmit" FormName="SignUpForm" class="auth-container">
+    <DataAnnotationsValidator />
+
+    <div class="auth-box">
+        <ValidationSummary class="notification is-alert" />
+
+        <h2 class="auth-heading">Sign Up</h2>
+
+        <!-- NAME -->
+        <div class="field">
+            <label class="label" for="name">Name</label>
+            <div class="control">
+                <InputText id="name" class="input" @bind-Value="@signupModel.Name" />
+            </div>
+            <ValidationMessage For="@(() => signupModel.Name)" />
+        </div>
+
+        <!-- EMAIL -->
+        <div class="field">
+            <label class="label" for="email">Email</label>
+            <div class="control">
+                <InputText id="email" class="input" @bind-Value="@signupModel.Email" />
+            </div>
+            <ValidationMessage For="@(() => signupModel.Email)" />
+        </div>
+
+        <!-- PASSWORD -->
+        <div class="field">
+            <label class="label" for="password">Password</label>
+            <div class="control">
+                <InputText id="password" type="password" class="input" @bind-Value="@signupModel.Password" />
+            </div>
+            <ValidationMessage For="@(() => signupModel.Password)" />
+        </div>
+
+        <!-- CONFIRM PASSWORD -->
+        <div class="field">
+            <label class="label" for="confirmPassword">Confirm Password</label>
+            <div class="control">
+                <InputText id="confirmPassword" type="password" class="input" @bind-Value="@signupModel.ConfirmPassword" />
+            </div>
+            <ValidationMessage For="@(() => signupModel.ConfirmPassword)" />
+        </div>
+
+        <div class="field is-grouped is-grouped-centered" style="margin-top:1rem; justify-content:center;">
+            <div class="control">
+                <button type="submit" class="button signup-button" disabled="@isSubmitting">
+                    @(isSubmitting ? "Signing Up..." : "Sign Up")
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="notification is-alert">@errorMessage</div>
+    }
+
+    <div class="already-member">
+        <p>Already have an account?</p>
+        <a href="/signin" class="button is-primary auth-button">Log in</a>
+    </div>
+</EditForm>
+
+@code {
+    private RegisterModel signupModel = new();
+    private string? errorMessage;
+    private bool isSubmitting = false;
+
+    private async Task HandleValidSubmit()
+    {
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var result = await AuthService.RegisterAsync(signupModel);
+
+            if (result.Succeeded)
+            {
+                // Redirect to server endpoint that can write cookies
+                var email = Uri.EscapeDataString(signupModel.Email);
+                var password = Uri.EscapeDataString(signupModel.Password);
+                Navigation.NavigateTo($"/api/auth/autologin?email={email}&password={password}", forceLoad: true);
+            }
+            else
+            {
+                errorMessage = string.Join("; ", result.Errors.Select(e => e.Description));
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Registration failed: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}
