@@ -176,19 +176,19 @@ namespace Tekhnologia.Services
         }
 
         /// <summary>
-        /// Marks a purchase as paid by Stripe session ID (called after successful payment).
+        /// Marks a purchase as paid using the Stripe session ID.
         /// </summary>
-        public async Task MarkPurchaseAsPaidBySessionIdAsync(string stripeSessionId)
+        public async Task MarkPurchaseAsPaidBySessionIdAsync(string sessionId)
         {
-            var purchase = _context.Purchases.FirstOrDefault(p => p.StripeSessionId == stripeSessionId);
+            var purchase = _context.Purchases.FirstOrDefault(p => p.StripeSessionId == sessionId);
             if (purchase == null)
-                throw new Exception($"Purchase not found for session ID: {stripeSessionId}");
+                throw new Exception("Purchase not found for the given session ID.");
 
-            if (!purchase.IsPaid)
-            {
-                purchase.IsPaid = true;
-                await _context.SaveChangesAsync();
-            }
+            if (purchase.IsPaid)
+                throw new Exception("Purchase is already marked as paid.");
+
+            purchase.IsPaid = true;
+            await _context.SaveChangesAsync();
         }
 
         /// <summary>

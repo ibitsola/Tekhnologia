@@ -182,7 +182,10 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db  = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
+    await db.Database.MigrateAsync();
+    
+    // Ensure database connection is properly established
+    await db.Database.EnsureCreatedAsync();
 
     var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     foreach (var role in new[] { "Admin", "User" })

@@ -18,7 +18,7 @@ namespace Tekhnologia.Tests.Services
             
             // Create mock configuration that returns null for OpenAI:ApiKey
             var mockConfig = new Mock<IConfiguration>();
-            mockConfig.Setup(c => c["OpenAI:ApiKey"]).Returns((string)null);
+            mockConfig.Setup(c => c["OpenAI:ApiKey"]).Returns((string?)null);
 
             // Act
             Action act = () => new AIService(mockConfig.Object);

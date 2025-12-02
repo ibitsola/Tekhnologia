@@ -15,8 +15,8 @@ namespace Tekhnologia.Models.DTOs
 
         public decimal? Price { get; set; }  // Nullable price field
 
-        public string? ThumbnailUrl { get; set; }  // Optional thumbnail image URL
+        public string? ThumbnailUrl { get; set; }
 
-        public string? ExternalUrl { get; set; }  // For courses: external link
+        public string? ExternalUrl { get; set; }
     }
 }

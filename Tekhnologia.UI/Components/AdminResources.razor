@@ -355,6 +355,12 @@
                     formFile = new FormFileAdapter(ms, selectedFile.Name, selectedFile.Name, selectedFile.ContentType, ms.Length);
                 }
 
+                if (formFile == null)
+                {
+                    errorMessage = "File upload failed. Please try again.";
+                    return;
+                }
+
                 var createDTO = new CreateDigitalResourceDTO
                 {
                     Title = resourceForm.Title,
