@@ -17,6 +17,19 @@ namespace Tekhnologia.Controllers
             _userService = userService;
         }
 
+        // Compatibility endpoint used by the migrated UI: GET /api/user/current
+        [HttpGet]
+        [Route("/api/user/current")]
+        [Authorize]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var user = await _userService.GetCurrentUserAsync();
+            if (user == null)
+                return Unauthorized();
+
+            return Ok(new { user.Id, user.Name, user.Email });
+        }
+
         // Get own profile (any logged-in user)
         [HttpGet("me")]
         [Authorize]

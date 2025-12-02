@@ -1,0 +1,320 @@
+@page "/admin/users"
+@layout Views.Shared.MainLayout
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Authorization
+@using Tekhnologia.Services.Interfaces
+@rendermode RenderMode.InteractiveServer
+@inject IAdminService AdminService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        @if (loading)
+        {
+            <div class="section has-text-centered">
+                <p>Loading...</p>
+            </div>
+        }
+        else
+        {
+    <div class="section admin-page">
+        <div class="container">
+            <h1 class="title">User Management</h1>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="notification is-danger">
+                    <button class="delete" @onclick="() => errorMessage = null"></button>
+                    @errorMessage
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="notification is-success">
+                    <button class="delete" @onclick="() => successMessage = null"></button>
+                    @successMessage
+                </div>
+            }
+
+            @if (users == null || !users.Any())
+            {
+                <div class="notification is-info">
+                    <p>No users found.</p>
+                </div>
+            }
+            else
+            {
+                <div class="box">
+                    <table class="table is-fullwidth is-striped is-hoverable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in users)
+                            {
+                                <tr>
+                                    <td>@user.Name</td>
+                                    <td>@user.Email</td>
+                                    <td>
+                                        <span class="tag @(user.Role == "Admin" ? "admin-role-tag" : "user-role-tag")">
+                                            @user.Role
+                                        </span>
+                                    </td>
+                                    <td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        <div class="buttons are-small">
+                                            <button class="button admin-action-btn" @onclick="() => ViewUserDetails(user.Id)">
+                                                View
+                                            </button>
+                                            @if (user.Role != "Admin")
+                                            {
+                                                <button class="button admin-action-btn" @onclick="() => PromoteUser(user.Id)">
+                                                    Promote
+                                                </button>
+                                            }
+                                            @if (user.Id != currentUserId)
+                                            {
+                                                <button class="button admin-action-btn" @onclick="() => DeleteUser(user.Id, user.Name)">
+                                                    Delete
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- User Details Modal -->
+    @if (showDetailsModal && selectedUser != null)
+    {
+        <div class="modal is-active">
+            <div class="modal-background" @onclick="CloseModal"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">User Details</p>
+                    <button class="delete" aria-label="close" @onclick="CloseModal"></button>
+                </header>
+                <section class="modal-card-body">
+                    <div class="content">
+                        <p><strong>Name:</strong> @selectedUser.Name</p>
+                        <p><strong>Email:</strong> @selectedUser.Email</p>
+                        <p><strong>Role:</strong> <span class="tag @(selectedUser.Role == "Admin" ? "admin-role-tag" : "user-role-tag")">@selectedUser.Role</span></p>
+                        <p><strong>User ID:</strong> @selectedUser.Id</p>
+                        <p><strong>Created:</strong> @selectedUser.CreatedAt.ToString("MMMM dd, yyyy 'at' h:mm tt")</p>
+                        <p><strong>Last Updated:</strong> @selectedUser.UpdatedAt.ToString("MMMM dd, yyyy 'at' h:mm tt")</p>
+                    </div>
+                </section>
+                <footer class="modal-card-foot">
+                    <button class="button" @onclick="CloseModal">Close</button>
+                </footer>
+            </div>
+        </div>
+    }
+
+    <!-- Delete Confirmation Modal -->
+    @if (showDeleteModal)
+    {
+        <div class="modal is-active">
+            <div class="modal-background" @onclick="CloseModal"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Confirm Deletion</p>
+                    <button class="delete" aria-label="close" @onclick="CloseModal"></button>
+                </header>
+                <section class="modal-card-body">
+                    <div class="content">
+                        <p>Are you sure you want to delete user <strong>@userToDelete?.Name</strong>?</p>
+                        <p class="has-text-danger">This action cannot be undone!</p>
+                    </div>
+                </section>
+                <footer class="modal-card-foot">
+                    <button class="button is-danger" @onclick="ConfirmDelete" disabled="@isDeleting">
+                        @(isDeleting ? "Deleting..." : "Delete")
+                    </button>
+                    <button class="button" @onclick="CloseModal">Cancel</button>
+                </footer>
+            </div>
+        </div>
+    }
+        }
+    </Authorized>
+    
+    <NotAuthorized>
+        <div class="section">
+            <div class="notification is-danger">
+                <p>Access Denied. You must be an administrator to view this page.</p>
+            </div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private List<UserListItem>? users;
+    private UserListItem? selectedUser;
+    private UserListItem? userToDelete;
+    private string? errorMessage;
+    private string? successMessage;
+    private string? currentUserId;
+    private bool loading = true;
+    private bool isAdmin = false;
+    private bool showDetailsModal = false;
+    private bool showDeleteModal = false;
+    private bool isDeleting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            
+            if (!authState.User.Identity?.IsAuthenticated ?? false)
+            {
+                Navigation.NavigateTo("/signin");
+                return;
+            }
+
+            currentUserId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            // Check if user is admin
+            isAdmin = authState.User.IsInRole("Admin");
+
+            if (!isAdmin)
+            {
+                loading = false;
+                return;
+            }
+
+            await LoadUsers();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading page: {ex.Message}";
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task LoadUsers()
+    {
+        try
+        {
+            var usersData = await AdminService.GetAllUsersAsync();
+            users = usersData.Select(u => new UserListItem
+            {
+                Id = u.GetType().GetProperty("Id")?.GetValue(u)?.ToString() ?? "",
+                Name = u.GetType().GetProperty("Name")?.GetValue(u)?.ToString() ?? "",
+                Email = u.GetType().GetProperty("Email")?.GetValue(u)?.ToString() ?? "",
+                Role = u.GetType().GetProperty("Role")?.GetValue(u)?.ToString() ?? "User",
+                CreatedAt = (DateTime)(u.GetType().GetProperty("CreatedAt")?.GetValue(u) ?? DateTime.MinValue),
+                UpdatedAt = (DateTime)(u.GetType().GetProperty("UpdatedAt")?.GetValue(u) ?? DateTime.MinValue)
+            }).ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading users: {ex.Message}";
+        }
+    }
+
+    private void ViewUserDetails(string userId)
+    {
+        selectedUser = users?.FirstOrDefault(u => u.Id == userId);
+        if (selectedUser != null)
+        {
+            showDetailsModal = true;
+        }
+    }
+
+    private async Task PromoteUser(string userId)
+    {
+        try
+        {
+            var user = users?.FirstOrDefault(u => u.Id == userId);
+            if (user == null) return;
+
+            var response = await AdminService.PromoteToAdminAsync(userId);
+            if (response.Success)
+            {
+                successMessage = $"{user.Name} has been promoted to Admin!";
+                await LoadUsers();
+            }
+            else
+            {
+                errorMessage = string.Join("; ", response.Errors);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error promoting user: {ex.Message}";
+        }
+    }
+
+    private void DeleteUser(string userId, string userName)
+    {
+        userToDelete = users?.FirstOrDefault(u => u.Id == userId);
+        showDeleteModal = true;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (userToDelete == null) return;
+
+        isDeleting = true;
+        try
+        {
+            var response = await AdminService.DeleteUserAsync(userToDelete.Id);
+            if (response.Success)
+            {
+                successMessage = $"User {userToDelete.Name} deleted successfully";
+                await LoadUsers();
+                CloseModal();
+            }
+            else
+            {
+                errorMessage = string.Join("; ", response.Errors);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error deleting user: {ex.Message}";
+        }
+        finally
+        {
+            isDeleting = false;
+        }
+    }
+
+    private void CloseModal()
+    {
+        showDetailsModal = false;
+        showDeleteModal = false;
+        selectedUser = null;
+        userToDelete = null;
+    }
+
+    private class UserListItem
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+}

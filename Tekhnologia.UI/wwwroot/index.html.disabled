@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tekhnologia - Static index (disabled)</title>
+</head>
+<body>
+    <h2>This static index page has been disabled during debugging. Use the interactive routes instead.</h2>
+    <p>Visit <a href="/">/</a> or <a href="/goaltracker">/goaltracker</a>.</p>
+</body>
+</html>

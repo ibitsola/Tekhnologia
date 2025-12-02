@@ -28,6 +28,9 @@ namespace Tekhnologia.Services.Interfaces
         // Marks a purchase as paid.
         Task MarkPurchaseAsPaidAsync(int id);
 
+        // Marks a purchase as paid by Stripe session ID.
+        Task MarkPurchaseAsPaidBySessionIdAsync(string stripeSessionId);
+
         // Processes a Stripe webhook event and marks the associated purchase as paid.
         Task ProcessStripeWebhookAsync(string json, string stripeSignature);
     }
