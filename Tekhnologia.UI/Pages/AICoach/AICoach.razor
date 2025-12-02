@@ -65,7 +65,7 @@
             <div class="goal-detail-area ai-chat-panel ai-chat-bg">
                 <div class="ai-chat-bg-layer" aria-hidden="true"></div>
                 <div class="board-header chat-header">
-                    <h1 class="board-title">Eva Your AI Coach</h1>
+                    <h1 class="board-title">Eve your AI Coach</h1>
                     <p class="board-subtitle muted">Personalised career & business coaching</p>
                 </div>
 
@@ -116,7 +116,7 @@
     <NotAuthorized>
         <section class="home">
             <div class="home-intro">
-                <h1 class="title is-1">Eva — AI Coach</h1>
+                <h1 class="title is-1">Eve the AI Coach</h1>
                 <hr class="hr" />
                 <p class="home-text">Personalised career coaching for women in tech. Please sign in to access your conversations and AI coach features.</p>
                 <div class="home-buttons buttons">
@@ -141,7 +141,6 @@
     private Guid? selectedConversationId;
     private List<Dictionary<string,string>> messagesBacking = new();
     private IJSObjectReference? aicoachApiModule;
-    private bool isNewChat = false;
 
     async Task Send()
     {
@@ -244,7 +243,6 @@
                         }
                     }
                 }
-                isNewChat = false;
                 await InvokeAsync(StateHasChanged);
             }
         }
@@ -269,7 +267,6 @@
         selectedConversationId = null;
         log.Clear();
         messagesBacking.Clear();
-        isNewChat = true;
         await InvokeAsync(StateHasChanged);
     }
 

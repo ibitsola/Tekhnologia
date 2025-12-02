@@ -7,6 +7,7 @@ using Tekhnologia.Services;
 using Tekhnologia.Services.Interfaces;
 using Microsoft.AspNetCore.DataProtection;
 using System.IO;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,14 @@ var configuration = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .Build();
 var openAiKey = configuration["OpenAI:ApiKey"];
+
+// Stripe configuration (read from environment variables)
+var stripeSecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY")
+                    ?? builder.Configuration["Stripe:SecretKey"];
+if (!string.IsNullOrEmpty(stripeSecretKey))
+{
+    Stripe.StripeConfiguration.ApiKey = stripeSecretKey;
+}
 
 // Database context (shared with backend)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

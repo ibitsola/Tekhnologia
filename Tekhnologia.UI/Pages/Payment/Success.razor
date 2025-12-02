@@ -1,0 +1,99 @@
+@page "/success"
+@layout Views.Shared.MainLayout
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+@using Tekhnologia.Services.Interfaces
+@using Microsoft.AspNetCore.WebUtilities
+@rendermode Microsoft.AspNetCore.Components.Web.RenderMode.InteractiveServer
+@inject NavigationManager Navigation
+@inject IPaymentService PaymentService
+
+<div class="goal-tracker-page">
+    <div class="goal-tracker-container" style="max-width: 600px; margin: 0 auto; padding: 2rem;">
+        @if (processing)
+        {
+            <div class="box" style="text-align: center;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">⏳</div>
+                <h1 class="title is-3">Processing Payment...</h1>
+                <p class="subtitle" style="margin-top: 1rem;">
+                    Please wait while we confirm your purchase.
+                </p>
+            </div>
+        }
+        else if (error)
+        {
+            <div class="box" style="text-align: center;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">⚠️</div>
+                <h1 class="title is-3" style="color: var(--text-danger);">Processing Error</h1>
+                <p class="subtitle" style="margin-top: 1rem;">
+                    @errorMessage
+                </p>
+                <div style="margin-top: 2rem;">
+                    <button class="button user-role-tag is-large" @onclick="GoToResources">
+                        Go to Resources
+                    </button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="box" style="text-align: center;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">✅</div>
+                <h1 class="title is-3" style="color: var(--shine-highlight);">Payment Successful!</h1>
+                <p class="subtitle" style="margin-top: 1rem;">
+                    Your purchase has been completed successfully.
+                </p>
+                <p style="margin-top: 1rem; color: var(--text-muted);">
+                    You can now download your resource from the Resources page.
+                </p>
+                <div style="margin-top: 2rem;">
+                    <button class="button user-role-tag is-large" @onclick="GoToResources">
+                        Go to Resources
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private bool processing = true;
+    private bool error = false;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Extract session_id from query string
+            var uri = new Uri(Navigation.Uri);
+            var queryParams = QueryHelpers.ParseQuery(uri.Query);
+            
+            if (queryParams.TryGetValue("session_id", out var sessionId) && !string.IsNullOrEmpty(sessionId))
+            {
+                // Mark the purchase as paid using the session ID
+                await PaymentService.MarkPurchaseAsPaidBySessionIdAsync(sessionId!);
+                processing = false;
+            }
+            else
+            {
+                // No session_id in URL - this shouldn't happen in normal flow
+                error = true;
+                errorMessage = "Payment session not found. Please contact support if you were charged.";
+                processing = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            error = true;
+            errorMessage = $"Error processing payment confirmation: {ex.Message}";
+            processing = false;
+            Console.WriteLine($"Payment confirmation error: {ex}");
+        }
+    }
+
+    private void GoToResources()
+    {
+        Navigation.NavigateTo("/resources");
+    }
+}

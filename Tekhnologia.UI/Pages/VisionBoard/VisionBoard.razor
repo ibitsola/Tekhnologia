@@ -381,7 +381,6 @@
     private bool isEditMode = false;
     private bool isSaving = false;
     private bool isDeleting = false;
-    private bool isDraggingOverBoard = false;
     private bool isResizing = false;
 
     private double zoomLevel = 1.0;
@@ -807,18 +806,15 @@
 
     private void OnDragEnter(DragEventArgs e)
     {
-        isDraggingOverBoard = true;
     }
 
     private void OnDragLeave(DragEventArgs e)
     {
-        isDraggingOverBoard = false;
     }
 
     private void OnDragOver(DragEventArgs e)
     {
         // Required to allow drop
-        isDraggingOverBoard = true;
     }
 
     private async Task OnDrop(DragEventArgs e)
@@ -876,7 +872,6 @@
         finally
         {
             draggedItem = null;
-            isDraggingOverBoard = false;
         }
     }
 

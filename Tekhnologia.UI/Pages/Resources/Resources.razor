@@ -1,26 +1,157 @@
 @page "/resources"
+@layout Views.Shared.MainLayout
+@using Microsoft.AspNetCore.Components
+@rendermode RenderMode.InteractiveServer
 @using Tekhnologia.Services.Interfaces
+@using Tekhnologia.Models.DTOs
+@using Tekhnologia.Models
+@using System.Net.Http.Json
+@using Microsoft.JSInterop
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Authorization
 @inject IAuthStateService AuthState
+@inject IDigitalResourceService DigitalResourceService
+@inject IPaymentService PaymentService
 @inject NavigationManager Navigation
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@inject AuthenticationStateProvider AuthStateProvider
 
 @if (AuthState.IsLoggedIn)
 {
-    <!-- 🔒 Authenticated Resource Hub UI -->
-    <section class="home">
-        <div class="home-intro">
-            <h1 class="title is-1">Your Career Resources</h1>
-            <hr class="hr" />
-            <p class="home-text">Browse and download helpful guides for your tech journey.</p>
-        </div>
-    </section>
+    <div class="goal-tracker-page">
+        <div class="goal-tracker-container">
+            <!-- LEFT SIDEBAR -->
+            <div class="goals-sidebar vision-board-sidebar">
+                <div class="sidebar-header">
+                    <h2 class="sidebar-title">My Resources</h2>
+                </div>
 
-    <section class="section has-text-centered">
-        <div class="box">
-            <p>PDF download/search UI goes here 📚</p>
+                <div class="ai-intro">
+                    <p>Browse and manage your library of career resources.</p>
+                </div>
+
+                <div class="ai-recent box">
+                    <h4>Categories</h4>
+                    <div class="goals-list">
+                        <div class="goal-list-item @(selectedCategory=="All"?"active":"")" @onclick='() => SelectCategory("All")'>
+                            <div class="goal-item-header">
+                                <span class="goal-item-title">📚 All Resources</span>
+                            </div>
+                        </div>
+                        <div class="goal-list-item @(selectedCategory=="Books"?"active":"")" @onclick='() => SelectCategory("Books")'>
+                            <div class="goal-item-header">
+                                <span class="goal-item-title">📖 Books</span>
+                            </div>
+                        </div>
+                        <div class="goal-list-item @(selectedCategory=="Images"?"active":"")" @onclick='() => SelectCategory("Images")'>
+                            <div class="goal-item-header">
+                                <span class="goal-item-title">🖼️ Images</span>
+                            </div>
+                        </div>
+                        <div class="goal-list-item @(selectedCategory=="Courses"?"active":"")" @onclick='() => SelectCategory("Courses")'>
+                            <div class="goal-item-header">
+                                <span class="goal-item-title">🎓 Courses</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr />
+                    <div class="field">
+                        <div class="control">
+                            <input class="input" placeholder="Search resources" @bind="search" @oninput="@(e => ApplyFilters())" />
+                        </div>
+                    </div>
+                </div>
+            </div>            <!-- RIGHT PANEL -->
+            <div class="goal-detail-area">
+                <div class="board-header chat-header">
+                    <h1 class="board-title">Your Resource Library</h1>
+                    <p class="board-subtitle muted">Download free resources or purchase premium guides.</p>
+                </div>
+
+                @if (loading)
+                {
+                    <div class="section has-text-centered">
+                        <p>Loading resources...</p>
+                    </div>
+                }
+                else if (filteredResources == null || !filteredResources.Any())
+                {
+                    <div class="empty-selection">
+                        <p>No resources found for the selected category.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="resources-grid">
+                        @foreach (var r in filteredResources)
+                        {
+                            <div class="resource-card box">
+                                <div class="resource-thumbnail">
+                                    @if (!string.IsNullOrEmpty(r.ThumbnailUrl))
+                                    {
+                                        <img src="@r.ThumbnailUrl" alt="@r.Title" />
+                                    }
+                                    else
+                                    {
+                                        <div class="default-thumbnail">
+                                            @if (r.Category == "Books")
+                                            {
+                                                <span class="icon-large">📖</span>
+                                            }
+                                            else if (r.Category == "Images")
+                                            {
+                                                <span class="icon-large">🖼️</span>
+                                            }
+                                            else if (r.Category == "Courses")
+                                            {
+                                                <span class="icon-large">🎓</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="icon-large">📄</span>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                                <div class="resource-info">
+                                    <h3 class="resource-title">@r.Title</h3>
+                                    <p class="resource-meta">@r.FileType • @r.UploadDate.ToString("MMM dd, yyyy")</p>
+                                    <div class="resource-price">
+                                        @if (r.IsFree)
+                                        {
+                                            <span class="tag user-role-tag">Free</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="tag admin-role-tag">£@r.Price?.ToString("F2")</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="resource-actions">
+                                    @if (r.Category == "Courses" && !string.IsNullOrEmpty(r.ExternalUrl))
+                                    {
+                                        <a href="@r.ExternalUrl" target="_blank" class="button user-role-tag is-fullwidth">Open Course</a>
+                                    }
+                                    else if (r.IsFree || UserHasPurchased(r.Id))
+                                    {
+                                        <button class="button user-role-tag is-fullwidth" @onclick="() => DownloadResource(r.Id)">Download</button>
+                                    }
+                                    else
+                                    {
+                                        <button class="button admin-action-btn is-fullwidth" @onclick="() => PurchaseResource(r.Id)">Buy - £@r.Price?.ToString("F2")</button>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
         </div>
-    </section>
-}
-else
+    </div>
+    }
+    else
 {
     <!-- 🌐 Public Marketing Content -->
     <section class="home">
@@ -134,6 +265,203 @@ else
 }
 
 @code {
+    private List<DigitalResourceDTO>? resources;
+    private List<DigitalResourceDTO>? filteredResources;
+    private string selectedCategory = "All";
+    private string search = string.Empty;
+    private bool loading = true;
+    private DotNetObjectReference<Resources>? dotNetRef;
+    private bool jsLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadResources();
+        // prime purchases cache for logged in users
+        if (AuthState.IsLoggedIn)
+            await LoadUserPurchases();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("import", "/js/download.js");
+                jsLoaded = true;
+            }
+            catch { }
+
+            if (AuthState.IsLoggedIn)
+            {
+                dotNetRef = DotNetObjectReference.Create(this);
+                try
+                {
+                    await JSRuntime.InvokeVoidAsync("_tekhnologia.registerVisibilityHandler", dotNetRef);
+                }
+                catch { }
+            }
+        }
+    }
+
+    private async Task LoadResources()
+    {
+        try
+        {
+            loading = true;
+            resources = DigitalResourceService.GetAllResources(null, null);
+            ApplyFilters();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private void ApplyFilters()
+    {
+        if (resources == null)
+        {
+            filteredResources = new List<DigitalResourceDTO>();
+            return;
+        }
+
+        IEnumerable<DigitalResourceDTO> q = resources;
+        
+        // Filter by search
+        if (!string.IsNullOrEmpty(search))
+            q = q.Where(r => (r.Title ?? "").Contains(search, StringComparison.OrdinalIgnoreCase) || (r.Category ?? "").Contains(search, StringComparison.OrdinalIgnoreCase));
+
+        // Filter by category
+        if (!string.IsNullOrEmpty(selectedCategory) && selectedCategory != "All")
+            q = q.Where(r => r.Category == selectedCategory);
+
+        filteredResources = q.OrderByDescending(r => r.UploadDate).ToList();
+    }
+
+    private void SelectCategory(string cat)
+    {
+        selectedCategory = cat;
+        search = string.Empty;
+        ApplyFilters();
+    }
+
+    private HashSet<int> purchasedResourceIds = new();
+
+    private bool UserHasPurchased(int resourceId)
+    {
+        return purchasedResourceIds.Contains(resourceId) || (resources?.FirstOrDefault(r => r.Id == resourceId)?.IsFree ?? false);
+    }
+
+    private async Task LoadUserPurchases()
+    {
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var purchases = PaymentService.GetUserPurchases(userId);
+                purchasedResourceIds = purchases.Select(p => p.DigitalResourceId).ToHashSet();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Failed to load user purchases: " + ex.Message);
+        }
+    }
+
+    [JSInvokable("OnPageVisible")]
+    public async Task OnPageVisible()
+    {
+        // when the page becomes visible, refresh purchases and resources
+        await LoadUserPurchases();
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("_tekhnologia.unregisterVisibilityHandler");
+        }
+        catch { }
+
+        dotNetRef?.Dispose();
+    }
+    
+
+    private async Task DownloadResource(int id)
+    {
+        if (!jsLoaded)
+        {
+            Console.WriteLine("JS not loaded yet");
+            return;
+        }
+
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            
+            if (string.IsNullOrEmpty(userId))
+            {
+                Console.WriteLine("User not authenticated");
+                return;
+            }
+
+            var (resource, fileBytes) = DigitalResourceService.DownloadResource(id, userId);
+            
+            var base64 = Convert.ToBase64String(fileBytes);
+            // Determine proper MIME type based on file extension
+            var contentType = resource.FileType.ToLower() switch
+            {
+                "pdf" => "application/pdf",
+                "jpg" or "jpeg" => "image/jpeg",
+                "png" => "image/png",
+                "gif" => "image/gif",
+                "webp" => "image/webp",
+                _ => "application/octet-stream"
+            };
+            var url = $"data:{contentType};base64,{base64}";
+            await JSRuntime.InvokeVoidAsync("downloadFromDataUrl", url, resource.FileName);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Download error: " + ex.Message);
+        }
+    }
+
+    private async Task PurchaseResource(int id)
+    {
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            
+            if (string.IsNullOrEmpty(userId))
+            {
+                Console.WriteLine("User not authenticated");
+                return;
+            }
+
+            var session = await PaymentService.CreateCheckoutSessionAsync(id, userId);
+            if (!string.IsNullOrEmpty(session.Url))
+            {
+                Navigation.NavigateTo(session.Url, forceLoad: true);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Purchase error: " + ex.Message);
+        }
+    }
+
     private void NavigateToSignup() =>
         Navigation.NavigateTo("/signup");
 }
