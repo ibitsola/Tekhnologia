@@ -25,3 +25,6 @@ obj/
 appsettings.json
 appsettings.Development.json
 appsettings.Production.json
+
+# Data Protection Keys - contain encryption keys for cookies/tokens
+DataProtection-Keys/
