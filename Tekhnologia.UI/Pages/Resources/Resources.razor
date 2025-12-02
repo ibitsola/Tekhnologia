@@ -447,13 +447,20 @@
             if (string.IsNullOrEmpty(userId))
             {
                 Console.WriteLine("User not authenticated");
+                Navigation.NavigateTo("/signin");
                 return;
             }
 
+            // Call the service directly to create checkout session
             var session = await PaymentService.CreateCheckoutSessionAsync(id, userId);
+            
             if (!string.IsNullOrEmpty(session.Url))
             {
                 Navigation.NavigateTo(session.Url, forceLoad: true);
+            }
+            else
+            {
+                Console.WriteLine("Failed to create checkout session: No URL returned");
             }
         }
         catch (Exception ex)

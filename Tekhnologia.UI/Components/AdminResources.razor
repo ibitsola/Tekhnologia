@@ -355,7 +355,9 @@
                     formFile = new FormFileAdapter(ms, selectedFile.Name, selectedFile.Name, selectedFile.ContentType, ms.Length);
                 }
 
-                if (formFile == null)
+                // For courses, file is optional (only for thumbnail)
+                // For other resources, file is required (validated above)
+                if (formFile == null && resourceForm.Category != "Courses")
                 {
                     errorMessage = "File upload failed. Please try again.";
                     return;
