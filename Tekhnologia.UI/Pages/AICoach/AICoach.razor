@@ -20,7 +20,7 @@
         <div class="goal-tracker-container">
             <div class="goals-sidebar vision-board-sidebar">
                 <div class="sidebar-header">
-                    <h2 class="sidebar-title">My Eva</h2>
+                    <h2 class="sidebar-title">My Eve</h2>
                     <button type="button" class="button is-small admin-action-btn" @onclick="NewChat">+ New Chat</button>
                 </div>
 
@@ -78,11 +78,11 @@
                     @foreach (var l in log)
                     {
                         var isUser = l.Role == "You";
-                        <div class="chat-message @(isUser ? "user" : "ai")">
+                        <div class="chat-message @(isUser ? "user" : "Eve")">
                             <div class="bubble">
                                 @if (!isUser)
                                 {
-                                    <div class="bubble-role">AI</div>
+                                    <div class="bubble-role">Eve</div>
                                 }
                                 <div class="bubble-text">@((MarkupString)System.Net.WebUtility.HtmlEncode(l.Text).Replace("\n", "<br/>"))</div>
                             </div>
@@ -159,9 +159,9 @@
             // record user message in backing store
             messagesBacking.Add(new Dictionary<string,string> { ["role"] = "You", ["text"] = msg });
             var reply = await Ai.GetBusinessCoachingResponse(msg);
-            log.Add(new("AI", reply));
-            messagesBacking.Add(new Dictionary<string,string> { ["role"] = "AI", ["text"] = reply });
-            // after AI reply, save conversation
+            log.Add(new("Eve", reply));
+            messagesBacking.Add(new Dictionary<string,string> { ["role"] = "Eve", ["text"] = reply });
+            // after Eve reply, save conversation
             await SaveConversationIfNeeded();
         }
         catch (Exception ex)
