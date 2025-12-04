@@ -1,0 +1,16 @@
+**/.git
+**/.vs
+**/.vscode
+**/bin
+**/obj
+**/node_modules
+**/*.user
+**/*.suo
+**/TestResults
+**/.DS_Store
+**/appsettings.Development.json
+**/appsettings.json
+DataProtection-Keys/
+*.db
+*.db-shm
+*.db-wal

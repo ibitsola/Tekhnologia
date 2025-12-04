@@ -72,39 +72,6 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// ─── 6) Authentication setup: Cookies + JWT Bearer ─────────────────────────────
-// builder.Services.AddAuthentication(options =>
-// {
-//     // interactive by default uses the Identity cookie
-//     options.DefaultScheme = IdentityConstants.ApplicationScheme;
-//     // for API endpoints [Authorize] with bearer
-//     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-// })
-// // JWT bearer for your Web API controllers
-// .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opts =>
-// {
-//     var jwtSection = builder.Configuration.GetSection("Jwt");
-//     var keyBytes   = Encoding.UTF8.GetBytes(jwtSection["Secret"] 
-//                            ?? throw new InvalidOperationException("Missing JWT secret"));
-//     opts.RequireHttpsMetadata = false;
-//     opts.SaveToken            = true;
-//     opts.TokenValidationParameters = new TokenValidationParameters
-//     {
-//         ValidateIssuerSigningKey = true,
-//         IssuerSigningKey         = new SymmetricSecurityKey(keyBytes),
-//         ValidateIssuer           = true,
-//         ValidIssuer              = jwtSection["Issuer"],
-//         ValidateAudience         = true,
-//         ValidAudience            = jwtSection["Audience"],
-//         ValidateLifetime         = true,
-//         ClockSkew                = TimeSpan.Zero
-//     };
-// });
-
-// ─── 6) Authentication setup: Identity cookie only ─────────────────────────────
-//builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
-//    .AddCookie(IdentityConstants.ApplicationScheme);
-
 // configure the Identity cookie (login path, expiration, etc.)
 builder.Services.ConfigureApplicationCookie(options =>
 {

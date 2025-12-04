@@ -1,0 +1,29 @@
+services:
+  # Web Service for the Blazor UI
+  - type: web
+    name: tekhnologia
+    runtime: docker
+    repo: https://github.com/ibitsola/Tekhnologia
+    region: oregon
+    plan: free
+    branch: main
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://0.0.0.0:$PORT
+      - key: OPENAI_API_KEY
+        sync: false  # Manual entry in Render dashboard
+      - key: STRIPE_SECRET_KEY
+        sync: false  # Manual entry in Render dashboard
+      - key: Stripe__WebhookSecret
+        sync: false
+    healthCheckPath: /
+
+databases:
+  # PostgreSQL Database (free tier)
+  - name: tekhnologia-db
+    plan: free
+    databaseName: tekhnologia
+    user: tekhnologia_user

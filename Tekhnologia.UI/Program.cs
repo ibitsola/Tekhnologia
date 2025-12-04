@@ -37,9 +37,27 @@ if (!string.IsNullOrEmpty(stripeSecretKey))
     Stripe.StripeConfiguration.ApiKey = stripeSecretKey;
 }
 
+// OLD CODE Before deployment to render
 // Database context (shared with backend)
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+// builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// NEW CODE
+// Database context - PostgreSQL for production (Render), SQLite for development
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (builder.Environment.IsProduction() && connectionString?.Contains("postgres") == true)
+{
+    // Use PostgreSQL in production (Render)
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(connectionString));
+}
+else
+{
+    // Use SQLite for development
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite(connectionString ?? "Data Source=tekhnologia.db"));
+}
 
 // Identity: Required for services that inject UserManager/SignInManager
 // Backend handles actual authentication, but UI services need access to user store
@@ -111,6 +129,68 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 var app = builder.Build();
+
+// NEW CODE (deployment to render)
+// Apply migrations and seed database on startup (Production only)
+if (app.Environment.IsProduction())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        try
+        {
+            var context = services.GetRequiredService<ApplicationDbContext>();
+            var logger = services.GetRequiredService<ILogger<Program>>();
+            
+            logger.LogInformation("Applying database migrations...");
+            await context.Database.MigrateAsync(); // Apply pending migrations
+            logger.LogInformation("Database migrations applied successfully.");
+            
+            // Seed admin user if needed
+            var userManager = services.GetRequiredService<UserManager<User>>();
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            
+            // Create Admin role if it doesn't exist
+            if (!await roleManager.RoleExistsAsync("Admin"))
+            {
+                logger.LogInformation("Creating Admin role...");
+                await roleManager.CreateAsync(new IdentityRole("Admin"));
+            }
+            
+            // Create default admin user if it doesn't exist
+            var adminEmail = "admin@tekhnologia.co.uk";
+            if (await userManager.FindByEmailAsync(adminEmail) == null)
+            {
+                logger.LogInformation("Creating default admin user...");
+                var adminUser = new User
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    Name = "Administrator",
+                    EmailConfirmed = true
+                };
+                
+                var result = await userManager.CreateAsync(adminUser, "Admin123!");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                    logger.LogInformation("Admin user created successfully.");
+                }
+                else
+                {
+                    logger.LogError("Failed to create admin user: {Errors}", 
+                        string.Join(", ", result.Errors.Select(e => e.Description)));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            var logger = services.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "An error occurred while migrating or seeding the database.");
+            throw; // Re-throw to prevent app from starting with broken database
+        }
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
