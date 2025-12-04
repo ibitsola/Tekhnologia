@@ -158,10 +158,12 @@ if (app.Environment.IsProduction())
             }
             
             // Create default admin user if it doesn't exist
-            var adminEmail = "admin@tekhnologia.co.uk";
+            var adminEmail = builder.Configuration["Admin:Email"] ?? "admin@tekhnologia.co.uk";
+            var adminPassword = builder.Configuration["Admin:Password"] ?? "Admin123!";
+            
             if (await userManager.FindByEmailAsync(adminEmail) == null)
             {
-                logger.LogInformation("Creating default admin user...");
+                logger.LogInformation("Creating default admin user with email: {Email}", adminEmail);
                 var adminUser = new User
                 {
                     UserName = adminEmail,
@@ -170,7 +172,7 @@ if (app.Environment.IsProduction())
                     EmailConfirmed = true
                 };
                 
-                var result = await userManager.CreateAsync(adminUser, "Admin123!");
+                var result = await userManager.CreateAsync(adminUser, adminPassword);
                 if (result.Succeeded)
                 {
                     await userManager.AddToRoleAsync(adminUser, "Admin");

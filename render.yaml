@@ -19,6 +19,10 @@ services:
         sync: false  # Manual entry in Render dashboard
       - key: Stripe__WebhookSecret
         sync: false
+      - key: Admin__Email
+        value: admin@tekhnologia.co.uk
+      - key: Admin__Password
+        sync: false  # Manual entry in Render dashboard - use strong password
     healthCheckPath: /
 
 databases:
