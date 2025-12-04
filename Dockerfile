@@ -40,22 +40,12 @@ RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 COPY --from=publish /app/publish/api ./api
 COPY --from=publish /app/publish/ui ./ui
 
+# Copy startup script
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
 # Create directory for uploaded files
 RUN mkdir -p /app/ui/wwwroot/digital-resources
-
-# Create startup script to run BOTH projects
-RUN echo '#!/bin/bash\n\
-set -e\n\
-echo "Starting Tekhnologia backend API..."\n\
-cd /app/api\n\
-dotnet Tekhnologia.dll --urls "http://0.0.0.0:7137" &\n\
-API_PID=$!\n\
-echo "Backend API started with PID $API_PID"\n\
-sleep 5\n\
-echo "Starting Tekhnologia UI..."\n\
-cd /app/ui\n\
-dotnet Tekhnologia.UI.dll --urls "http://0.0.0.0:$PORT"\n\
-' > /app/start.sh && chmod +x /app/start.sh
 
 # Expose port (Render will set $PORT)
 EXPOSE 8080
