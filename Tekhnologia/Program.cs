@@ -62,8 +62,21 @@ builder.Services.AddHttpClient<GoalApiService>(client =>
 });
 
 // ─── 5) Entity Framework & Identity ────────────────────────────────────────────
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Database context - PostgreSQL for production, SQLite for development
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (builder.Environment.IsProduction() && connectionString?.Contains("postgres") == true)
+{
+    // Use PostgreSQL in production (Render)
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(connectionString));
+}
+else
+{
+    // Use SQLite for development
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite(connectionString ?? "Data Source=tekhnologia.db"));
+}
 
 builder.Services.AddIdentity<User, IdentityRole>(options =>
     {
