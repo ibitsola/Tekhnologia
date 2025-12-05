@@ -29,56 +29,23 @@ RUN dotnet publish "Tekhnologia.csproj" -c Release -o /app/publish/api /p:UseApp
 WORKDIR "/src/Tekhnologia.UI"
 RUN dotnet publish "Tekhnologia.UI.csproj" -c Release -o /app/publish/ui /p:UseAppHost=false
 
-# Stage 3: Runtime
+# Stage 3: Runtime - single ASP.NET process (API) that also serves the UI static files
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
 
-# Copy both published apps
+# Copy API published app
 COPY --from=publish /app/publish/api ./api
-COPY --from=publish /app/publish/ui ./ui
 
-# Create directory for uploaded files
-RUN mkdir -p /app/ui/wwwroot/digital-resources
+# Copy UI published static files into the API's wwwroot so API serves the UI
+RUN mkdir -p /app/api/wwwroot
+COPY --from=publish /app/publish/ui/wwwroot/ ./api/wwwroot/
 
-# Install supervisor to manage multiple processes
-RUN apt-get update && \
-    apt-get install -y supervisor && \
-    rm -rf /var/lib/apt/lists/*
+# Create directory for uploaded files inside API wwwroot
+RUN mkdir -p /app/api/wwwroot/digital-resources
 
-# Create supervisor config to run both API and UI
-RUN printf '[supervisord]\n\
-nodaemon=true\n\
-user=root\n\
-loglevel=info\n\
-\n\
-[program:api]\n\
-command=dotnet /app/api/Tekhnologia.dll --urls http://0.0.0.0:7137\n\
-directory=/app/api\n\
-autostart=true\n\
-autorestart=true\n\
-stdout_logfile=/dev/stdout\n\
-stdout_logfile_maxbytes=0\n\
-stderr_logfile=/dev/stderr\n\
-stderr_logfile_maxbytes=0\n\
-priority=100\n\
-startsecs=10\n\
-\n\
-# Use a shell wrapper for the UI so the runtime $PORT is expanded by the shell\n\
-[program:ui]\n\
-command=/bin/sh -c "dotnet /app/ui/Tekhnologia.UI.dll --urls http://0.0.0.0:$PORT"\n\
-directory=/app/ui\n\
-autostart=true\n\
-autorestart=true\n\
-stdout_logfile=/dev/stdout\n\
-stdout_logfile_maxbytes=0\n\
-stderr_logfile=/dev/stderr\n\
-stderr_logfile_maxbytes=0\n\
-priority=200\n\
-startsecs=15\n\
-' > /etc/supervisor/conf.d/supervisord.conf
-
-# Expose port (Render will set $PORT)
+# Expose port; Render will provide $PORT at runtime
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Start only the API process; use shell so $PORT is expanded by the shell
+CMD ["/bin/sh", "-c", "dotnet /app/api/Tekhnologia.dll --urls http://0.0.0.0:$PORT"]
