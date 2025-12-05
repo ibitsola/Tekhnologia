@@ -63,8 +63,9 @@ stderr_logfile_maxbytes=0\n\
 priority=100\n\
 startsecs=10\n\
 \n\
+# Use a shell wrapper for the UI so the runtime $PORT is expanded by the shell\n\
 [program:ui]\n\
-command=dotnet /app/ui/Tekhnologia.UI.dll --urls http://0.0.0.0:%%(ENV_PORT)s\n\
+command=/bin/sh -c "dotnet /app/ui/Tekhnologia.UI.dll --urls http://0.0.0.0:$PORT"\n\
 directory=/app/ui\n\
 autostart=true\n\
 autorestart=true\n\
