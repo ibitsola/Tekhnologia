@@ -63,17 +63,38 @@ builder.Services.AddHttpClient<GoalApiService>(client =>
 
 // ─── 5) Entity Framework & Identity ────────────────────────────────────────────
 // Database context - PostgreSQL for production, SQLite for development
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                       ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+                       ?? Environment.GetEnvironmentVariable("DATABASE_URL");
 
-if (builder.Environment.IsProduction() && connectionString?.Contains("postgres") == true)
+if (builder.Environment.IsProduction())
 {
-    // Use PostgreSQL in production (Render)
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(connectionString));
+    if (string.IsNullOrWhiteSpace(connectionString))
+    {
+        throw new InvalidOperationException("Production database connection string is not set. Set ConnectionStrings__DefaultConnection or DATABASE_URL.");
+    }
+
+    if (connectionString.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase)
+        || connectionString.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
+    {
+        var uri = new Uri(connectionString);
+        var userInfo = uri.UserInfo.Split(':');
+        var user = Uri.UnescapeDataString(userInfo[0]);
+        var pass = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : string.Empty;
+        var host = uri.Host;
+        var port = uri.Port > 0 ? uri.Port : 5432;
+        var database = uri.AbsolutePath.TrimStart('/');
+
+        var npgsql = $"Host={host};Port={port};Database={database};Username={user};Password={pass};";
+        builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(npgsql));
+    }
+    else
+    {
+        builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
+    }
 }
 else
 {
-    // Use SQLite for development
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlite(connectionString ?? "Data Source=tekhnologia.db"));
 }
