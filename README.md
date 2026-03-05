@@ -2,7 +2,6 @@
 
 [![.NET](https://img.shields.io/badge/.NET-9.0-blue)](https://dotnet.microsoft.com/)
 [![Blazor Server](https://img.shields.io/badge/Blazor-Server-purple)](https://blazor.net/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 > A comprehensive well-being and career growth platform specifically designed to support women in technology through evidence-based tools and AI-powered coaching.
 
