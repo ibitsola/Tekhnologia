@@ -1,4 +1,4 @@
-# Tekhnologia - Empowering Women in Tech 🚀
+# Tekhnologia - Empowering Women in Tech
 
 [![.NET](https://img.shields.io/badge/.NET-9.0-blue)](https://dotnet.microsoft.com/)
 [![Blazor Server](https://img.shields.io/badge/Blazor-Server-purple)](https://blazor.net/)
@@ -6,14 +6,14 @@
 
 > A comprehensive well-being and career growth platform specifically designed to support women in technology through evidence-based tools and AI-powered coaching.
 
-## 🌟 Project Overview
+## Project Overview
 
 **Tekhnologia** is a full-stack web application that addresses the unique challenges faced by women in the technology industry. Through a combination of personal development tools, AI-powered career coaching, and a supportive digital ecosystem, the platform aims to reduce barriers and accelerate career growth for women in tech.
 
-### 🎯 Mission Statement
+### Mission Statement
 To create an inclusive, evidence-based platform that empowers women in technology to overcome imposter syndrome, build confidence, and achieve their career aspirations through structured goal-setting, reflective practices, and personalized AI guidance.
 
-## 🏗️ Architecture & Technology Stack
+## Architecture & Technology Stack
 
 ### Backend Architecture
 - **Framework**: ASP.NET Core Web API (.NET 9)
@@ -40,51 +40,51 @@ Users (ASP.NET Identity)
     └── DigitalResources (N:1) - Purchasable career resources
 ```
 
-## ✨ Core Features
+## Core Features
 
-### 🔐 Secure Authentication System
+### Secure Authentication System
 - Hybrid ASP.NET Core Identity + JWT authentication
 - Role-based authorization (Admin/User)
 - Secure password management with industry standards
 - Seamless Blazor Server integration
 
-### 📝 Reflective Journaling
+### Reflective Journaling
 - **Evidence-Based**: Reduces stress and builds resilience (Cascio et al., 2016)
 - Private, secure journal entries with rich text support
 - Date-based organization and filtering
 - User-specific data isolation
 
-### 🎯 SMART Goal Tracking
+### SMART Goal Tracking
 - Career-focused goal creation and management
 - Progress tracking with completion status
 - Due date management and organization
 - Visual progress indicators
 
-### 🖼️ Digital Vision Board
+### Digital Vision Board
 - Upload and organize inspirational images
 - Goal categorization and description system
 - Secure local file storage with future cloud migration path
 - Responsive image gallery interface
 
-### 🤖 AI Career Coach (Eve)
+### AI Career Coach (Eve)
 - **OpenAI GPT Integration**: Personalized career coaching
 - 24/7 availability for career guidance and support
 - Specialized prompting for women in tech challenges
 - Conversational interface with professional coaching context
 
-### 💼 Digital Resource Marketplace
+### Digital Resource Marketplace
 - Curated career development resources
 - Stripe-integrated payment processing
 - Admin panel for resource management
 - Secure download system for purchased resources
 
-### 👩‍💼 Administrative Panel
+### Administrative Panel
 - User management and analytics
 - Digital resource upload and management
 - Role-based access control
 - System monitoring and maintenance tools
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
@@ -139,7 +139,7 @@ Users (ASP.NET Identity)
    - Navigate to `https://localhost:7136`
    - Default admin user is created automatically
 
-### 🔧 Configuration
+### Configuration
 
 The application uses a hybrid configuration approach:
 - **Development**: User secrets and environment variables
@@ -151,7 +151,7 @@ Key configuration areas:
 - JWT signing keys for authentication
 - Database connection strings
 
-## 📚 API Documentation
+## API Documentation
 
 ### Authentication Endpoints
 ```http
@@ -186,7 +186,7 @@ GET    /api/digitalresource   # Browse resources
 POST   /api/payment/create-payment-intent # Purchase resource
 ```
 
-## 🧪 Testing
+## Testing
 
 The application includes comprehensive testing infrastructure:
 
@@ -205,7 +205,7 @@ dotnet test --filter Category=Services
 - **Authentication Tests**: Security and authorization flow validation
 - **Integration Tests**: End-to-end feature validation
 
-## 🌐 Deployment
+## Deployment
 
 ### Development Deployment
 The application is designed for easy local development with SQLite and local file storage.
@@ -222,7 +222,7 @@ The application is prepared for deployment to **Tekhnologia.co.uk** with:
 - Custom domain configuration
 - CDN integration readiness
 
-## 🎯 CS50 Final Project Requirements
+## CS50 Final Project Requirements
 
 ### Distinctiveness and Complexity
 **Tekhnologia** demonstrates significant complexity and distinctiveness through:
@@ -251,18 +251,18 @@ The project addresses documented challenges in tech industry diversity:
 - **Skill Development**: Digital resource marketplace for career growth
 - **Community Building**: Platform designed for scalable community features
 
-## 💼 Funding & Future Development
+##  Funding & Future Development
 
 ### Government Funding Application Ready
 This project is positioned for funding applications to support women in tech initiatives:
 
-### 📊 Impact Metrics (Projection)
+### Impact Metrics (Projection)
 - **Target Users**: 10,000+ women in tech within first year
 - **Career Advancement**: 25% increase in promotion rates among active users
 - **Skill Development**: 500+ digital resources distributed monthly
 - **AI Coaching Sessions**: 50,000+ coaching interactions annually
 
-### 🔮 Roadmap
+### Roadmap
 **Phase 1: MVP Launch** (Current)
 - Core features functional and tested
 - Domain acquisition and production deployment
@@ -280,13 +280,13 @@ This project is positioned for funding applications to support women in tech ini
 - Mentorship matching system
 - International expansion and localization
 
-### 💰 Sustainability Model
+### Sustainability Model
 - **Freemium Model**: Core features free, premium resources paid
 - **Corporate Partnerships**: Enterprise licensing for companies
 - **Grant Funding**: Government and foundation grants for social impact
 - **Resource Marketplace**: Revenue sharing on digital resource sales
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions from the community! This project is particularly suited for:
 - Women in tech who understand the target user challenges
@@ -301,13 +301,9 @@ We welcome contributions from the community! This project is particularly suited
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📄 License
+## About the Creator
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👥 About the Creator
-
-**Ira Bitsola** - Full-Stack Developer & Women in Tech Advocate
+**Panagiota Ira Bitsola** - Full-Stack Developer
 
 - **GitHub**: [@ibitsola](https://github.com/ibitsola)
 - **Project Repository**: [Tekhnologia](https://github.com/ibitsola/Tekhnologia)
@@ -320,7 +316,7 @@ This project represents a comprehensive year-long development journey, evolving 
 - **Technology Integration**: Adding AI, payment processing, and real-time features
 - **Production Readiness**: Comprehensive testing, security, and deployment preparation
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **Harvard CS50** for providing the foundation and inspiration
 - **OpenAI** for making advanced AI accessible to developers
@@ -330,13 +326,12 @@ This project represents a comprehensive year-long development journey, evolving 
 
 ---
 
-## 📞 Support & Contact
+## Support & Contact
 
 For questions, feedback, or collaboration opportunities:
 - **Issues**: [GitHub Issues](https://github.com/ibitsola/Tekhnologia/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/ibitsola/Tekhnologia/discussions)
-- **Email**: Available through GitHub profile
 
 ---
 
-**Tekhnologia** - *Empowering the next generation of women in technology* 🚀✨
+**Tekhnologia** - *Empowering the next generation of women in technology*
